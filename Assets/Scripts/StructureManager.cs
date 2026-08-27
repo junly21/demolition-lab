@@ -6,6 +6,8 @@ namespace DemolitionLab
     public sealed class StructureManager : MonoBehaviour
     {
         [SerializeField] private List<StructuralBlock> blocks = new();
+        [SerializeField] private StructuralStabilityEvaluator stabilityEvaluator;
+        [SerializeField] private bool keepDestroyedBlocksAsDebris;
         [SerializeField] private bool drawGraphGizmos = true;
 
         private readonly Dictionary<StructuralBlock, List<StructuralBlock>> adjacency = new();
@@ -15,14 +17,14 @@ namespace DemolitionLab
             InitializeGraph();
         }
 
-        public void DestroyBlock(StructuralBlock block)
+        public void DestroyBlock(StructuralBlock block, Vector3 impulse, Vector3 impactPoint)
         {
             if (block == null || !block.IsActive)
             {
                 return;
             }
 
-            block.MarkDestroyed();
+            block.MarkDestroyed(keepDestroyedBlocksAsDebris, impulse, impactPoint);
             RecalculateSupport($"Destroyed structural node '{block.NodeId}'.");
         }
 
@@ -82,49 +84,134 @@ namespace DemolitionLab
 
         private void RecalculateSupport(string reason)
         {
-            var supported = new HashSet<StructuralBlock>();
-            var searchQueue = new Queue<StructuralBlock>();
+            List<List<StructuralBlock>> components = FindActiveComponents();
+            stabilityEvaluator?.BeginEvaluation();
 
-            foreach (StructuralBlock block in adjacency.Keys)
+            int supportedCount = 0;
+            int unsupportedCount = 0;
+
+            foreach (List<StructuralBlock> component in components)
             {
-                if (block.IsActive && block.IsGroundAnchor)
+                bool isConnected = HasGroundAnchor(component);
+                bool isStable = isConnected;
+                StructuralStabilityResult stability = default;
+
+                if (stabilityEvaluator != null)
                 {
-                    supported.Add(block);
-                    searchQueue.Enqueue(block);
+                    stability = stabilityEvaluator.Evaluate(component);
+                    isStable = isConnected && stability.IsStable;
                 }
-            }
 
-            while (searchQueue.Count > 0)
-            {
-                StructuralBlock current = searchQueue.Dequeue();
-                foreach (StructuralBlock neighbor in adjacency[current])
+                StructuralBlockState releaseState = isConnected
+                    ? StructuralBlockState.Unstable
+                    : StructuralBlockState.Disconnected;
+                int releasedCount = 0;
+
+                foreach (StructuralBlock block in component)
                 {
-                    if (neighbor.IsActive && supported.Add(neighbor))
+                    if (isStable)
                     {
-                        searchQueue.Enqueue(neighbor);
+                        block.KeepSupported();
+                        supportedCount++;
+                    }
+                    else
+                    {
+                        if (block.ReleaseToPhysics(releaseState))
+                        {
+                            releasedCount++;
+                        }
+                        unsupportedCount++;
                     }
                 }
-            }
 
-            int unsupportedCount = 0;
-            foreach (StructuralBlock block in adjacency.Keys)
-            {
-                if (!block.IsActive)
+                if (stabilityEvaluator != null)
                 {
-                    continue;
-                }
-
-                bool isSupported = supported.Contains(block);
-                block.SetSupported(isSupported);
-                if (!isSupported)
-                {
-                    unsupportedCount++;
+                    LogStabilityResult(component, stability, isConnected, isStable, releasedCount);
                 }
             }
 
             Debug.Log(
-                $"{reason} Traversal visited {supported.Count} nodes: "
-                + $"{supported.Count} supported, {unsupportedCount} unsupported.",
+                $"{reason} Traversal visited {supportedCount} nodes: "
+                + $"{supportedCount} supported, {unsupportedCount} unsupported.",
+                this);
+        }
+
+        private List<List<StructuralBlock>> FindActiveComponents()
+        {
+            var unvisited = new HashSet<StructuralBlock>();
+            foreach (StructuralBlock block in adjacency.Keys)
+            {
+                if (block.IsActive)
+                {
+                    unvisited.Add(block);
+                }
+            }
+
+            var components = new List<List<StructuralBlock>>();
+            var searchQueue = new Queue<StructuralBlock>();
+
+            while (unvisited.Count > 0)
+            {
+                StructuralBlock start = null;
+                foreach (StructuralBlock candidate in unvisited)
+                {
+                    start = candidate;
+                    break;
+                }
+
+                var component = new List<StructuralBlock>();
+                unvisited.Remove(start);
+                searchQueue.Enqueue(start);
+
+                while (searchQueue.Count > 0)
+                {
+                    StructuralBlock current = searchQueue.Dequeue();
+                    component.Add(current);
+
+                    foreach (StructuralBlock neighbor in adjacency[current])
+                    {
+                        if (neighbor.IsActive && unvisited.Remove(neighbor))
+                        {
+                            searchQueue.Enqueue(neighbor);
+                        }
+                    }
+                }
+
+                components.Add(component);
+            }
+
+            return components;
+        }
+
+        private static bool HasGroundAnchor(IReadOnlyList<StructuralBlock> component)
+        {
+            foreach (StructuralBlock block in component)
+            {
+                if (block.IsGroundAnchor)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private void LogStabilityResult(
+            IReadOnlyList<StructuralBlock> component,
+            StructuralStabilityResult result,
+            bool isConnected,
+            bool isStable,
+            int releasedCount)
+        {
+            string supportInterval = result.HasSupport
+                ? $"[{result.SupportMinX:0.00}, {result.SupportMaxX:0.00}]"
+                : "none";
+
+            Debug.Log(
+                $"Component '{component[0].NodeId}': nodes={component.Count}, "
+                + $"mass={result.TotalMass:0.00}, COM.x={result.CenterOfMass.x:0.00}, "
+                + $"support={supportInterval}, connected={isConnected}, stable={isStable}, "
+                + $"released={releasedCount}.",
                 this);
         }
 
@@ -142,12 +229,6 @@ namespace DemolitionLab
                     continue;
                 }
 
-                if (!block.IsActive && Application.isPlaying)
-                {
-                    Gizmos.color = Color.gray;
-                    Gizmos.DrawWireCube(block.transform.position, block.transform.lossyScale * 1.05f);
-                }
-
                 foreach (StructuralBlock neighbor in block.Neighbors)
                 {
                     if (neighbor == null || blocks.IndexOf(block) >= blocks.IndexOf(neighbor))
@@ -155,22 +236,38 @@ namespace DemolitionLab
                         continue;
                     }
 
-                    if (Application.isPlaying && (!block.IsActive || !neighbor.IsActive))
-                    {
-                        Gizmos.color = Color.gray;
-                    }
-                    else if (Application.isPlaying && (!block.IsSupported || !neighbor.IsSupported))
-                    {
-                        Gizmos.color = Color.red;
-                    }
-                    else
-                    {
-                        Gizmos.color = Color.green;
-                    }
-
+                    Gizmos.color = GetStateColor(block, neighbor);
                     Gizmos.DrawLine(block.transform.position, neighbor.transform.position);
                 }
             }
+        }
+
+        private static Color GetStateColor(StructuralBlock first, StructuralBlock second)
+        {
+            if (!Application.isPlaying)
+            {
+                return Color.green;
+            }
+
+            if (first.State == StructuralBlockState.Destroyed
+                || second.State == StructuralBlockState.Destroyed)
+            {
+                return Color.gray;
+            }
+
+            if (first.State == StructuralBlockState.Disconnected
+                || second.State == StructuralBlockState.Disconnected)
+            {
+                return Color.red;
+            }
+
+            if (first.State == StructuralBlockState.Unstable
+                || second.State == StructuralBlockState.Unstable)
+            {
+                return Color.yellow;
+            }
+
+            return Color.green;
         }
     }
 }

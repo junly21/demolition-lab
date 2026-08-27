@@ -30,7 +30,11 @@ namespace DemolitionLab
             hasReportedImpact = true;
             if (collision.gameObject.TryGetComponent(out StructuralBlock structuralBlock))
             {
-                structuralBlock.HandleProjectileImpact();
+                Vector3 impactImpulse = projectileRigidbody.mass * projectileRigidbody.linearVelocity;
+                Vector3 impactPoint = collision.contactCount > 0
+                    ? collision.GetContact(0).point
+                    : structuralBlock.transform.position;
+                structuralBlock.HandleProjectileImpact(impactImpulse, impactPoint);
             }
 
             Debug.Log(
