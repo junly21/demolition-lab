@@ -312,9 +312,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DemolitionLab.StructuralConnection
   blockA: {fileID: 1794756248}
   blockB: {fileID: 1163628249}
-  connectionStrength: 120
+  gravityCapacity: 240
+  impactCapacity: 60
   isActive: 1
-  currentEstimatedLoad: 0
+  currentGravityLoad: 0
+  currentImpactImpulse: 0
+  gravityUtilization: 0
+  impactUtilization: 0
+  failureScore: 0
   drawConnectionGizmo: 1
 --- !u!4 &36322722
 Transform:
@@ -848,9 +853,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DemolitionLab.StructuralConnection
   blockA: {fileID: 1163628249}
   blockB: {fileID: 1336564719}
-  connectionStrength: 120
+  gravityCapacity: 240
+  impactCapacity: 60
   isActive: 1
-  currentEstimatedLoad: 0
+  currentGravityLoad: 0
+  currentImpactImpulse: 0
+  gravityUtilization: 0
+  impactUtilization: 0
+  failureScore: 0
   drawConnectionGizmo: 1
 --- !u!4 &124286877
 Transform:
@@ -898,9 +908,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DemolitionLab.StructuralConnection
   blockA: {fileID: 58482}
   blockB: {fileID: 1163628249}
-  connectionStrength: 120
+  gravityCapacity: 240
+  impactCapacity: 60
   isActive: 1
-  currentEstimatedLoad: 0
+  currentGravityLoad: 0
+  currentImpactImpulse: 0
+  gravityUtilization: 0
+  impactUtilization: 0
+  failureScore: 0
   drawConnectionGizmo: 1
 --- !u!4 &127579363
 Transform:
@@ -948,9 +963,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DemolitionLab.StructuralConnection
   blockA: {fileID: 45331895}
   blockB: {fileID: 1744183758}
-  connectionStrength: 50
+  gravityCapacity: 120
+  impactCapacity: 28
   isActive: 1
-  currentEstimatedLoad: 0
+  currentGravityLoad: 0
+  currentImpactImpulse: 0
+  gravityUtilization: 0
+  impactUtilization: 0
+  failureScore: 0
   drawConnectionGizmo: 1
 --- !u!4 &139112944
 Transform:
@@ -998,9 +1018,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DemolitionLab.StructuralConnection
   blockA: {fileID: 986154139}
   blockB: {fileID: 1336230062}
-  connectionStrength: 50
+  gravityCapacity: 120
+  impactCapacity: 28
   isActive: 1
-  currentEstimatedLoad: 0
+  currentGravityLoad: 0
+  currentImpactImpulse: 0
+  gravityUtilization: 0
+  impactUtilization: 0
+  failureScore: 0
   drawConnectionGizmo: 1
 --- !u!4 &185464952
 Transform:
@@ -1227,9 +1252,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DemolitionLab.StructuralConnection
   blockA: {fileID: 1834845939}
   blockB: {fileID: 58482}
-  connectionStrength: 120
+  gravityCapacity: 240
+  impactCapacity: 60
   isActive: 1
-  currentEstimatedLoad: 0
+  currentGravityLoad: 0
+  currentImpactImpulse: 0
+  gravityUtilization: 0
+  impactUtilization: 0
+  failureScore: 0
   drawConnectionGizmo: 1
 --- !u!4 &318958899
 Transform:
@@ -1277,9 +1307,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DemolitionLab.StructuralConnection
   blockA: {fileID: 38297197}
   blockB: {fileID: 522195790}
-  connectionStrength: 120
+  gravityCapacity: 240
+  impactCapacity: 60
   isActive: 1
-  currentEstimatedLoad: 0
+  currentGravityLoad: 0
+  currentImpactImpulse: 0
+  gravityUtilization: 0
+  impactUtilization: 0
+  failureScore: 0
   drawConnectionGizmo: 1
 --- !u!4 &394558812
 Transform:
@@ -1327,9 +1362,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DemolitionLab.StructuralConnection
   blockA: {fileID: 1744183758}
   blockB: {fileID: 2082065488}
-  connectionStrength: 50
+  gravityCapacity: 120
+  impactCapacity: 28
   isActive: 1
-  currentEstimatedLoad: 0
+  currentGravityLoad: 0
+  currentImpactImpulse: 0
+  gravityUtilization: 0
+  impactUtilization: 0
+  failureScore: 0
   drawConnectionGizmo: 1
 --- !u!4 &400587844
 Transform:
@@ -1539,9 +1579,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DemolitionLab.StructuralConnection
   blockA: {fileID: 1336230062}
   blockB: {fileID: 436219544}
-  connectionStrength: 50
+  gravityCapacity: 120
+  impactCapacity: 28
   isActive: 1
-  currentEstimatedLoad: 0
+  currentGravityLoad: 0
+  currentImpactImpulse: 0
+  gravityUtilization: 0
+  impactUtilization: 0
+  failureScore: 0
   drawConnectionGizmo: 1
 --- !u!4 &442542764
 Transform:
@@ -1589,9 +1634,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DemolitionLab.StructuralConnection
   blockA: {fileID: 744437240}
   blockB: {fileID: 1744183758}
-  connectionStrength: 50
+  gravityCapacity: 120
+  impactCapacity: 28
   isActive: 1
-  currentEstimatedLoad: 0
+  currentGravityLoad: 0
+  currentImpactImpulse: 0
+  gravityUtilization: 0
+  impactUtilization: 0
+  failureScore: 0
   drawConnectionGizmo: 1
 --- !u!4 &469511605
 Transform:
@@ -1802,7 +1852,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c76955e9ad8e34e88ad9f26ac245775c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DemolitionLab.StructuralLoadEvaluator
-  impactLoadScale: 1
   leverArmMultiplier: 0.5
 --- !u!114 &526224673
 MonoBehaviour:
@@ -1952,9 +2001,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DemolitionLab.StructuralConnection
   blockA: {fileID: 45331895}
   blockB: {fileID: 1225228810}
-  connectionStrength: 50
+  gravityCapacity: 120
+  impactCapacity: 28
   isActive: 1
-  currentEstimatedLoad: 0
+  currentGravityLoad: 0
+  currentImpactImpulse: 0
+  gravityUtilization: 0
+  impactUtilization: 0
+  failureScore: 0
   drawConnectionGizmo: 1
 --- !u!4 &544216051
 Transform:
@@ -2002,9 +2056,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DemolitionLab.StructuralConnection
   blockA: {fileID: 1794756248}
   blockB: {fileID: 1834845939}
-  connectionStrength: 120
+  gravityCapacity: 240
+  impactCapacity: 60
   isActive: 1
-  currentEstimatedLoad: 0
+  currentGravityLoad: 0
+  currentImpactImpulse: 0
+  gravityUtilization: 0
+  impactUtilization: 0
+  failureScore: 0
   drawConnectionGizmo: 1
 --- !u!4 &714940561
 Transform:
@@ -2214,9 +2273,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DemolitionLab.StructuralConnection
   blockA: {fileID: 2082065488}
   blockB: {fileID: 986154139}
-  connectionStrength: 50
+  gravityCapacity: 120
+  impactCapacity: 28
   isActive: 1
-  currentEstimatedLoad: 0
+  currentGravityLoad: 0
+  currentImpactImpulse: 0
+  gravityUtilization: 0
+  impactUtilization: 0
+  failureScore: 0
   drawConnectionGizmo: 1
 --- !u!4 &734170495
 Transform:
@@ -2588,9 +2652,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DemolitionLab.StructuralConnection
   blockA: {fileID: 1336564719}
   blockB: {fileID: 747316458}
-  connectionStrength: 120
+  gravityCapacity: 240
+  impactCapacity: 60
   isActive: 1
-  currentEstimatedLoad: 0
+  currentGravityLoad: 0
+  currentImpactImpulse: 0
+  gravityUtilization: 0
+  impactUtilization: 0
+  failureScore: 0
   drawConnectionGizmo: 1
 --- !u!4 &752355911
 Transform:
@@ -2892,9 +2961,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DemolitionLab.StructuralConnection
   blockA: {fileID: 1402209439}
   blockB: {fileID: 717490149}
-  connectionStrength: 120
+  gravityCapacity: 240
+  impactCapacity: 60
   isActive: 1
-  currentEstimatedLoad: 0
+  currentGravityLoad: 0
+  currentImpactImpulse: 0
+  gravityUtilization: 0
+  impactUtilization: 0
+  failureScore: 0
   drawConnectionGizmo: 1
 --- !u!4 &799503720
 Transform:
@@ -3103,9 +3177,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DemolitionLab.StructuralConnection
   blockA: {fileID: 717490149}
   blockB: {fileID: 1493649583}
-  connectionStrength: 50
+  gravityCapacity: 240
+  impactCapacity: 60
   isActive: 1
-  currentEstimatedLoad: 0
+  currentGravityLoad: 0
+  currentImpactImpulse: 0
+  gravityUtilization: 0
+  impactUtilization: 0
+  failureScore: 0
   drawConnectionGizmo: 1
 --- !u!4 &964842280
 Transform:
@@ -3360,9 +3439,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DemolitionLab.StructuralConnection
   blockA: {fileID: 1225228810}
   blockB: {fileID: 744437240}
-  connectionStrength: 50
+  gravityCapacity: 120
+  impactCapacity: 28
   isActive: 1
-  currentEstimatedLoad: 0
+  currentGravityLoad: 0
+  currentImpactImpulse: 0
+  gravityUtilization: 0
+  impactUtilization: 0
+  failureScore: 0
   drawConnectionGizmo: 1
 --- !u!4 &1062589743
 Transform:
@@ -4320,9 +4404,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DemolitionLab.StructuralConnection
   blockA: {fileID: 908057936}
   blockB: {fileID: 81134127}
-  connectionStrength: 50
+  gravityCapacity: 120
+  impactCapacity: 28
   isActive: 1
-  currentEstimatedLoad: 0
+  currentGravityLoad: 0
+  currentImpactImpulse: 0
+  gravityUtilization: 0
+  impactUtilization: 0
+  failureScore: 0
   drawConnectionGizmo: 1
 --- !u!4 &1400305503
 Transform:
@@ -4754,9 +4843,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DemolitionLab.StructuralConnection
   blockA: {fileID: 436219544}
   blockB: {fileID: 1990596555}
-  connectionStrength: 50
+  gravityCapacity: 120
+  impactCapacity: 28
   isActive: 1
-  currentEstimatedLoad: 0
+  currentGravityLoad: 0
+  currentImpactImpulse: 0
+  gravityUtilization: 0
+  impactUtilization: 0
+  failureScore: 0
   drawConnectionGizmo: 1
 --- !u!4 &1611367087
 Transform:
@@ -5026,7 +5120,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c76955e9ad8e34e88ad9f26ac245775c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DemolitionLab.StructuralLoadEvaluator
-  impactLoadScale: 1
   leverArmMultiplier: 0.5
 --- !u!1 &1730924983
 GameObject:
@@ -5059,9 +5152,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DemolitionLab.StructuralConnection
   blockA: {fileID: 1402209439}
   blockB: {fileID: 747316458}
-  connectionStrength: 120
+  gravityCapacity: 240
+  impactCapacity: 60
   isActive: 1
-  currentEstimatedLoad: 0
+  currentGravityLoad: 0
+  currentImpactImpulse: 0
+  gravityUtilization: 0
+  impactUtilization: 0
+  failureScore: 0
   drawConnectionGizmo: 1
 --- !u!4 &1730924985
 Transform:
@@ -5435,9 +5533,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DemolitionLab.StructuralConnection
   blockA: {fileID: 761286050}
   blockB: {fileID: 717490149}
-  connectionStrength: 120
+  gravityCapacity: 240
+  impactCapacity: 60
   isActive: 1
-  currentEstimatedLoad: 0
+  currentGravityLoad: 0
+  currentImpactImpulse: 0
+  gravityUtilization: 0
+  impactUtilization: 0
+  failureScore: 0
   drawConnectionGizmo: 1
 --- !u!4 &1810744653
 Transform:
@@ -5485,9 +5588,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DemolitionLab.StructuralConnection
   blockA: {fileID: 81134127}
   blockB: {fileID: 45331895}
-  connectionStrength: 50
+  gravityCapacity: 120
+  impactCapacity: 28
   isActive: 1
-  currentEstimatedLoad: 0
+  currentGravityLoad: 0
+  currentImpactImpulse: 0
+  gravityUtilization: 0
+  impactUtilization: 0
+  failureScore: 0
   drawConnectionGizmo: 1
 --- !u!4 &1826629339
 Transform:
@@ -5697,9 +5805,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DemolitionLab.StructuralConnection
   blockA: {fileID: 747316458}
   blockB: {fileID: 761286050}
-  connectionStrength: 120
+  gravityCapacity: 240
+  impactCapacity: 60
   isActive: 1
-  currentEstimatedLoad: 0
+  currentGravityLoad: 0
+  currentImpactImpulse: 0
+  gravityUtilization: 0
+  impactUtilization: 0
+  failureScore: 0
   drawConnectionGizmo: 1
 --- !u!4 &1870845540
 Transform:
@@ -5747,9 +5860,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DemolitionLab.StructuralConnection
   blockA: {fileID: 1493649583}
   blockB: {fileID: 1402209439}
-  connectionStrength: 120
+  gravityCapacity: 240
+  impactCapacity: 60
   isActive: 1
-  currentEstimatedLoad: 0
+  currentGravityLoad: 0
+  currentImpactImpulse: 0
+  gravityUtilization: 0
+  impactUtilization: 0
+  failureScore: 0
   drawConnectionGizmo: 1
 --- !u!4 &1952250370
 Transform:
@@ -5958,9 +6076,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DemolitionLab.StructuralConnection
   blockA: {fileID: 522195790}
   blockB: {fileID: 1794756248}
-  connectionStrength: 120
+  gravityCapacity: 240
+  impactCapacity: 60
   isActive: 1
-  currentEstimatedLoad: 0
+  currentGravityLoad: 0
+  currentImpactImpulse: 0
+  gravityUtilization: 0
+  impactUtilization: 0
+  failureScore: 0
   drawConnectionGizmo: 1
 --- !u!4 &2078460483
 Transform:

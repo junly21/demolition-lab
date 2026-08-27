@@ -17,7 +17,6 @@ namespace DemolitionLab
 
     public sealed class StructuralLoadEvaluator : MonoBehaviour
     {
-        [SerializeField, Min(0f)] private float impactLoadScale = 1f;
         [SerializeField, Min(0f)] private float leverArmMultiplier = 0.5f;
 
         internal StructuralLoadEvaluationResult Evaluate(
@@ -27,7 +26,7 @@ namespace DemolitionLab
             float impactImpulseMagnitude)
         {
             int evaluatedConnections = 0;
-            var loads = new Dictionary<StructuralConnection, float>();
+            var loads = new Dictionary<StructuralConnection, ConnectionLoads>();
 
             foreach (StructuralConnection connection in connections)
             {
@@ -37,26 +36,29 @@ namespace DemolitionLab
                 }
 
                 float gravityLoad = CalculateGravityLoad(adjacency, connection);
-                float impactLoad = impactedBlock != null && connection.Connects(impactedBlock)
-                    ? impactImpulseMagnitude * impactLoadScale
+                float impactImpulse = impactedBlock != null && connection.Connects(impactedBlock)
+                    ? impactImpulseMagnitude
                     : 0f;
-                loads[connection] = gravityLoad + impactLoad;
+                loads[connection] = new ConnectionLoads(gravityLoad, impactImpulse);
                 evaluatedConnections++;
             }
 
             int brokenConnections = 0;
-            foreach (KeyValuePair<StructuralConnection, float> connectionLoad in loads)
+            foreach (KeyValuePair<StructuralConnection, ConnectionLoads> connectionLoads in loads)
             {
-                StructuralConnection connection = connectionLoad.Key;
-                float load = connectionLoad.Value;
-                connection.SetEstimatedLoad(load);
-                if (load > connection.ConnectionStrength && connection.Break(load))
+                StructuralConnection connection = connectionLoads.Key;
+                ConnectionLoads load = connectionLoads.Value;
+                connection.SetLoadEvaluation(load.GravityLoad, load.ImpactImpulse);
+                if (connection.FailureScore > 1f && connection.Break())
                 {
                     brokenConnections++;
                     Debug.Log(
                         $"Structural connection broke: '{connection.BlockA.NodeId}' <-> "
-                        + $"'{connection.BlockB.NodeId}', load={load:0.00}, "
-                        + $"strength={connection.ConnectionStrength:0.00}.",
+                        + $"'{connection.BlockB.NodeId}', gravity={connection.CurrentGravityLoad:0.00} N "
+                        + $"({connection.GravityUtilization:0.00}), "
+                        + $"impact={connection.CurrentImpactImpulse:0.00} N·s "
+                        + $"({connection.ImpactUtilization:0.00}), "
+                        + $"failureScore={connection.FailureScore:0.00}.",
                         connection);
                 }
             }
@@ -161,6 +163,18 @@ namespace DemolitionLab
             }
 
             return false;
+        }
+
+        private readonly struct ConnectionLoads
+        {
+            public ConnectionLoads(float gravityLoad, float impactImpulse)
+            {
+                GravityLoad = gravityLoad;
+                ImpactImpulse = impactImpulse;
+            }
+
+            public float GravityLoad { get; }
+            public float ImpactImpulse { get; }
         }
     }
 }

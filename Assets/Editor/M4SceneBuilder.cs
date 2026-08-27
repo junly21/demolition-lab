@@ -10,8 +10,10 @@ public static class M4SceneBuilder
 {
     private const string SourceScenePath = "Assets/Scenes/M3_LocalSupport.unity";
     private const string ScenePath = "Assets/Scenes/M4_BreakableConnections.unity";
-    private const float WeakStrength = 50f;
-    private const float ReinforcedStrength = 120f;
+    private const float WeakGravityCapacity = 120f;
+    private const float WeakImpactCapacity = 28f;
+    private const float ReinforcedGravityCapacity = 240f;
+    private const float ReinforcedImpactCapacity = 60f;
 
     private static readonly (string First, string Second)[] BaseEdges =
     {
@@ -49,8 +51,18 @@ public static class M4SceneBuilder
         weakRoot.transform.position = new Vector3(-5f, 0f, 0f);
         reinforcedRoot.transform.position = new Vector3(5f, 0f, 0f);
 
-        ConfigureStructure(weakRoot, "Weak", WeakStrength, false);
-        ConfigureStructure(reinforcedRoot, "Reinforced", ReinforcedStrength, true);
+        ConfigureStructure(
+            weakRoot,
+            "Weak",
+            WeakGravityCapacity,
+            WeakImpactCapacity,
+            false);
+        ConfigureStructure(
+            reinforcedRoot,
+            "Reinforced",
+            ReinforcedGravityCapacity,
+            ReinforcedImpactCapacity,
+            true);
         ConfigureCameraAndLauncher();
 
         EditorSceneManager.SaveScene(scene);
@@ -70,11 +82,15 @@ public static class M4SceneBuilder
     {
         ValidateLoadFormula();
         ValidateInitialStructures();
-        ValidateWeakImpactBreak();
+        ValidateWeakNormalImpactBreak();
+        ValidateStrongWeakImpactBreak();
         ValidateDistantImpactIsolation();
-        ValidateReinforcedImpactPath();
+        ValidateReinforcedNormalImpactSurvival();
+        ValidateGravityContribution();
         EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
-        Debug.Log("M4 validation passed: load ordering, local impact breaks, graph reevaluation, and reinforcement verified.");
+        Debug.Log(
+            "M4.1 validation passed: realistic impact calibration, normalized gravity contribution, "
+            + "local break isolation, graph reevaluation, and reinforcement verified.");
     }
 
     private static void ValidateLoadFormula()
@@ -92,6 +108,9 @@ public static class M4SceneBuilder
         ValidationContext context = LoadAndInitializeScene();
         foreach (StructureContext structure in new[] { context.Weak, context.Reinforced })
         {
+            bool isWeak = structure.Manager.name.StartsWith("Weak");
+            float expectedGravityCapacity = isWeak ? WeakGravityCapacity : ReinforcedGravityCapacity;
+            float expectedImpactCapacity = isWeak ? WeakImpactCapacity : ReinforcedImpactCapacity;
             foreach (StructuralBlock block in structure.Blocks.Values)
             {
                 if (!block.ParticipatesInStructure || !block.GetComponent<Rigidbody>().isKinematic)
@@ -106,22 +125,29 @@ public static class M4SceneBuilder
                 {
                     throw new UnityException("The symmetric M4 structure broke a connection during initialization.");
                 }
+
+                if (!Mathf.Approximately(connection.GravityCapacity, expectedGravityCapacity)
+                    || !Mathf.Approximately(connection.ImpactCapacity, expectedImpactCapacity))
+                {
+                    throw new UnityException(
+                        $"M4 connection capacity mismatch on '{structure.Manager.name}'.");
+                }
             }
         }
     }
 
-    private static void ValidateWeakImpactBreak()
+    private static void ValidateWeakNormalImpactBreak()
     {
         ValidationContext context = LoadAndInitializeScene();
         StructureContext weak = context.Weak;
         StructuralConnection critical = FindConnection(weak, "Right_Mid", "Right_Base");
         StructuralConnection unrelated = FindConnection(weak, "Roof_Left", "Roof_Right");
 
-        weak.Blocks["Right_Base"].HandleProjectileImpact(new Vector3(60f, 0f, 0f), Vector3.zero);
+        weak.Blocks["Right_Base"].HandleProjectileImpact(new Vector3(30f, 0f, 0f), Vector3.zero);
 
         if (critical.IsActive)
         {
-            throw new UnityException("Weak direct connection did not break under sufficient impact.");
+            throw new UnityException("Weak direct connection did not break under a representative 30 N·s impact.");
         }
 
         if (!unrelated.IsActive)
@@ -144,23 +170,32 @@ public static class M4SceneBuilder
         }
     }
 
-    private static void ValidateReinforcedImpactPath()
+    private static void ValidateStrongWeakImpactBreak()
+    {
+        ValidationContext context = LoadAndInitializeScene();
+        StructureContext weak = context.Weak;
+        StructuralConnection localRoofConnection = FindConnection(weak, "Roof_Left", "Roof_Right");
+
+        weak.Blocks["Roof_Right"].HandleProjectileImpact(new Vector3(35f, 0f, 0f), Vector3.zero);
+
+        if (localRoofConnection.IsActive)
+        {
+            throw new UnityException("Weak direct connection did not break under a strong 35 N·s gameplay impact.");
+        }
+    }
+
+    private static void ValidateReinforcedNormalImpactSurvival()
     {
         ValidationContext context = LoadAndInitializeScene();
         StructureContext reinforced = context.Reinforced;
-        StructuralConnection weakPrimary = FindConnection(reinforced, "Right_Mid", "Right_Base");
+        StructuralConnection primary = FindConnection(reinforced, "Right_Mid", "Right_Base");
         StructuralConnection strongBackup = FindConnection(reinforced, "Right_Base", "Right_Brace");
 
-        reinforced.Blocks["Right_Base"].HandleProjectileImpact(new Vector3(60f, 0f, 0f), Vector3.zero);
+        reinforced.Blocks["Right_Base"].HandleProjectileImpact(new Vector3(30f, 0f, 0f), Vector3.zero);
 
-        if (weakPrimary.IsActive)
+        if (!primary.IsActive || !strongBackup.IsActive)
         {
-            throw new UnityException("The reinforced structure's weak primary connection should still break.");
-        }
-
-        if (!strongBackup.IsActive)
-        {
-            throw new UnityException("The strong backup connection did not survive the same impact.");
+            throw new UnityException("A reinforced connection did not survive the representative 30 N·s impact.");
         }
 
         foreach (StructuralBlock block in reinforced.Blocks.Values)
@@ -173,6 +208,33 @@ public static class M4SceneBuilder
         }
     }
 
+    private static void ValidateGravityContribution()
+    {
+        ValidationContext context = LoadAndInitializeScene();
+        StructuralConnection weak = FindConnection(context.Weak, "Beam_Left", "Beam_Center");
+        StructuralConnection reinforced = FindConnection(context.Reinforced, "Beam_Left", "Beam_Center");
+        const float representativeGravityLoad = 73.575f;
+        const float moderateImpact = 12f;
+
+        if (weak.CalculateFailureScore(0f, moderateImpact) > 1f
+            || weak.CalculateFailureScore(representativeGravityLoad, moderateImpact) <= 1f)
+        {
+            throw new UnityException("Weak gravity utilization did not reduce the remaining impact margin.");
+        }
+
+        if (reinforced.CalculateFailureScore(representativeGravityLoad, moderateImpact) > 1f)
+        {
+            throw new UnityException("Reinforced connection failed under moderate combined utilization.");
+        }
+
+        const float significantGravityLoad = 161.865f;
+        const float strongImpact = 20f;
+        if (reinforced.CalculateFailureScore(significantGravityLoad, strongImpact) <= 1f)
+        {
+            throw new UnityException("Reinforced connection did not fail under significant combined utilization.");
+        }
+    }
+
     private static void ValidateDistantImpactIsolation()
     {
         ValidationContext context = LoadAndInitializeScene();
@@ -180,7 +242,7 @@ public static class M4SceneBuilder
         StructuralConnection critical = FindConnection(weak, "Right_Mid", "Right_Base");
         StructuralConnection localRoofConnection = FindConnection(weak, "Roof_Left", "Roof_Right");
 
-        weak.Blocks["Roof_Right"].HandleProjectileImpact(new Vector3(60f, 0f, 0f), Vector3.zero);
+        weak.Blocks["Roof_Right"].HandleProjectileImpact(new Vector3(35f, 0f, 0f), Vector3.zero);
 
         if (localRoofConnection.IsActive)
         {
@@ -196,7 +258,8 @@ public static class M4SceneBuilder
     private static void ConfigureStructure(
         GameObject root,
         string prefix,
-        float defaultStrength,
+        float gravityCapacity,
+        float impactCapacity,
         bool addReinforcement)
     {
         root.name = $"{prefix} Structure";
@@ -223,10 +286,12 @@ public static class M4SceneBuilder
         var connections = new List<StructuralConnection>();
         foreach ((string first, string second) in BaseEdges)
         {
-            float strength = addReinforcement && first == "Right_Mid" && second == "Right_Base"
-                ? WeakStrength
-                : defaultStrength;
-            connections.Add(CreateConnection(root.transform, blocks[first], blocks[second], strength));
+            connections.Add(CreateConnection(
+                root.transform,
+                blocks[first],
+                blocks[second],
+                gravityCapacity,
+                impactCapacity));
         }
 
         if (addReinforcement)
@@ -235,17 +300,20 @@ public static class M4SceneBuilder
                 root.transform,
                 blocks["Right_Base"],
                 blocks["Right_Brace"],
-                ReinforcedStrength));
+                ReinforcedGravityCapacity,
+                ReinforcedImpactCapacity));
             connections.Add(CreateConnection(
                 root.transform,
                 blocks["Right_Brace"],
                 blocks["Beam_Right"],
-                ReinforcedStrength));
+                ReinforcedGravityCapacity,
+                ReinforcedImpactCapacity));
             connections.Add(CreateConnection(
                 root.transform,
                 blocks["Right_Brace"],
                 blocks["Right_Mid"],
-                ReinforcedStrength));
+                ReinforcedGravityCapacity,
+                ReinforcedImpactCapacity));
         }
 
         StructuralLoadEvaluator loadEvaluator = root.GetComponent<StructuralLoadEvaluator>();
@@ -280,7 +348,8 @@ public static class M4SceneBuilder
         Transform parent,
         StructuralBlock first,
         StructuralBlock second,
-        float strength)
+        float gravityCapacity,
+        float impactCapacity)
     {
         GameObject connectionObject = new($"Connection_{first.NodeId}_{second.NodeId}");
         connectionObject.transform.SetParent(parent, false);
@@ -288,7 +357,8 @@ public static class M4SceneBuilder
         var serializedConnection = new SerializedObject(connection);
         serializedConnection.FindProperty("blockA").objectReferenceValue = first;
         serializedConnection.FindProperty("blockB").objectReferenceValue = second;
-        serializedConnection.FindProperty("connectionStrength").floatValue = strength;
+        serializedConnection.FindProperty("gravityCapacity").floatValue = gravityCapacity;
+        serializedConnection.FindProperty("impactCapacity").floatValue = impactCapacity;
         serializedConnection.FindProperty("isActive").boolValue = true;
         serializedConnection.ApplyModifiedPropertiesWithoutUndo();
         return connection;

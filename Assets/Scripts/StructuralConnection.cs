@@ -6,16 +6,27 @@ namespace DemolitionLab
     {
         [SerializeField] private StructuralBlock blockA;
         [SerializeField] private StructuralBlock blockB;
-        [SerializeField, Min(0.01f)] private float connectionStrength = 75f;
+        [SerializeField, Min(0.01f)] private float gravityCapacity = 120f;
+        [SerializeField, Min(0.01f)] private float impactCapacity = 28f;
         [SerializeField] private bool isActive = true;
-        [SerializeField] private float currentEstimatedLoad;
+        [SerializeField] private float currentGravityLoad;
+        [SerializeField] private float currentImpactImpulse;
+        [SerializeField] private float gravityUtilization;
+        [SerializeField] private float impactUtilization;
+        [SerializeField] private float failureScore;
         [SerializeField] private bool drawConnectionGizmo = true;
 
         public StructuralBlock BlockA => blockA;
         public StructuralBlock BlockB => blockB;
-        public float ConnectionStrength => connectionStrength;
+        public float GravityCapacity => gravityCapacity;
+        public float ImpactCapacity => impactCapacity;
         public bool IsActive => isActive;
-        public float CurrentEstimatedLoad => currentEstimatedLoad;
+        public bool IsBroken => !isActive;
+        public float CurrentGravityLoad => currentGravityLoad;
+        public float CurrentImpactImpulse => currentImpactImpulse;
+        public float GravityUtilization => gravityUtilization;
+        public float ImpactUtilization => impactUtilization;
+        public float FailureScore => failureScore;
 
         public bool Connects(StructuralBlock block)
         {
@@ -32,14 +43,22 @@ namespace DemolitionLab
                 && blockB.ParticipatesInStructure;
         }
 
-        internal void SetEstimatedLoad(float load)
+        internal void SetLoadEvaluation(float gravityLoad, float impactImpulse)
         {
-            currentEstimatedLoad = Mathf.Max(0f, load);
+            currentGravityLoad = Mathf.Max(0f, gravityLoad);
+            currentImpactImpulse = Mathf.Max(0f, impactImpulse);
+            gravityUtilization = CalculateGravityUtilization(currentGravityLoad);
+            impactUtilization = CalculateImpactUtilization(currentImpactImpulse);
+            failureScore = gravityUtilization + impactUtilization;
         }
 
-        internal bool Break(float load)
+        public float CalculateFailureScore(float gravityLoad, float impactImpulse)
         {
-            SetEstimatedLoad(load);
+            return CalculateGravityUtilization(gravityLoad) + CalculateImpactUtilization(impactImpulse);
+        }
+
+        internal bool Break()
+        {
             if (!isActive)
             {
                 return false;
@@ -52,6 +71,16 @@ namespace DemolitionLab
         internal void Deactivate()
         {
             isActive = false;
+        }
+
+        private float CalculateGravityUtilization(float gravityLoad)
+        {
+            return Mathf.Max(0f, gravityLoad) / Mathf.Max(0.01f, gravityCapacity);
+        }
+
+        private float CalculateImpactUtilization(float impactImpulse)
+        {
+            return Mathf.Max(0f, impactImpulse) / Mathf.Max(0.01f, impactCapacity);
         }
 
         private void OnDrawGizmos()
@@ -71,10 +100,7 @@ namespace DemolitionLab
             }
             else
             {
-                float normalizedLoad = connectionStrength > 0f
-                    ? Mathf.Clamp01(currentEstimatedLoad / connectionStrength)
-                    : 1f;
-                Gizmos.color = Color.Lerp(Color.green, Color.red, normalizedLoad);
+                Gizmos.color = Color.Lerp(Color.green, Color.red, Mathf.Clamp01(failureScore));
             }
 
             Vector3 start = blockA.transform.position;
