@@ -6,9 +6,12 @@ namespace DemolitionLab
     public sealed class StructureManager : MonoBehaviour
     {
         [SerializeField] private List<StructuralBlock> blocks = new();
+        [SerializeField] private List<StructuralConnection> connections = new();
         [SerializeField] private StructuralStabilityEvaluator stabilityEvaluator;
         [SerializeField] private LocalSupportEvaluator localSupportEvaluator;
+        [SerializeField] private StructuralLoadEvaluator loadEvaluator;
         [SerializeField] private bool keepDestroyedBlocksAsDebris;
+        [SerializeField] private bool destroyImpactedBlocks = true;
         [SerializeField] private bool drawGraphGizmos = true;
 
         private readonly Dictionary<StructuralBlock, List<StructuralBlock>> adjacency = new();
@@ -25,8 +28,20 @@ namespace DemolitionLab
                 return;
             }
 
-            block.MarkDestroyed(keepDestroyedBlocksAsDebris, impulse, impactPoint);
-            RecalculateSupport($"Destroyed structural node '{block.NodeId}'.");
+            int connectionEvaluations = EvaluateConnections(block, impulse.magnitude);
+            string reason = $"Impacted structural node '{block.NodeId}'.";
+
+            if (destroyImpactedBlocks)
+            {
+                block.MarkDestroyed(keepDestroyedBlocksAsDebris, impulse, impactPoint);
+                DeactivateConnectionsFor(block);
+                RebuildActiveAdjacency();
+                connectionEvaluations += EvaluateConnections(null, 0f);
+                reason = $"Destroyed structural node '{block.NodeId}'.";
+            }
+
+            RecalculateSupport(reason);
+            LogEvaluationCounts(connectionEvaluations);
         }
 
         private void InitializeGraph()
@@ -44,19 +59,8 @@ namespace DemolitionLab
                 block.Initialize(this);
             }
 
-            foreach (StructuralBlock block in adjacency.Keys)
-            {
-                foreach (StructuralBlock neighbor in block.Neighbors)
-                {
-                    if (neighbor == null || neighbor == block || !adjacency.ContainsKey(neighbor))
-                    {
-                        continue;
-                    }
-
-                    AddEdge(block, neighbor);
-                    AddEdge(neighbor, block);
-                }
-            }
+            RebuildActiveAdjacency();
+            int connectionEvaluations = EvaluateConnections(null, 0f);
 
             int anchorCount = 0;
             foreach (StructuralBlock block in adjacency.Keys)
@@ -73,6 +77,114 @@ namespace DemolitionLab
             }
 
             RecalculateSupport($"Initialized structural graph with {adjacency.Count} nodes and {anchorCount} anchors.");
+            LogEvaluationCounts(connectionEvaluations);
+        }
+
+        private void RebuildActiveAdjacency()
+        {
+            foreach (List<StructuralBlock> neighbors in adjacency.Values)
+            {
+                neighbors.Clear();
+            }
+
+            if (connections.Count > 0)
+            {
+                foreach (StructuralConnection connection in connections)
+                {
+                    if (connection == null || !connection.IsValidForStaticGraph())
+                    {
+                        continue;
+                    }
+
+                    AddEdge(connection.BlockA, connection.BlockB);
+                    AddEdge(connection.BlockB, connection.BlockA);
+                }
+
+                return;
+            }
+
+            foreach (StructuralBlock block in adjacency.Keys)
+            {
+                foreach (StructuralBlock neighbor in block.Neighbors)
+                {
+                    if (neighbor == null || neighbor == block || !adjacency.ContainsKey(neighbor))
+                    {
+                        continue;
+                    }
+
+                    AddEdge(block, neighbor);
+                    AddEdge(neighbor, block);
+                }
+            }
+        }
+
+        private int EvaluateConnections(StructuralBlock impactedBlock, float impactImpulseMagnitude)
+        {
+            if (loadEvaluator == null || connections.Count == 0)
+            {
+                return 0;
+            }
+
+            int totalEvaluations = 0;
+            bool applyImpact = impactedBlock != null;
+            StructuralLoadEvaluationResult result;
+
+            do
+            {
+                result = loadEvaluator.Evaluate(
+                    adjacency,
+                    connections,
+                    applyImpact ? impactedBlock : null,
+                    applyImpact ? impactImpulseMagnitude : 0f);
+                totalEvaluations += result.EvaluatedConnections;
+                applyImpact = false;
+
+                if (result.BrokenConnections > 0)
+                {
+                    RebuildActiveAdjacency();
+                }
+            }
+            while (result.BrokenConnections > 0);
+
+            return totalEvaluations;
+        }
+
+        private void DeactivateConnectionsFor(StructuralBlock block)
+        {
+            foreach (StructuralConnection connection in connections)
+            {
+                if (connection != null && connection.Connects(block))
+                {
+                    connection.Deactivate();
+                }
+            }
+        }
+
+        private void LogEvaluationCounts(int connectionEvaluations)
+        {
+            int activeBlocks = 0;
+            foreach (StructuralBlock block in blocks)
+            {
+                if (block != null && block.ParticipatesInStructure)
+                {
+                    activeBlocks++;
+                }
+            }
+
+            int activeConnections = 0;
+            foreach (StructuralConnection connection in connections)
+            {
+                if (connection != null && connection.IsValidForStaticGraph())
+                {
+                    activeConnections++;
+                }
+            }
+
+            Debug.Log(
+                $"Structural event metrics: activeBlocks={activeBlocks}, "
+                + $"activeConnections={activeConnections}, "
+                + $"connectionEvaluations={connectionEvaluations}.",
+                this);
         }
 
         private void AddEdge(StructuralBlock from, StructuralBlock to)
@@ -126,7 +238,7 @@ namespace DemolitionLab
 
                     if (localSupportEvaluator != null)
                     {
-                        LocalSupportResult localSupport = localSupportEvaluator.Evaluate(component);
+                        LocalSupportResult localSupport = localSupportEvaluator.Evaluate(component, adjacency);
                         if (localSupport.UnsupportedBlocks.Count > 0)
                         {
                             int componentReleased = ReleaseBlocks(

@@ -36,7 +36,9 @@ namespace DemolitionLab
             debugLinks.Clear();
         }
 
-        internal LocalSupportResult Evaluate(IReadOnlyList<StructuralBlock> component)
+        internal LocalSupportResult Evaluate(
+            IReadOnlyList<StructuralBlock> component,
+            IReadOnlyDictionary<StructuralBlock, List<StructuralBlock>> adjacency)
         {
             var spans = new Dictionary<StructuralBlock, int>();
             var searchQueue = new Queue<StructuralBlock>();
@@ -57,7 +59,7 @@ namespace DemolitionLab
                 StructuralBlock current = searchQueue.Dequeue();
                 int currentSpan = spans[current];
 
-                foreach (StructuralBlock neighbor in current.Neighbors)
+                foreach (StructuralBlock neighbor in adjacency[current])
                 {
                     if (neighbor == null || !neighbor.ParticipatesInStructure || !Contains(component, neighbor))
                     {

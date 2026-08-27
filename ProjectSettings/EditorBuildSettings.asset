@@ -17,5 +17,8 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/M3_LocalSupport.unity
     guid: 597ed4da1437946809bb504de1c75686
+  - enabled: 1
+    path: Assets/Scenes/M4_BreakableConnections.unity
+    guid: 6eb75329973d544a4aa150a974b4c471
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

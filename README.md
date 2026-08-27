@@ -1,6 +1,6 @@
 # DemolitionLab
 
-**Current milestone:** M3
+**Current milestone:** M4
 
 DemolitionLab is a small Unity prototype for comparing physics demolition, graph connectivity, and center-of-mass structural stability.
 
@@ -16,6 +16,7 @@ DemolitionLab is a small Unity prototype for comparing physics demolition, graph
 - `M1_StructuralGraph`: support-graph scene with two anchored pillars, a bridge, and a non-critical upper block
 - `M2_StructuralStability`: side-view structure that adds center-of-mass stability to graph connectivity
 - `M3_LocalSupport`: M2.1 structure with geometric vertical support and bounded cantilever validation
+- `M4_BreakableConnections`: side-by-side weak and reinforced structures with finite connection strength
 
 ## M0 Baseline
 
@@ -56,6 +57,12 @@ M3 keeps the global graph and COM decision, then validates blocks in each global
 
 Local releases trigger another global and local evaluation of the remaining static structure. This continues until no additional block loses support. Released blocks never re-enter the static model.
 
+## M4 Breakable Connections
+
+M4 replaces implicit infinite-strength graph edges with authored `StructuralConnection` components. Each connection exposes endpoints, strength, active state, and current estimated load. Event-driven impact and gravity/cantilever loads may break an edge before the existing graph, COM, local-support, and physics-release layers run again.
+
+The M4 scene compares a weak single-path structure with a reinforced structure containing an additional physical brace and alternate connection path. It contains 23 blocks and 25 explicit connections.
+
 ## Debugging
 
 - Supported blocks use the green M1 material.
@@ -66,6 +73,7 @@ Local releases trigger another global and local evaluation of the remaining stat
 - M2 displays each component COM as a Gizmo sphere and its support interval as a ground line.
 - M2 graph/state colors are green for stable, yellow for unstable, red for disconnected, and gray for destroyed debris.
 - M3 draws cyan wireframes and links for locally supported blocks, blue links for cantilever paths, and magenta wireframes for locally unsupported blocks selected for release.
+- M4 connection Gizmos move from green toward red as load approaches strength, use magenta for broken edges, and gray for connections whose blocks have left the static model.
 
 ## M1 Manual Test Scenarios
 
@@ -91,10 +99,19 @@ Local releases trigger another global and local evaluation of the remaining stat
 - **E — Excessive cantilever:** The third horizontal block and its unsupported dependents should release.
 - **F — Middle support:** Destroying `Right_Mid` should release `Right_Top` and the excessive overhang while preserving valid static blocks.
 
+## M4 Manual Test Scenarios
+
+- **A — Symmetric support:** Both weak and reinforced structures should remain static before impact.
+- **B — Weak support joint:** A strong hit near the weak right joint should break it and trigger reevaluation.
+- **C — Long cantilever:** The newly single-supported weak span should overload additional carrying connections.
+- **D — Distant impact:** A roof hit should break only directly incident weak connections, not the remote base joint.
+- **E — Reinforced path:** The weak primary joint may break while the strong brace path preserves the structure.
+- **F — Debug evidence:** Inspector load values and connection Gizmos should clearly show active, loaded, and broken states.
+
 ## Current Scope
 
-M3 intentionally uses a static graph only for blocks that have not entered dynamic simulation, binary node destruction, 2D X-axis support intervals, simple local contact rules, and standard Rigidbody simulation. Structural edge strength, stress, bending, joints, fracture, support polygons, dynamic reconnection, and performance optimization are not implemented yet.
+M4 uses finite gameplay-oriented connection loads before the existing static graph, 2D COM, local contact rules, and Rigidbody handoff. Stress tensors, deformation, beam bending, joints, fracture, dynamic reconnection, and material simulation are not implemented.
 
-See `docs/m1-structural-support.md`, `docs/m2-structural-stability.md`, and `docs/m3-local-support.md` for milestone hypotheses and implementation notes.
+See `docs/m1-structural-support.md`, `docs/m2-structural-stability.md`, `docs/m3-local-support.md`, and `docs/m4-breakable-connections.md` for milestone notes.
 
 Scenes can be regenerated from the corresponding `DemolitionLab > Build M* Scene` Unity Editor menu items.
