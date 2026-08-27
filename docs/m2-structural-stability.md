@@ -51,8 +51,9 @@ The default tolerance is `0.05` world units.
 - Stable connected components remain kinematic.
 - Connected but unstable components are released together with `isKinematic = false`.
 - Disconnected components are released together regardless of COM.
-- Once released, a component is not automatically frozen or reconnected in M2.
-- The directly hit node is removed from graph evaluation but remains visible as dynamic gray debris with an impulse based on projectile mass and impact velocity.
+- Once released, a component leaves static BFS and COM evaluation and is not automatically frozen or reconnected.
+- The directly hit node is removed from graph evaluation but remains visible as dynamic gray debris with the opposite of the collision impulse reported on the projectile.
+- Before handoff, the manager reports any Collider penetration and records one mass, position, linear-velocity, and angular-velocity snapshot per released block.
 
 ### Debug Evidence
 
@@ -71,10 +72,28 @@ The visualization is intended to support later portfolio screenshots. No screens
 - **A — Both supports intact:** connected, COM inside the combined support interval, stable.
 - **B — Non-critical upper block removed:** remains stable if COM stays inside the interval.
 - **C — Left support removed:** still connected to the right anchor, but COM outside the right footprint; release the entire active component.
-- **D — Right support removed:** the deliberately heavier left side keeps COM inside the left footprint; remain stable.
+- **D — Right support removed:** the wider left footprint keeps COM inside the left support bounds; remain stable.
 - **E — Both supports removed:** no ground-connected component; release regardless of COM.
 
 These are expected outcomes, not manual test results.
+
+## M2.1 Physics Handoff Correction
+
+Manual M2 testing showed that an unstable component could scatter sideways and that implausible structures could remain frozen. Investigation found five `0.15 m` horizontal Collider penetrations, `0.1 m` vertical gaps, a `0.05 m` ground gap, a `20:1` mass ratio, and released blocks remaining in the static structural model.
+
+**Correct release does not guarantee natural collapse.** A valid COM decision can still hand invalid geometry to the physics solver.
+
+M2.1 makes the authored test structure physically coherent:
+
+- Unit structural blocks use `1 × 1 × 1` dimensions, `1 m` center spacing, and `1 kg` mass.
+- Both bases use `3 × 1 × 1` dimensions and `3 kg` mass, preserving a consistent mass-per-volume relationship.
+- Every intended neighbor touches without overlap, and each base touches the ground plane.
+- The left-biased upper geometry, rather than an extreme mass ratio, differentiates the one-support scenarios.
+- Editor validation rejects initial penetration and unintended gaps between graph neighbors.
+- Released blocks no longer participate in static graph traversal, COM calculation, or ground support.
+- Projectile debris impulse uses Unity collision impulse data instead of callback-time projectile velocity.
+
+Automated checks verify authored geometry, COM boundary behavior, non-critical removal, both asymmetric support cases, disconnected release, and exclusion of released blocks. Natural toppling and the visual quality of the handoff still require manual Play Mode testing; this note does not claim that manual result.
 
 ## Known Simplifications
 
@@ -83,5 +102,5 @@ These are expected outcomes, not manual test results.
 - Rigidbody positions are used as block mass points; custom Rigidbody center-of-mass offsets are not modeled.
 - The graph has binary nodes and static authored edges with no strength or stress model.
 - There is no fracture, joint simulation, torque solver, or finite element analysis.
-- Released blocks do not reconnect and stability is not continuously recalculated from moving geometry.
+- Released blocks are excluded from the static model, do not reconnect, and are not continuously evaluated from moving geometry.
 - No performance optimization or scalability claim is attempted.

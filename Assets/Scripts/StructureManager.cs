@@ -19,7 +19,7 @@ namespace DemolitionLab
 
         public void DestroyBlock(StructuralBlock block, Vector3 impulse, Vector3 impactPoint)
         {
-            if (block == null || !block.IsActive)
+            if (block == null || !block.ParticipatesInStructure)
             {
                 return;
             }
@@ -107,6 +107,11 @@ namespace DemolitionLab
                     : StructuralBlockState.Disconnected;
                 int releasedCount = 0;
 
+                if (!isStable)
+                {
+                    LogPhysicsHandoff(component);
+                }
+
                 foreach (StructuralBlock block in component)
                 {
                     if (isStable)
@@ -141,7 +146,7 @@ namespace DemolitionLab
             var unvisited = new HashSet<StructuralBlock>();
             foreach (StructuralBlock block in adjacency.Keys)
             {
-                if (block.IsActive)
+                if (block.ParticipatesInStructure)
                 {
                     unvisited.Add(block);
                 }
@@ -170,7 +175,7 @@ namespace DemolitionLab
 
                     foreach (StructuralBlock neighbor in adjacency[current])
                     {
-                        if (neighbor.IsActive && unvisited.Remove(neighbor))
+                        if (neighbor.ParticipatesInStructure && unvisited.Remove(neighbor))
                         {
                             searchQueue.Enqueue(neighbor);
                         }
@@ -194,6 +199,47 @@ namespace DemolitionLab
             }
 
             return false;
+        }
+
+        private void LogPhysicsHandoff(IReadOnlyList<StructuralBlock> component)
+        {
+            for (int firstIndex = 0; firstIndex < component.Count; firstIndex++)
+            {
+                StructuralBlock first = component[firstIndex];
+                Collider firstCollider = first.GetComponent<Collider>();
+
+                for (int secondIndex = firstIndex + 1; secondIndex < component.Count; secondIndex++)
+                {
+                    StructuralBlock second = component[secondIndex];
+                    Collider secondCollider = second.GetComponent<Collider>();
+                    if (Physics.ComputePenetration(
+                            firstCollider,
+                            first.transform.position,
+                            first.transform.rotation,
+                            secondCollider,
+                            second.transform.position,
+                            second.transform.rotation,
+                            out Vector3 direction,
+                            out float distance)
+                        && distance > 0.0001f)
+                    {
+                        Debug.LogError(
+                            $"Physics handoff penetration: '{first.NodeId}' and '{second.NodeId}' "
+                            + $"overlap by {distance:0.0000} m along {direction}.",
+                            this);
+                    }
+                }
+            }
+
+            foreach (StructuralBlock block in component)
+            {
+                Rigidbody body = block.GetComponent<Rigidbody>();
+                Debug.Log(
+                    $"Release snapshot '{block.NodeId}': mass={body.mass:0.00}, "
+                    + $"position={body.position}, linearVelocity={body.linearVelocity}, "
+                    + $"angularVelocity={body.angularVelocity}.",
+                    this);
+            }
         }
 
         private void LogStabilityResult(

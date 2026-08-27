@@ -67,6 +67,7 @@ public static class M2SceneBuilder
     public static void ValidateScene()
     {
         ValidateStabilityMath();
+        ValidateNonCriticalUpperRemoval();
         ValidateLeftSupportRemoval();
         ValidateRightSupportRemoval();
         ValidateDisconnectedComponent();
@@ -120,11 +121,14 @@ public static class M2SceneBuilder
         {
             if (block.IsActive
                 && (block.State != StructuralBlockState.Unstable
-                    || block.GetComponent<Rigidbody>().isKinematic))
+                    || block.GetComponent<Rigidbody>().isKinematic
+                    || block.ParticipatesInStructure))
             {
                 throw new UnityException("The connected overhanging component was not released together.");
             }
         }
+
+        AssertNoStaticComponentsRemain(context.Manager);
     }
 
     private static void ValidateRightSupportRemoval()
@@ -142,21 +146,51 @@ public static class M2SceneBuilder
         }
     }
 
+    private static void ValidateNonCriticalUpperRemoval()
+    {
+        ValidationContext context = LoadAndInitializeScene();
+        StructuralBlock roofRight = context.Blocks["Roof_Right"];
+        roofRight.HandleProjectileImpact();
+
+        int staticBlockCount = 0;
+        foreach (StructuralBlock block in context.Blocks.Values)
+        {
+            if (block.ParticipatesInStructure
+                && (!block.IsSupported || !block.GetComponent<Rigidbody>().isKinematic))
+            {
+                throw new UnityException("Removing Roof_Right should leave the static structure stable.");
+            }
+
+            if (block.ParticipatesInStructure)
+            {
+                staticBlockCount++;
+            }
+        }
+
+        if (roofRight.State != StructuralBlockState.Destroyed || staticBlockCount != 10)
+        {
+            throw new UnityException("The non-critical upper-block scenario did not preserve 10 static blocks.");
+        }
+    }
+
     private static void ValidateDisconnectedComponent()
     {
         ValidationContext context = LoadAndInitializeScene();
-        context.Blocks["Left_Base"].HandleProjectileImpact();
         context.Blocks["Right_Base"].HandleProjectileImpact();
+        context.Blocks["Left_Base"].HandleProjectileImpact();
 
         foreach (StructuralBlock block in context.Blocks.Values)
         {
             if (block.IsActive
                 && (block.State != StructuralBlockState.Disconnected
-                    || block.GetComponent<Rigidbody>().isKinematic))
+                    || block.GetComponent<Rigidbody>().isKinematic
+                    || block.ParticipatesInStructure))
             {
                 throw new UnityException("A component without ground connectivity was not marked disconnected.");
             }
         }
+
+        AssertNoStaticComponentsRemain(context.Manager);
     }
 
     private static ValidationContext LoadAndInitializeScene()
@@ -195,7 +229,10 @@ public static class M2SceneBuilder
             "Awake",
             BindingFlags.Instance | BindingFlags.NonPublic);
         awake?.Invoke(manager, null);
-        return new ValidationContext(blocksById);
+        Physics.SyncTransforms();
+        ValidateInitialGeometry(blocks);
+        ValidateGroundContact(blocks);
+        return new ValidationContext(blocksById, manager);
     }
 
     private static void CreateLighting()
@@ -232,17 +269,17 @@ public static class M2SceneBuilder
         const float structureZ = 2f;
         var blocks = new List<StructuralBlock>
         {
-            CreateBlock("Left_Base", new Vector3(-3f, 0.5f, structureZ), 20f, structureRoot.transform),
-            CreateBlock("Left_Mid", new Vector3(-3f, 1.5f, structureZ), 20f, structureRoot.transform),
-            CreateBlock("Left_Top", new Vector3(-3f, 2.5f, structureZ), 20f, structureRoot.transform),
-            CreateBlock("Beam_Left", new Vector3(-2f, 2.5f, structureZ), 1f, structureRoot.transform),
-            CreateBlock("Beam_MidLeft", new Vector3(-1f, 2.5f, structureZ), 1f, structureRoot.transform),
-            CreateBlock("Beam_Center", new Vector3(0f, 2.5f, structureZ), 1f, structureRoot.transform),
-            CreateBlock("Beam_Right", new Vector3(1f, 2.5f, structureZ), 1f, structureRoot.transform),
-            CreateBlock("Right_Top", new Vector3(2f, 2.5f, structureZ), 1f, structureRoot.transform),
-            CreateBlock("Right_Mid", new Vector3(2f, 1.5f, structureZ), 1f, structureRoot.transform),
-            CreateBlock("Right_Base", new Vector3(2f, 0.5f, structureZ), 1f, structureRoot.transform),
-            CreateBlock("Roof_Cap", new Vector3(-1f, 3.5f, structureZ), 1f, structureRoot.transform)
+            CreateBlock("Left_Base", new Vector3(-2f, 0.5f, structureZ), new Vector3(3f, 1f, 1f), 3f, structureRoot.transform),
+            CreateBlock("Left_Mid", new Vector3(-2f, 1.5f, structureZ), Vector3.one, 1f, structureRoot.transform),
+            CreateBlock("Left_Top", new Vector3(-2f, 2.5f, structureZ), Vector3.one, 1f, structureRoot.transform),
+            CreateBlock("Beam_Left", new Vector3(-1f, 2.5f, structureZ), Vector3.one, 1f, structureRoot.transform),
+            CreateBlock("Beam_Center", new Vector3(0f, 2.5f, structureZ), Vector3.one, 1f, structureRoot.transform),
+            CreateBlock("Beam_Right", new Vector3(1f, 2.5f, structureZ), Vector3.one, 1f, structureRoot.transform),
+            CreateBlock("Right_Top", new Vector3(2f, 2.5f, structureZ), Vector3.one, 1f, structureRoot.transform),
+            CreateBlock("Right_Mid", new Vector3(2f, 1.5f, structureZ), Vector3.one, 1f, structureRoot.transform),
+            CreateBlock("Right_Base", new Vector3(2f, 0.5f, structureZ), new Vector3(3f, 1f, 1f), 3f, structureRoot.transform),
+            CreateBlock("Roof_Left", new Vector3(-2f, 3.5f, structureZ), Vector3.one, 1f, structureRoot.transform),
+            CreateBlock("Roof_Right", new Vector3(-1f, 3.5f, structureZ), Vector3.one, 1f, structureRoot.transform)
         };
 
         var connections = new Dictionary<StructuralBlock, List<StructuralBlock>>();
@@ -251,17 +288,19 @@ public static class M2SceneBuilder
             connections.Add(block, new List<StructuralBlock>());
         }
 
-        for (int index = 0; index < 9; index++)
+        for (int index = 0; index < 8; index++)
         {
             Connect(blocks[index], blocks[index + 1], connections);
         }
-        Connect(blocks[4], blocks[10], connections);
+        Connect(blocks[2], blocks[9], connections);
+        Connect(blocks[9], blocks[10], connections);
+        Connect(blocks[10], blocks[3], connections);
 
         foreach (StructuralBlock block in blocks)
         {
             var serializedBlock = new SerializedObject(block);
             serializedBlock.FindProperty("nodeId").stringValue = block.name;
-            serializedBlock.FindProperty("isGroundAnchor").boolValue = block == blocks[0] || block == blocks[9];
+            serializedBlock.FindProperty("isGroundAnchor").boolValue = block == blocks[0] || block == blocks[8];
             serializedBlock.FindProperty("supportedMaterial").objectReferenceValue = stableMaterial;
             serializedBlock.FindProperty("unsupportedMaterial").objectReferenceValue = unstableMaterial;
             serializedBlock.FindProperty("disconnectedMaterial").objectReferenceValue = disconnectedMaterial;
@@ -293,6 +332,7 @@ public static class M2SceneBuilder
     private static StructuralBlock CreateBlock(
         string nodeId,
         Vector3 position,
+        Vector3 scale,
         float mass,
         Transform parent)
     {
@@ -301,7 +341,7 @@ public static class M2SceneBuilder
         block.tag = "Destructible";
         block.transform.SetParent(parent);
         block.transform.position = position;
-        block.transform.localScale = new Vector3(1.15f, 0.9f, 0.9f);
+        block.transform.localScale = scale;
 
         Rigidbody rigidbody = block.AddComponent<Rigidbody>();
         rigidbody.mass = mass;
@@ -309,6 +349,108 @@ public static class M2SceneBuilder
         rigidbody.interpolation = RigidbodyInterpolation.Interpolate;
         rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
         return block.AddComponent<StructuralBlock>();
+    }
+
+    private static void ValidateInitialGeometry(IReadOnlyList<StructuralBlock> blocks)
+    {
+        for (int firstIndex = 0; firstIndex < blocks.Count; firstIndex++)
+        {
+            StructuralBlock first = blocks[firstIndex];
+            Collider firstCollider = first.GetComponent<Collider>();
+
+            for (int secondIndex = firstIndex + 1; secondIndex < blocks.Count; secondIndex++)
+            {
+                StructuralBlock second = blocks[secondIndex];
+                Collider secondCollider = second.GetComponent<Collider>();
+                if (Physics.ComputePenetration(
+                        firstCollider,
+                        first.transform.position,
+                        first.transform.rotation,
+                        secondCollider,
+                        second.transform.position,
+                        second.transform.rotation,
+                        out _,
+                        out float distance)
+                    && distance > 0.0001f)
+                {
+                    throw new UnityException(
+                        $"M2 initial penetration: '{first.NodeId}' and '{second.NodeId}' overlap by {distance:0.0000} m.");
+                }
+            }
+
+            foreach (StructuralBlock neighbor in first.Neighbors)
+            {
+                float separation = CalculateBoundsSeparation(
+                    firstCollider.bounds,
+                    neighbor.GetComponent<Collider>().bounds);
+                if (separation > 0.001f)
+                {
+                    throw new UnityException(
+                        $"M2 graph adjacency gap: '{first.NodeId}' and '{neighbor.NodeId}' are {separation:0.0000} m apart.");
+                }
+            }
+        }
+    }
+
+    private static float CalculateBoundsSeparation(Bounds first, Bounds second)
+    {
+        float x = Mathf.Max(0f, Mathf.Max(first.min.x - second.max.x, second.min.x - first.max.x));
+        float y = Mathf.Max(0f, Mathf.Max(first.min.y - second.max.y, second.min.y - first.max.y));
+        float z = Mathf.Max(0f, Mathf.Max(first.min.z - second.max.z, second.min.z - first.max.z));
+        return new Vector3(x, y, z).magnitude;
+    }
+
+    private static void ValidateGroundContact(IReadOnlyList<StructuralBlock> blocks)
+    {
+        GameObject ground = GameObject.Find("Ground");
+        Collider groundCollider = ground != null ? ground.GetComponent<Collider>() : null;
+        if (groundCollider == null)
+        {
+            throw new UnityException("M2 validation could not find the Ground collider.");
+        }
+
+        foreach (StructuralBlock block in blocks)
+        {
+            if (!block.IsGroundAnchor)
+            {
+                continue;
+            }
+
+            Collider blockCollider = block.GetComponent<Collider>();
+            if (Physics.ComputePenetration(
+                    blockCollider,
+                    block.transform.position,
+                    block.transform.rotation,
+                    groundCollider,
+                    ground.transform.position,
+                    ground.transform.rotation,
+                    out _,
+                    out float penetration)
+                && penetration > 0.0001f)
+            {
+                throw new UnityException(
+                    $"M2 ground penetration: '{block.NodeId}' overlaps Ground by {penetration:0.0000} m.");
+            }
+
+            float separation = CalculateBoundsSeparation(blockCollider.bounds, groundCollider.bounds);
+            if (separation > 0.001f)
+            {
+                throw new UnityException(
+                    $"M2 ground gap: '{block.NodeId}' is {separation:0.0000} m above Ground.");
+            }
+        }
+    }
+
+    private static void AssertNoStaticComponentsRemain(StructureManager manager)
+    {
+        MethodInfo findComponents = typeof(StructureManager).GetMethod(
+            "FindActiveComponents",
+            BindingFlags.Instance | BindingFlags.NonPublic);
+        var components = findComponents?.Invoke(manager, null) as List<List<StructuralBlock>>;
+        if (components == null || components.Count != 0)
+        {
+            throw new UnityException("Released blocks still participate in static structural evaluation.");
+        }
     }
 
     private static void Connect(
@@ -422,11 +564,13 @@ public static class M2SceneBuilder
 
     private readonly struct ValidationContext
     {
-        public ValidationContext(Dictionary<string, StructuralBlock> blocks)
+        public ValidationContext(Dictionary<string, StructuralBlock> blocks, StructureManager manager)
         {
             Blocks = blocks;
+            Manager = manager;
         }
 
         public Dictionary<string, StructuralBlock> Blocks { get; }
+        public StructureManager Manager { get; }
     }
 }

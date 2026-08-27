@@ -33,6 +33,7 @@ namespace DemolitionLab
         public string NodeId => nodeId;
         public bool IsGroundAnchor => isGroundAnchor;
         public bool IsActive { get; private set; }
+        public bool ParticipatesInStructure => IsActive && !IsReleased;
         public bool IsSupported => State == StructuralBlockState.Supported;
         public bool IsReleased { get; private set; }
         public StructuralBlockState State { get; private set; }
@@ -70,7 +71,7 @@ namespace DemolitionLab
 
         internal void KeepSupported()
         {
-            if (!IsActive || IsReleased)
+            if (!ParticipatesInStructure)
             {
                 return;
             }

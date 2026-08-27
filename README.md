@@ -1,6 +1,6 @@
 # DemolitionLab
 
-**Current milestone:** M2
+**Current milestone:** M2.1
 
 DemolitionLab is a small Unity prototype for comparing physics demolition, graph connectivity, and center-of-mass structural stability.
 
@@ -47,6 +47,8 @@ For each active connected component, M2:
 
 M2 hit blocks are structurally removed but remain as gray dynamic debris. Released components are never automatically reconnected or frozen again.
 
+M2.1 normalizes the test structure to touching, non-overlapping Collider geometry and uses density-consistent masses: `1 kg` unit blocks and `3 kg` bases with three times the volume. Released blocks leave the static BFS/COM model immediately, while continuing under Rigidbody physics.
+
 ## Debugging
 
 - Supported blocks use the green M1 material.
@@ -67,14 +69,14 @@ M2 hit blocks are structurally removed but remain as gray dynamic debris. Releas
 ## M2 Manual Test Scenarios
 
 - **A — Both supports:** The intact structure should remain connected and stable.
-- **B — Upper block:** Removing `Roof_Cap` should remain stable if COM stays in the support interval.
+- **B — Upper block:** Removing `Roof_Right` should remain stable if COM stays in the support interval.
 - **C — Left support:** The connected overhang should become unstable and topple after the whole component is released.
-- **D — Right support:** The heavy left-supported component should remain stable despite losing one support.
+- **D — Right support:** The wider left footprint should keep the remaining COM supported without extreme mass weighting.
 - **E — No supports:** Removing both anchors should release the remaining disconnected component regardless of COM.
 
 ## Current Scope
 
-M2 intentionally uses a static graph, binary node destruction, 2D X-axis support intervals, and standard Rigidbody simulation. Structural edge strength, stress, joints, fracture, support polygons, dynamic reconnection, and performance optimization are not implemented yet.
+M2.1 intentionally uses a static graph only for blocks that have not entered dynamic simulation, binary node destruction, 2D X-axis support intervals, and standard Rigidbody simulation. Structural edge strength, stress, joints, fracture, support polygons, dynamic reconnection, and performance optimization are not implemented yet.
 
 See `docs/m1-structural-support.md` and `docs/m2-structural-stability.md` for milestone hypotheses and implementation notes.
 

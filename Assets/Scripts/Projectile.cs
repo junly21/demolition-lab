@@ -30,7 +30,7 @@ namespace DemolitionLab
             hasReportedImpact = true;
             if (collision.gameObject.TryGetComponent(out StructuralBlock structuralBlock))
             {
-                Vector3 impactImpulse = projectileRigidbody.mass * projectileRigidbody.linearVelocity;
+                Vector3 impactImpulse = -collision.impulse;
                 Vector3 impactPoint = collision.contactCount > 0
                     ? collision.GetContact(0).point
                     : structuralBlock.transform.position;
@@ -38,7 +38,9 @@ namespace DemolitionLab
             }
 
             Debug.Log(
-                $"Projectile impacted {collision.gameObject.name} at {collision.relativeVelocity.magnitude:0.0} m/s.",
+                $"Projectile impacted {collision.gameObject.name} at "
+                + $"{collision.relativeVelocity.magnitude:0.0} m/s with "
+                + $"{collision.impulse.magnitude:0.00} N·s collision impulse.",
                 this);
         }
     }
