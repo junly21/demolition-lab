@@ -3726,7 +3726,7 @@ MonoBehaviour:
   yawPivot: {fileID: 1183974677}
   pitchPivot: {fileID: 1409327863}
   muzzle: {fileID: 379603229}
-  projectilePrefab: {fileID: 0}
+  projectilePrefab: {fileID: 505899950155711697, guid: d053b1ea81e88403087cb3f1184e353f, type: 3}
   aimLine: {fileID: 1689179601}
   projectileSpeed: 18
   projectileMass: 2

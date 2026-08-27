@@ -154,6 +154,11 @@ public static class M0SceneBuilder
         serializedController.FindProperty("projectilePrefab").objectReferenceValue = projectilePrefab;
         serializedController.FindProperty("aimLine").objectReferenceValue = aimLine;
         serializedController.ApplyModifiedPropertiesWithoutUndo();
+
+        if (serializedController.FindProperty("projectilePrefab").objectReferenceValue == null)
+        {
+            throw new UnityException("Failed to assign the projectile prefab to LauncherController.");
+        }
     }
 
     private static void CreateCamera()
@@ -180,9 +185,18 @@ public static class M0SceneBuilder
         rigidbody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
         Projectile projectile = projectileObject.AddComponent<Projectile>();
 
-        GameObject prefab = PrefabUtility.SaveAsPrefabAsset(projectileObject, ProjectilePrefabPath);
+        PrefabUtility.SaveAsPrefabAsset(projectileObject, ProjectilePrefabPath);
         Object.DestroyImmediate(projectileObject);
-        return prefab.GetComponent<Projectile>();
+        AssetDatabase.ImportAsset(ProjectilePrefabPath, ImportAssetOptions.ForceSynchronousImport);
+
+        GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(ProjectilePrefabPath);
+        Projectile projectilePrefab = prefab != null ? prefab.GetComponent<Projectile>() : null;
+        if (projectilePrefab == null)
+        {
+            throw new UnityException($"Projectile component is missing from {ProjectilePrefabPath}.");
+        }
+
+        return projectilePrefab;
     }
 
     private static Material CreateMaterial(string path, Color color)

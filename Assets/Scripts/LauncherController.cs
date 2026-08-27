@@ -28,9 +28,16 @@ namespace DemolitionLab
         private Quaternion initialPitchRotation;
         private float yawAngle;
         private float pitchAngle = 15f;
+        private bool hasValidReferences;
 
         private void Awake()
         {
+            hasValidReferences = ValidateRequiredReferences();
+            if (!hasValidReferences)
+            {
+                return;
+            }
+
             initialYawRotation = yawPivot.localRotation;
             initialPitchRotation = pitchPivot.localRotation;
             ApplyAim();
@@ -38,6 +45,11 @@ namespace DemolitionLab
 
         private void Update()
         {
+            if (!hasValidReferences)
+            {
+                return;
+            }
+
             Keyboard keyboard = Keyboard.current;
             if (keyboard == null)
             {
@@ -115,6 +127,36 @@ namespace DemolitionLab
                     + 0.5f * Physics.gravity * time * time;
                 aimLine.SetPosition(index, point);
             }
+        }
+
+        [ContextMenu("Validate Required References")]
+        private void ValidateReferencesFromContextMenu()
+        {
+            ValidateRequiredReferences();
+        }
+
+        private bool ValidateRequiredReferences()
+        {
+            bool isValid = true;
+            isValid &= ValidateReference(yawPivot, nameof(yawPivot));
+            isValid &= ValidateReference(pitchPivot, nameof(pitchPivot));
+            isValid &= ValidateReference(muzzle, nameof(muzzle));
+            isValid &= ValidateReference(projectilePrefab, nameof(projectilePrefab));
+            isValid &= ValidateReference(aimLine, nameof(aimLine));
+            return isValid;
+        }
+
+        private bool ValidateReference(Object reference, string fieldName)
+        {
+            if (reference != null)
+            {
+                return true;
+            }
+
+            Debug.LogError(
+                $"{nameof(LauncherController)} on {name} is missing required reference '{fieldName}'.",
+                this);
+            return false;
         }
     }
 }
