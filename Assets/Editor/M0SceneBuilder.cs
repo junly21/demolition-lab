@@ -1,4 +1,5 @@
 using DemolitionLab;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -216,10 +217,10 @@ public static class M0SceneBuilder
 
     private static void AddSceneToBuildSettings()
     {
-        EditorBuildSettings.scenes = new[]
-        {
-            new EditorBuildSettingsScene(ScenePath, true)
-        };
+        var scenes = new List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
+        scenes.RemoveAll(scene => scene.path == ScenePath);
+        scenes.Insert(0, new EditorBuildSettingsScene(ScenePath, true));
+        EditorBuildSettings.scenes = scenes.ToArray();
     }
 
     private static void EnsureDestructibleTag()

@@ -8,5 +8,8 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/M0_DemolitionLab.unity
     guid: 1a79137aa51464da39a167fb69548458
+  - enabled: 1
+    path: Assets/Scenes/M1_StructuralGraph.unity
+    guid: 3b3863566df3d4b5cb798bfd7c41f945
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

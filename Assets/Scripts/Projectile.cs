@@ -28,6 +28,11 @@ namespace DemolitionLab
             }
 
             hasReportedImpact = true;
+            if (collision.gameObject.TryGetComponent(out StructuralBlock structuralBlock))
+            {
+                structuralBlock.HandleProjectileImpact();
+            }
+
             Debug.Log(
                 $"Projectile impacted {collision.gameObject.name} at {collision.relativeVelocity.magnitude:0.0} m/s.",
                 this);
