@@ -1,6 +1,6 @@
 # DemolitionLab
 
-**Current milestone:** M2.1
+**Current milestone:** M3
 
 DemolitionLab is a small Unity prototype for comparing physics demolition, graph connectivity, and center-of-mass structural stability.
 
@@ -15,6 +15,7 @@ DemolitionLab is a small Unity prototype for comparing physics demolition, graph
 - `M0_DemolitionLab`: baseline stacked-block scene using only Rigidbody physics
 - `M1_StructuralGraph`: support-graph scene with two anchored pillars, a bridge, and a non-critical upper block
 - `M2_StructuralStability`: side-view structure that adds center-of-mass stability to graph connectivity
+- `M3_LocalSupport`: M2.1 structure with geometric vertical support and bounded cantilever validation
 
 ## M0 Baseline
 
@@ -49,6 +50,12 @@ M2 hit blocks are structurally removed but remain as gray dynamic debris. Releas
 
 M2.1 normalizes the test structure to touching, non-overlapping Collider geometry and uses density-consistent masses: `1 kg` unit blocks and `3 kg` bases with three times the volume. Released blocks leave the static BFS/COM model immediately, while continuing under Rigidbody physics.
 
+## M3 Local Support
+
+M3 keeps the global graph and COM decision, then validates blocks in each globally stable component from its ground anchors. Actual vertical contacts preserve the current cantilever span, while authored horizontal neighbors with touching Collider faces add one block to the span. Blocks beyond the configured `maxCantileverBlocks` limit never enter the locally supported set and are released with any blocks that depend on them.
+
+Local releases trigger another global and local evaluation of the remaining static structure. This continues until no additional block loses support. Released blocks never re-enter the static model.
+
 ## Debugging
 
 - Supported blocks use the green M1 material.
@@ -58,6 +65,7 @@ M2.1 normalizes the test structure to touching, non-overlapping Collider geometr
 - Recalculation logs include the destroyed node ID, visited/supported count, and unsupported count.
 - M2 displays each component COM as a Gizmo sphere and its support interval as a ground line.
 - M2 graph/state colors are green for stable, yellow for unstable, red for disconnected, and gray for destroyed debris.
+- M3 draws cyan wireframes and links for locally supported blocks, blue links for cantilever paths, and magenta wireframes for locally unsupported blocks selected for release.
 
 ## M1 Manual Test Scenarios
 
@@ -74,10 +82,19 @@ M2.1 normalizes the test structure to touching, non-overlapping Collider geometr
 - **D — Right support:** The wider left footprint should keep the remaining COM supported without extreme mass weighting.
 - **E — No supports:** Removing both anchors should release the remaining disconnected component regardless of COM.
 
+## M3 Manual Test Scenarios
+
+- **A — Both supports:** All intended blocks should remain globally and locally supported.
+- **B — Left support:** The globally unstable structure should release as in M2.1.
+- **C — Right support:** The global component should pass COM, but unsupported right-side blocks should release locally.
+- **D — Short cantilever:** One- and two-block extensions should remain static with the default limit of two.
+- **E — Excessive cantilever:** The third horizontal block and its unsupported dependents should release.
+- **F — Middle support:** Destroying `Right_Mid` should release `Right_Top` and the excessive overhang while preserving valid static blocks.
+
 ## Current Scope
 
-M2.1 intentionally uses a static graph only for blocks that have not entered dynamic simulation, binary node destruction, 2D X-axis support intervals, and standard Rigidbody simulation. Structural edge strength, stress, joints, fracture, support polygons, dynamic reconnection, and performance optimization are not implemented yet.
+M3 intentionally uses a static graph only for blocks that have not entered dynamic simulation, binary node destruction, 2D X-axis support intervals, simple local contact rules, and standard Rigidbody simulation. Structural edge strength, stress, bending, joints, fracture, support polygons, dynamic reconnection, and performance optimization are not implemented yet.
 
-See `docs/m1-structural-support.md` and `docs/m2-structural-stability.md` for milestone hypotheses and implementation notes.
+See `docs/m1-structural-support.md`, `docs/m2-structural-stability.md`, and `docs/m3-local-support.md` for milestone hypotheses and implementation notes.
 
 Scenes can be regenerated from the corresponding `DemolitionLab > Build M* Scene` Unity Editor menu items.

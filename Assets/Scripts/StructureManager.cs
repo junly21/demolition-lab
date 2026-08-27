@@ -7,6 +7,7 @@ namespace DemolitionLab
     {
         [SerializeField] private List<StructuralBlock> blocks = new();
         [SerializeField] private StructuralStabilityEvaluator stabilityEvaluator;
+        [SerializeField] private LocalSupportEvaluator localSupportEvaluator;
         [SerializeField] private bool keepDestroyedBlocksAsDebris;
         [SerializeField] private bool drawGraphGizmos = true;
 
@@ -84,61 +85,107 @@ namespace DemolitionLab
 
         private void RecalculateSupport(string reason)
         {
-            List<List<StructuralBlock>> components = FindActiveComponents();
             stabilityEvaluator?.BeginEvaluation();
+            localSupportEvaluator?.BeginEvaluation();
 
-            int supportedCount = 0;
-            int unsupportedCount = 0;
+            int releasedCount = 0;
+            bool repeatEvaluation;
 
-            foreach (List<StructuralBlock> component in components)
+            do
             {
-                bool isConnected = HasGroundAnchor(component);
-                bool isStable = isConnected;
-                StructuralStabilityResult stability = default;
+                repeatEvaluation = false;
+                List<List<StructuralBlock>> components = FindActiveComponents();
 
-                if (stabilityEvaluator != null)
+                foreach (List<StructuralBlock> component in components)
                 {
-                    stability = stabilityEvaluator.Evaluate(component);
-                    isStable = isConnected && stability.IsStable;
-                }
+                    bool isConnected = HasGroundAnchor(component);
+                    bool isStable = isConnected;
+                    StructuralStabilityResult stability = default;
 
-                StructuralBlockState releaseState = isConnected
-                    ? StructuralBlockState.Unstable
-                    : StructuralBlockState.Disconnected;
-                int releasedCount = 0;
+                    if (stabilityEvaluator != null)
+                    {
+                        stability = stabilityEvaluator.Evaluate(component);
+                        isStable = isConnected && stability.IsStable;
+                    }
 
-                if (!isStable)
-                {
-                    LogPhysicsHandoff(component);
-                }
+                    if (!isStable)
+                    {
+                        StructuralBlockState releaseState = isConnected
+                            ? StructuralBlockState.Unstable
+                            : StructuralBlockState.Disconnected;
+                        int componentReleased = ReleaseBlocks(component, releaseState);
+                        releasedCount += componentReleased;
+                        LogStabilityResultIfAvailable(
+                            component,
+                            stability,
+                            isConnected,
+                            false,
+                            componentReleased);
+                        continue;
+                    }
 
-                foreach (StructuralBlock block in component)
-                {
-                    if (isStable)
+                    if (localSupportEvaluator != null)
+                    {
+                        LocalSupportResult localSupport = localSupportEvaluator.Evaluate(component);
+                        if (localSupport.UnsupportedBlocks.Count > 0)
+                        {
+                            int componentReleased = ReleaseBlocks(
+                                localSupport.UnsupportedBlocks,
+                                StructuralBlockState.Unstable);
+                            releasedCount += componentReleased;
+                            repeatEvaluation |= componentReleased > 0;
+                            LogLocalSupportResult(component, localSupport, componentReleased);
+                            LogStabilityResultIfAvailable(
+                                component,
+                                stability,
+                                true,
+                                true,
+                                componentReleased);
+                            continue;
+                        }
+                    }
+
+                    foreach (StructuralBlock block in component)
                     {
                         block.KeepSupported();
-                        supportedCount++;
                     }
-                    else
-                    {
-                        if (block.ReleaseToPhysics(releaseState))
-                        {
-                            releasedCount++;
-                        }
-                        unsupportedCount++;
-                    }
-                }
 
-                if (stabilityEvaluator != null)
+                    LogStabilityResultIfAvailable(component, stability, true, true, 0);
+                }
+            }
+            while (repeatEvaluation);
+
+            int supportedCount = 0;
+            foreach (StructuralBlock block in adjacency.Keys)
+            {
+                if (block.ParticipatesInStructure)
                 {
-                    LogStabilityResult(component, stability, isConnected, isStable, releasedCount);
+                    supportedCount++;
                 }
             }
 
             Debug.Log(
                 $"{reason} Traversal visited {supportedCount} nodes: "
-                + $"{supportedCount} supported, {unsupportedCount} unsupported.",
+                + $"{supportedCount} supported, {releasedCount} released.",
                 this);
+        }
+
+        private int ReleaseBlocks(
+            IReadOnlyList<StructuralBlock> blocksToRelease,
+            StructuralBlockState releaseState)
+        {
+            LogPhysicsHandoff(blocksToRelease);
+            int releasedCount = 0;
+
+            foreach (StructuralBlock block in blocksToRelease)
+            {
+                if (block.ReleaseToPhysics(releaseState))
+                {
+                    releasedCount++;
+                }
+            }
+
+            return releasedCount;
         }
 
         private List<List<StructuralBlock>> FindActiveComponents()
@@ -257,6 +304,38 @@ namespace DemolitionLab
                 $"Component '{component[0].NodeId}': nodes={component.Count}, "
                 + $"mass={result.TotalMass:0.00}, COM.x={result.CenterOfMass.x:0.00}, "
                 + $"support={supportInterval}, connected={isConnected}, stable={isStable}, "
+                + $"released={releasedCount}.",
+                this);
+        }
+
+        private void LogStabilityResultIfAvailable(
+            IReadOnlyList<StructuralBlock> component,
+            StructuralStabilityResult result,
+            bool isConnected,
+            bool isStable,
+            int releasedCount)
+        {
+            if (stabilityEvaluator != null)
+            {
+                LogStabilityResult(component, result, isConnected, isStable, releasedCount);
+            }
+        }
+
+        private void LogLocalSupportResult(
+            IReadOnlyList<StructuralBlock> component,
+            LocalSupportResult result,
+            int releasedCount)
+        {
+            var unsupportedIds = new List<string>();
+            foreach (StructuralBlock block in result.UnsupportedBlocks)
+            {
+                unsupportedIds.Add(block.NodeId);
+            }
+
+            Debug.Log(
+                $"Local support '{component[0].NodeId}': supported={result.SupportedBlocks.Count}, "
+                + $"unsupported=[{string.Join(", ", unsupportedIds)}], "
+                + $"maxCantileverBlocks={localSupportEvaluator.MaxCantileverBlocks}, "
                 + $"released={releasedCount}.",
                 this);
         }
