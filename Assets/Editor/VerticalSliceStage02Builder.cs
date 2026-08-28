@@ -77,6 +77,7 @@ public static class VerticalSliceStage02Builder
         ValidateController(controllers[0]);
         ValidateJoints(joints);
         ValidateNoInitialPenetration(pieces);
+        ValidateNoResearchSystems();
 
         int leftTargets = 0;
         int rightTargets = 0;
@@ -243,9 +244,49 @@ public static class VerticalSliceStage02Builder
             || serializedController.FindProperty("startingShots").intValue != 3
             || !Mathf.Approximately(serializedController.FindProperty("clearThreshold").floatValue, 0.7f)
             || serializedController.FindProperty("nextSceneName").stringValue != "VerticalSlice_Stage03"
-            || serializedController.FindProperty("targetPieces").arraySize != ExpectedTargetCount)
+            || serializedController.FindProperty("targetPieces").arraySize != ExpectedTargetCount
+            || !new List<EditorBuildSettingsScene>(EditorBuildSettings.scenes).Exists(
+                scene => scene.enabled && scene.path == "Assets/Scenes/VerticalSlice_Stage03.unity"))
         {
             throw new UnityException("Stage02 controller configuration is invalid.");
+        }
+
+        ValidateControllerReferences(serializedController);
+    }
+
+    private static void ValidateControllerReferences(SerializedObject controller)
+    {
+        string[] references =
+        {
+            "launcher", "stageLabelText", "shotsText", "destructionText", "endPanel",
+            "resultTitleText", "resultDetailsText", "nextButton", "cameraShake", "impactDust"
+        };
+
+        foreach (string propertyName in references)
+        {
+            if (controller.FindProperty(propertyName).objectReferenceValue == null)
+            {
+                throw new UnityException($"Stage02 controller is missing '{propertyName}'.");
+            }
+        }
+
+        SerializedProperty targets = controller.FindProperty("targetPieces");
+        for (int index = 0; index < targets.arraySize; index++)
+        {
+            if (targets.GetArrayElementAtIndex(index).objectReferenceValue == null)
+            {
+                throw new UnityException($"Stage02 target reference {index} is missing.");
+            }
+        }
+    }
+
+    private static void ValidateNoResearchSystems()
+    {
+        if (Object.FindAnyObjectByType<StructureManager>() != null
+            || Object.FindAnyObjectByType<StructuralBlock>() != null
+            || Object.FindAnyObjectByType<StructuralConnection>() != null)
+        {
+            throw new UnityException("Stage02 must not use the M1-M5 structural simulation stack.");
         }
     }
 

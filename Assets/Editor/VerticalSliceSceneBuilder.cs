@@ -627,9 +627,11 @@ public static class VerticalSliceSceneBuilder
         Object.DestroyImmediate(targetObject);
 
         int requiredTargets = Mathf.CeilToInt(ExpectedTargetCount * 0.7f);
-        if (requiredTargets != 6)
+        if (requiredTargets != 6
+            || !new List<EditorBuildSettingsScene>(EditorBuildSettings.scenes).Exists(
+                scene => scene.enabled && scene.path == "Assets/Scenes/VerticalSlice_Stage02.unity"))
         {
-            throw new UnityException("Stage threshold behavior is incorrect.");
+            throw new UnityException("Stage threshold or Stage02 progression behavior is incorrect.");
         }
 
         if (!new List<EditorBuildSettingsScene>(EditorBuildSettings.scenes).Exists(
