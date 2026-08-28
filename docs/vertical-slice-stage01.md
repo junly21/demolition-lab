@@ -13,6 +13,7 @@ Stage 01 tests the complete 20–60 second loop: aim, identify a weak support, s
 - Ammunition: 3 shots
 - Clear condition: after at least one accepted shot, at least 70% of target pieces fall, move, or rotate beyond their objective threshold
 - Projectile: 2 kg at 18 m/s
+- Launcher: faces the structure along +Z with an 18° default pitch
 - Weak joints: 350 N break force, 140 N·m break torque
 - Reinforced joints: 900 N break force, 400 N·m break torque
 
@@ -35,7 +36,7 @@ Meaningful projectile impacts trigger a brief camera shake and reusable dust bur
 
 ## Automated Validation
 
-Use `DemolitionLab > Validate Vertical Slice Stage 01`. It checks piece and target counts, four critical joints and their thresholds, all stage-controller and launcher references, projectile tuning, collider separation, and absence of the M1–M5 structural simulation stack. It also checks initial 0% target evaluation, ammo decrement, Initializing/Ready/Active/Settling/Clear/Failed transitions, fallen-target counting, the 70% threshold, Retry build configuration, and empty-next-scene behavior.
+Use `DemolitionLab > Validate Vertical Slice Stage 01`. It checks piece and target counts, four critical joints and their thresholds, all stage-controller and launcher references, projectile tuning, collider separation, default trajectory intersection, and absence of the M1–M5 structural simulation stack. It also checks initial 0% target evaluation, ammo decrement, Initializing/Ready/Active/Settling/Clear/Failed transitions, fallen-target counting, the 70% threshold, Retry build configuration, and empty-next-scene behavior.
 
 Automated checks establish scene-state correctness only. They do not establish that collapse quality or difficulty feels good.
 

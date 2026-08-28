@@ -108,6 +108,7 @@ public static class VerticalSliceSceneBuilder
 
         ValidateRequiredReferences(controller, launcher);
         ValidateStageFlowRules(controller);
+        ValidateDefaultTrajectory(launcher);
 
         int weakJoints = 0;
         int reinforcedJoints = 0;
@@ -413,11 +414,12 @@ public static class VerticalSliceSceneBuilder
         camera.transform.LookAt(new Vector3(0f, 2.8f, 4f));
         camera.fieldOfView = 52f;
         launcher.transform.position = new Vector3(0f, 0f, -8f);
-        launcher.transform.rotation = Quaternion.identity;
+        launcher.transform.rotation = Quaternion.Euler(0f, -90f, 0f);
 
         var serializedLauncher = new SerializedObject(launcher);
         serializedLauncher.FindProperty("projectileSpeed").floatValue = 18f;
         serializedLauncher.FindProperty("projectileMass").floatValue = 2f;
+        serializedLauncher.FindProperty("initialPitchAngle").floatValue = 18f;
         serializedLauncher.FindProperty("yawLimits").vector2Value = new Vector2(-28f, 28f);
         serializedLauncher.FindProperty("pitchLimits").vector2Value = new Vector2(2f, 30f);
         serializedLauncher.ApplyModifiedPropertiesWithoutUndo();
@@ -635,6 +637,49 @@ public static class VerticalSliceSceneBuilder
         {
             throw new UnityException("Stage 01 must be enabled in build settings for Retry.");
         }
+    }
+
+    private static void ValidateDefaultTrajectory(LauncherController launcher)
+    {
+        var serializedLauncher = new SerializedObject(launcher);
+        Transform pitchPivot = (Transform)serializedLauncher.FindProperty("pitchPivot").objectReferenceValue;
+        Transform muzzle = (Transform)serializedLauncher.FindProperty("muzzle").objectReferenceValue;
+        float speed = serializedLauncher.FindProperty("projectileSpeed").floatValue;
+        int pointCount = serializedLauncher.FindProperty("trajectoryPoints").intValue;
+        float timeStep = serializedLauncher.FindProperty("trajectoryTimeStep").floatValue;
+
+        float initialPitchAngle = serializedLauncher.FindProperty("initialPitchAngle").floatValue;
+        Quaternion runtimePitchRotation = pitchPivot.rotation * Quaternion.Euler(-initialPitchAngle, 0f, 0f);
+        Vector3 startPosition = pitchPivot.position + runtimePitchRotation * muzzle.localPosition;
+        Vector3 startVelocity = runtimePitchRotation * muzzle.localRotation * Vector3.forward * speed;
+        Vector3 previousPoint = startPosition;
+        Physics.SyncTransforms();
+        Debug.Log(
+            $"Stage 01 default trajectory starts at {startPosition} with velocity {startVelocity}.");
+
+        for (int index = 1; index < pointCount; index++)
+        {
+            float time = index * timeStep;
+            Vector3 nextPoint = startPosition
+                + startVelocity * time
+                + 0.5f * Physics.gravity * time * time;
+
+            if (Physics.Linecast(previousPoint, nextPoint, out RaycastHit hit, ~0, QueryTriggerInteraction.Ignore))
+            {
+                if (!hit.collider.CompareTag("Destructible"))
+                {
+                    throw new UnityException(
+                        $"Stage 01 default trajectory is blocked by '{hit.collider.name}' before the structure.");
+                }
+
+                Debug.Log($"Stage 01 default trajectory intersects '{hit.collider.name}'.");
+                return;
+            }
+
+            previousPoint = nextPoint;
+        }
+
+        throw new UnityException("Stage 01 default trajectory never intersects the destructible structure.");
     }
 
     private static void AssignObjectList<T>(SerializedProperty property, IReadOnlyList<T> values)

@@ -20,6 +20,7 @@ namespace DemolitionLab
 
         [Header("Aiming")]
         [SerializeField, Min(1f)] private float aimingSensitivity = 35f;
+        [SerializeField] private float initialPitchAngle = 15f;
         [SerializeField] private Vector2 yawLimits = new(-25f, 25f);
         [SerializeField] private Vector2 pitchLimits = new(5f, 35f);
         [SerializeField, Range(8, 40)] private int trajectoryPoints = 24;
@@ -28,7 +29,7 @@ namespace DemolitionLab
         private Quaternion initialYawRotation;
         private Quaternion initialPitchRotation;
         private float yawAngle;
-        private float pitchAngle = 15f;
+        private float pitchAngle;
         private bool hasValidReferences;
         private bool gameplayEnabled = true;
 
@@ -48,6 +49,7 @@ namespace DemolitionLab
 
             initialYawRotation = yawPivot.localRotation;
             initialPitchRotation = pitchPivot.localRotation;
+            pitchAngle = Mathf.Clamp(initialPitchAngle, pitchLimits.x, pitchLimits.y);
             ApplyAim();
         }
 
