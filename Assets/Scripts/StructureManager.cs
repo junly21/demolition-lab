@@ -12,6 +12,7 @@ namespace DemolitionLab
         [SerializeField] private StructuralLoadEvaluator loadEvaluator;
         [SerializeField] private bool keepDestroyedBlocksAsDebris;
         [SerializeField] private bool destroyImpactedBlocks = true;
+        [SerializeField] private bool usePhysicalJoints;
         [SerializeField] private bool drawGraphGizmos = true;
 
         private readonly Dictionary<StructuralBlock, List<StructuralBlock>> adjacency = new();
@@ -25,6 +26,15 @@ namespace DemolitionLab
         {
             if (block == null || !block.ParticipatesInStructure)
             {
+                return;
+            }
+
+            if (usePhysicalJoints)
+            {
+                Debug.Log(
+                    $"Physical impact registered on '{block.NodeId}' with impulse "
+                    + $"{impulse.magnitude:0.00} N·s; ConfigurableJoint physics remains authoritative.",
+                    this);
                 return;
             }
 
@@ -56,11 +66,16 @@ namespace DemolitionLab
                 }
 
                 adjacency.Add(block, new List<StructuralBlock>());
-                block.Initialize(this);
+                block.Initialize(this, usePhysicalJoints);
+            }
+
+            foreach (StructuralConnection connection in connections)
+            {
+                connection?.Initialize(this, usePhysicalJoints);
             }
 
             RebuildActiveAdjacency();
-            int connectionEvaluations = EvaluateConnections(null, 0f);
+            int connectionEvaluations = usePhysicalJoints ? 0 : EvaluateConnections(null, 0f);
 
             int anchorCount = 0;
             foreach (StructuralBlock block in adjacency.Keys)
@@ -78,6 +93,22 @@ namespace DemolitionLab
 
             RecalculateSupport($"Initialized structural graph with {adjacency.Count} nodes and {anchorCount} anchors.");
             LogEvaluationCounts(connectionEvaluations);
+        }
+
+        internal void HandlePhysicalConnectionBreak(
+            StructuralConnection connection,
+            float measuredBreakForce)
+        {
+            if (!usePhysicalJoints || connection == null || !connections.Contains(connection))
+            {
+                return;
+            }
+
+            RebuildActiveAdjacency();
+            RecalculateSupport(
+                $"Physical joint broke between '{connection.BlockA.NodeId}' and "
+                + $"'{connection.BlockB.NodeId}' at {measuredBreakForce:0.00} N.");
+            LogEvaluationCounts(0);
         }
 
         private void RebuildActiveAdjacency()

@@ -1,6 +1,6 @@
 # DemolitionLab
 
-**Current milestone:** M4
+**Current milestone:** M5
 
 DemolitionLab is a small Unity prototype for comparing physics demolition, graph connectivity, and center-of-mass structural stability.
 
@@ -17,6 +17,7 @@ DemolitionLab is a small Unity prototype for comparing physics demolition, graph
 - `M2_StructuralStability`: side-view structure that adds center-of-mass stability to graph connectivity
 - `M3_LocalSupport`: M2.1 structure with geometric vertical support and bounded cantilever validation
 - `M4_BreakableConnections`: side-by-side weak and reinforced structures with finite connection strength
+- `M5_PhysicalConnections`: 45-piece dynamic frame with weak and reinforced physical joints
 
 ## M0 Baseline
 
@@ -59,9 +60,13 @@ Local releases trigger another global and local evaluation of the remaining stat
 
 ## M4 Breakable Connections
 
-M4 replaces implicit infinite-strength graph edges with authored `StructuralConnection` components. Each connection exposes endpoints, strength, active state, and current estimated load. Event-driven impact and gravity/cantilever loads may break an edge before the existing graph, COM, local-support, and physics-release layers run again.
+M4 replaces implicit infinite-strength graph edges with authored `StructuralConnection` components. M4.1 separates gravity and impact capacities, normalizes each demand, and breaks a connection when their dimensionless utilization sum exceeds one.
 
 The M4 scene compares a weak single-path structure with a reinforced structure containing an additional physical brace and alternate connection path. It contains 23 blocks and 25 explicit connections.
+
+## M5 Physical Connections
+
+M5 keeps the logical graph and support evaluators but adds a `ConfigurableJoint` to every active test-scene connection. Four ground anchors remain kinematic; the other 41 blocks are dynamic from startup so collision force and torque can propagate through the frame. Unity joint failure is authoritative in M5 and immediately synchronizes the logical connection before graph, COM, and local-support reevaluation.
 
 ## Debugging
 
@@ -74,6 +79,7 @@ The M4 scene compares a weak single-path structure with a reinforced structure c
 - M2 graph/state colors are green for stable, yellow for unstable, red for disconnected, and gray for destroyed debris.
 - M3 draws cyan wireframes and links for locally supported blocks, blue links for cantilever paths, and magenta wireframes for locally unsupported blocks selected for release.
 - M4 connection Gizmos move from green toward red as load approaches strength, use magenta for broken edges, and gray for connections whose blocks have left the static model.
+- M5 physical joints use orange for Weak, cyan for Reinforced, magenta for broken, and gray for released endpoints.
 
 ## M1 Manual Test Scenarios
 
@@ -110,8 +116,8 @@ The M4 scene compares a weak single-path structure with a reinforced structure c
 
 ## Current Scope
 
-M4 uses finite gameplay-oriented connection loads before the existing static graph, 2D COM, local contact rules, and Rigidbody handoff. Stress tensors, deformation, beam bending, joints, fracture, dynamic reconnection, and material simulation are not implemented.
+M5 uses built-in configurable joints alongside the existing authored graph, 2D COM, and local contact rules. It does not implement a custom constraint solver, deformable materials, fracture meshes, fatigue, dynamic reconnection, or real structural engineering.
 
-See `docs/m1-structural-support.md`, `docs/m2-structural-stability.md`, `docs/m3-local-support.md`, and `docs/m4-breakable-connections.md` for milestone notes.
+See the milestone notes in `docs/`, including `docs/m5-physical-connections.md`.
 
 Scenes can be regenerated from the corresponding `DemolitionLab > Build M* Scene` Unity Editor menu items.

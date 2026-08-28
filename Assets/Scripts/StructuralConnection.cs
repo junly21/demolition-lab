@@ -2,13 +2,28 @@ using UnityEngine;
 
 namespace DemolitionLab
 {
+    public enum StructuralConnectionType
+    {
+        Weak,
+        Reinforced
+    }
+
     public sealed class StructuralConnection : MonoBehaviour
     {
+        [Header("Logical Connection")]
         [SerializeField] private StructuralBlock blockA;
         [SerializeField] private StructuralBlock blockB;
         [SerializeField, Min(0.01f)] private float gravityCapacity = 120f;
         [SerializeField, Min(0.01f)] private float impactCapacity = 28f;
         [SerializeField] private bool isActive = true;
+
+        [Header("Physical Joint")]
+        [SerializeField] private StructuralConnectionType connectionType;
+        [SerializeField] private ConfigurableJoint physicalJoint;
+        [SerializeField, Min(0.01f)] private float physicalBreakForce = 900f;
+        [SerializeField, Min(0.01f)] private float physicalBreakTorque = 450f;
+
+        [Header("Debug State")]
         [SerializeField] private float currentGravityLoad;
         [SerializeField] private float currentImpactImpulse;
         [SerializeField] private float gravityUtilization;
@@ -16,12 +31,21 @@ namespace DemolitionLab
         [SerializeField] private float failureScore;
         [SerializeField] private bool drawConnectionGizmo = true;
 
+        private StructureManager structureManager;
+        private bool physicalJointConfigured;
+        private bool jointBreakSignalPending;
+        private float reportedJointBreakForce;
+
         public StructuralBlock BlockA => blockA;
         public StructuralBlock BlockB => blockB;
         public float GravityCapacity => gravityCapacity;
         public float ImpactCapacity => impactCapacity;
         public bool IsActive => isActive;
         public bool IsBroken => !isActive;
+        public StructuralConnectionType ConnectionType => connectionType;
+        public bool HasPhysicalJoint => physicalJoint != null;
+        public float PhysicalBreakForce => physicalBreakForce;
+        public float PhysicalBreakTorque => physicalBreakTorque;
         public float CurrentGravityLoad => currentGravityLoad;
         public float CurrentImpactImpulse => currentImpactImpulse;
         public float GravityUtilization => gravityUtilization;
@@ -31,6 +55,27 @@ namespace DemolitionLab
         public bool Connects(StructuralBlock block)
         {
             return blockA == block || blockB == block;
+        }
+
+        internal void Initialize(StructureManager manager, bool physicalJointMode)
+        {
+            structureManager = manager;
+            if (!physicalJointMode)
+            {
+                return;
+            }
+
+            physicalJointConfigured = physicalJoint != null;
+            if (physicalJoint == null)
+            {
+                Debug.LogError(
+                    $"Physical connection '{name}' is missing its ConfigurableJoint reference.",
+                    this);
+                return;
+            }
+
+            physicalJoint.breakForce = physicalBreakForce;
+            physicalJoint.breakTorque = physicalBreakTorque;
         }
 
         internal bool IsValidForStaticGraph()
@@ -65,12 +110,62 @@ namespace DemolitionLab
             }
 
             isActive = false;
+            RemovePhysicalJoint();
             return true;
         }
 
         internal void Deactivate()
         {
             isActive = false;
+            RemovePhysicalJoint();
+        }
+
+        private void OnJointBreak(float breakForce)
+        {
+            jointBreakSignalPending = true;
+            reportedJointBreakForce = breakForce;
+            ResolvePhysicalJointBreak();
+        }
+
+        private void LateUpdate()
+        {
+            ResolvePhysicalJointBreak();
+        }
+
+        private void FixedUpdate()
+        {
+            ResolvePhysicalJointBreak();
+        }
+
+        private void ResolvePhysicalJointBreak()
+        {
+            if (!physicalJointConfigured || !isActive || physicalJoint != null)
+            {
+                return;
+            }
+
+            jointBreakSignalPending = false;
+            isActive = false;
+            structureManager?.HandlePhysicalConnectionBreak(this, reportedJointBreakForce);
+        }
+
+        private void RemovePhysicalJoint()
+        {
+            if (physicalJoint == null)
+            {
+                return;
+            }
+
+            if (Application.isPlaying)
+            {
+                Destroy(physicalJoint);
+            }
+            else
+            {
+                DestroyImmediate(physicalJoint);
+            }
+
+            physicalJoint = null;
         }
 
         private float CalculateGravityUtilization(float gravityLoad)
@@ -100,13 +195,18 @@ namespace DemolitionLab
             }
             else
             {
-                Gizmos.color = Color.Lerp(Color.green, Color.red, Mathf.Clamp01(failureScore));
+                Gizmos.color = physicalJoint != null
+                    ? connectionType == StructuralConnectionType.Weak
+                        ? new Color(1f, 0.55f, 0.1f)
+                        : Color.cyan
+                    : Color.Lerp(Color.green, Color.red, Mathf.Clamp01(failureScore));
             }
 
             Vector3 start = blockA.transform.position;
             Vector3 end = blockB.transform.position;
             Gizmos.DrawLine(start, end);
-            Gizmos.DrawWireSphere(Vector3.Lerp(start, end, 0.5f), 0.08f);
+            float markerRadius = connectionType == StructuralConnectionType.Reinforced ? 0.11f : 0.08f;
+            Gizmos.DrawWireSphere(Vector3.Lerp(start, end, 0.5f), markerRadius);
         }
     }
 }

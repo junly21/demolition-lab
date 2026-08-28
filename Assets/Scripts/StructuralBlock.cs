@@ -29,6 +29,7 @@ namespace DemolitionLab
         private Rigidbody blockRigidbody;
         private Collider blockCollider;
         private Renderer blockRenderer;
+        private bool usesPhysicalJoints;
 
         public string NodeId => nodeId;
         public bool IsGroundAnchor => isGroundAnchor;
@@ -41,9 +42,10 @@ namespace DemolitionLab
         public float Mass => blockRigidbody.mass;
         public Bounds ColliderBounds => blockCollider.bounds;
 
-        internal void Initialize(StructureManager manager)
+        internal void Initialize(StructureManager manager, bool physicalJointMode)
         {
             structureManager = manager;
+            usesPhysicalJoints = physicalJointMode;
             blockRigidbody = GetComponent<Rigidbody>();
             blockCollider = GetComponent<Collider>();
             blockRenderer = GetComponent<Renderer>();
@@ -52,7 +54,7 @@ namespace DemolitionLab
             State = StructuralBlockState.Supported;
             blockCollider.enabled = true;
             blockRenderer.enabled = true;
-            blockRigidbody.isKinematic = true;
+            blockRigidbody.isKinematic = !usesPhysicalJoints || isGroundAnchor;
             blockRenderer.sharedMaterial = supportedMaterial;
         }
 
@@ -77,7 +79,7 @@ namespace DemolitionLab
             }
 
             State = StructuralBlockState.Supported;
-            blockRigidbody.isKinematic = true;
+            blockRigidbody.isKinematic = !usesPhysicalJoints || isGroundAnchor;
             blockRenderer.sharedMaterial = supportedMaterial;
         }
 
@@ -102,7 +104,7 @@ namespace DemolitionLab
 
             State = releaseState;
             IsReleased = true;
-            blockRigidbody.isKinematic = false;
+            blockRigidbody.isKinematic = usesPhysicalJoints && isGroundAnchor;
             blockRenderer.sharedMaterial = releaseState == StructuralBlockState.Disconnected
                 && disconnectedMaterial != null
                     ? disconnectedMaterial
