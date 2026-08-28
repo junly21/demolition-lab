@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -29,11 +30,17 @@ namespace DemolitionLab
         private float yawAngle;
         private float pitchAngle = 15f;
         private bool hasValidReferences;
+        private bool gameplayEnabled = true;
+
+        public event Action ProjectileFired;
+
+        public float ProjectileSpeed => projectileSpeed;
+        public float ProjectileMass => projectileMass;
 
         private void Awake()
         {
             hasValidReferences = ValidateRequiredReferences();
-            if (!hasValidReferences)
+            if (!hasValidReferences || !gameplayEnabled)
             {
                 return;
             }
@@ -45,7 +52,7 @@ namespace DemolitionLab
 
         private void Update()
         {
-            if (!hasValidReferences)
+            if (!hasValidReferences || !gameplayEnabled)
             {
                 return;
             }
@@ -101,10 +108,16 @@ namespace DemolitionLab
             pitchPivot.localRotation = initialPitchRotation * Quaternion.Euler(-pitchAngle, 0f, 0f);
         }
 
+        public void SetGameplayEnabled(bool isEnabled)
+        {
+            gameplayEnabled = isEnabled;
+        }
+
         private void Fire()
         {
             Projectile projectile = Instantiate(projectilePrefab, muzzle.position, muzzle.rotation);
             projectile.Launch(muzzle.forward * projectileSpeed, projectileMass, projectileLifetime);
+            ProjectileFired?.Invoke();
             Debug.Log($"Projectile fired at {projectileSpeed:0.0} m/s.", this);
         }
 
@@ -146,7 +159,7 @@ namespace DemolitionLab
             return isValid;
         }
 
-        private bool ValidateReference(Object reference, string fieldName)
+        private bool ValidateReference(UnityEngine.Object reference, string fieldName)
         {
             if (reference != null)
             {

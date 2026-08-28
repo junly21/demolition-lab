@@ -1,17 +1,19 @@
 # DemolitionLab
 
-**Current milestone:** M5
+**Current build:** First playable vertical slice — Stage 01
 
-DemolitionLab is a small Unity prototype for comparing physics demolition, graph connectivity, and center-of-mass structural stability.
+DemolitionLab is a short demolition puzzle where three carefully aimed shots bring down a readable structure.
 
 ## Controls
 
 - **Aim:** `WASD` or arrow keys
 - **Fire:** `Space`
 - **Reset scene:** `R`
+- **Retry after result:** click `RETRY`
 
 ## Scenes
 
+- `VerticalSlice_Stage01`: final-game prototype with three shots, a destruction objective, HUD, result flow, and four critical support joints
 - `M0_DemolitionLab`: baseline stacked-block scene using only Rigidbody physics
 - `M1_StructuralGraph`: support-graph scene with two anchored pillars, a bridge, and a non-critical upper block
 - `M2_StructuralStability`: side-view structure that adds center-of-mass stability to graph connectivity
@@ -116,8 +118,8 @@ M5 keeps the logical graph and support evaluators but adds a `ConfigurableJoint`
 
 ## Current Scope
 
-M5 uses built-in configurable joints alongside the existing authored graph, 2D COM, and local contact rules. It does not implement a custom constraint solver, deformable materials, fracture meshes, fatigue, dynamic reconnection, or real structural engineering.
+The vertical slice deliberately does not use the M1–M5 graph, COM, local-support, or connection-load simulation. Stage 01 uses Rigidbody debris plus four gameplay-critical `FixedJoint` connections so intact supports remain readable and failure can produce a decisive collapse.
 
-See the milestone notes in `docs/`, including `docs/m5-physical-connections.md`.
+See `docs/vertical-slice-stage01.md` and `docs/vertical-slice-reuse.md` for the final-game scope and reuse decisions. M0–M5 remain as preserved R&D scenes and documentation.
 
-Scenes can be regenerated from the corresponding `DemolitionLab > Build M* Scene` Unity Editor menu items.
+R&D scenes and Stage 01 can be regenerated from their corresponding `DemolitionLab` Unity Editor menu items.

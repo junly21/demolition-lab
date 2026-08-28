@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace DemolitionLab
@@ -9,6 +10,8 @@ namespace DemolitionLab
 
         private Rigidbody projectileRigidbody;
         private bool hasReportedImpact;
+
+        public static event Action<Vector3, float> MeaningfulImpact;
 
         private void Awake()
         {
@@ -31,14 +34,16 @@ namespace DemolitionLab
 
             hasReportedImpact = true;
             Destroy(gameObject, postImpactLifetime);
+            Vector3 impactPoint = collision.contactCount > 0
+                ? collision.GetContact(0).point
+                : collision.transform.position;
             if (collision.gameObject.TryGetComponent(out StructuralBlock structuralBlock))
             {
                 Vector3 impactImpulse = -collision.impulse;
-                Vector3 impactPoint = collision.contactCount > 0
-                    ? collision.GetContact(0).point
-                    : structuralBlock.transform.position;
                 structuralBlock.HandleProjectileImpact(impactImpulse, impactPoint);
             }
+
+            MeaningfulImpact?.Invoke(impactPoint, collision.impulse.magnitude);
 
             Debug.Log(
                 $"Projectile impacted {collision.gameObject.name} at "
