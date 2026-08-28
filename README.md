@@ -14,6 +14,7 @@ DemolitionLab is a short demolition puzzle where three carefully aimed shots bri
 ## Scenes
 
 - `VerticalSlice_Stage01`: final-game prototype with three shots, a destruction objective, HUD, result flow, and four critical support joints
+- `VerticalSlice_Stage02`: dual-support puzzle where each weak side controls one half of the objective
 - `M0_DemolitionLab`: baseline stacked-block scene using only Rigidbody physics
 - `M1_StructuralGraph`: support-graph scene with two anchored pillars, a bridge, and a non-critical upper block
 - `M2_StructuralStability`: side-view structure that adds center-of-mass stability to graph connectivity
