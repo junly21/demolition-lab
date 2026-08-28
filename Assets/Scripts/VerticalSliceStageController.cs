@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -8,14 +9,17 @@ namespace DemolitionLab
 {
     public sealed class VerticalSliceStageController : MonoBehaviour
     {
-        [Header("Stage Rules")]
+        [Header("Stage Configuration")]
+        [SerializeField] private string stageLabel = "STAGE 01";
         [SerializeField, Min(1)] private int startingShots = 3;
         [SerializeField, Range(0.1f, 1f)] private float clearThreshold = 0.7f;
         [SerializeField, Min(0f)] private float collapseSettleDelay = 2.75f;
+        [SerializeField] private string nextSceneName;
         [SerializeField] private LauncherController launcher;
         [SerializeField] private List<StageTargetPiece> targetPieces = new();
 
         [Header("HUD")]
+        [SerializeField] private Text stageLabelText;
         [SerializeField] private Text shotsText;
         [SerializeField] private Text destructionText;
         [SerializeField] private GameObject endPanel;
@@ -27,15 +31,20 @@ namespace DemolitionLab
         [SerializeField] private SimpleCameraShake cameraShake;
         [SerializeField] private ParticleSystem impactDust;
 
-        private int shotsRemaining;
-        private StageState state;
+        private readonly StageFlowStateMachine flow = new();
         private bool hasValidReferences;
 
-        public int ShotsRemaining => shotsRemaining;
+        public StageState CurrentState => flow.State;
+        public int ShotsRemaining => flow.AmmoRemaining;
+        public int ShotsUsed => flow.ShotsUsed;
+        public int DestroyedTargetCount => CountDestroyedTargets();
         public float DestructionPercentage => CalculateDestructionPercentage();
+        public bool HasNextScene => !string.IsNullOrWhiteSpace(nextSceneName)
+            && Application.CanStreamedLevelBeLoaded(nextSceneName);
 
         private void Awake()
         {
+            flow.Initialize(startingShots);
             hasValidReferences = ValidateRequiredReferences();
             if (!hasValidReferences)
             {
@@ -43,11 +52,10 @@ namespace DemolitionLab
                 return;
             }
 
-            shotsRemaining = startingShots;
-            state = StageState.Playing;
+            launcher.SetGameplayEnabled(false);
             endPanel.SetActive(false);
             nextButton.gameObject.SetActive(false);
-            launcher.SetGameplayEnabled(true);
+            stageLabelText.text = stageLabel;
             RefreshHud();
         }
 
@@ -60,6 +68,20 @@ namespace DemolitionLab
 
             launcher.ProjectileFired += HandleProjectileFired;
             Projectile.MeaningfulImpact += HandleImpact;
+        }
+
+        private void Start()
+        {
+            if (!hasValidReferences)
+            {
+                return;
+            }
+
+            InitializeTargets();
+            flow.MarkReady();
+            LogInitialTargetState();
+            RefreshHud();
+            StartCoroutine(ActivateGameplayNextFrame());
         }
 
         private void OnDisable()
@@ -75,10 +97,15 @@ namespace DemolitionLab
 
         private void Update()
         {
-            RefreshHud();
-            if (state == StageState.Playing && CalculateDestructionPercentage() >= clearThreshold * 100f)
+            if (flow.State != StageState.Active)
             {
-                BeginResolution();
+                return;
+            }
+
+            RefreshHud();
+            if (flow.ShotsUsed > 0 && DestructionPercentage >= clearThreshold * 100f)
+            {
+                BeginSettling();
             }
         }
 
@@ -90,27 +117,56 @@ namespace DemolitionLab
 
         public void RetryStage()
         {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            Scene activeScene = SceneManager.GetActiveScene();
+            SceneManager.LoadScene(activeScene.name);
         }
 
-        public void ShowNextPlaceholder()
+        public void LoadNextStage()
         {
-            resultTitleText.text = "STAGE 02 COMING SOON";
-            nextButton.interactable = false;
-        }
-
-        private void HandleProjectileFired()
-        {
-            if (state != StageState.Playing)
+            if (flow.State != StageState.Clear || !HasNextScene)
             {
                 return;
             }
 
-            shotsRemaining = Mathf.Max(0, shotsRemaining - 1);
-            RefreshHud();
-            if (shotsRemaining == 0)
+            SceneManager.LoadScene(nextSceneName);
+        }
+
+        private IEnumerator ActivateGameplayNextFrame()
+        {
+            yield return null;
+            if (!flow.Activate())
             {
-                BeginResolution();
+                yield break;
+            }
+
+            foreach (StageTargetPiece target in targetPieces)
+            {
+                target.BeginEvaluation();
+            }
+
+            launcher.SetGameplayEnabled(true);
+            Debug.Log($"{stageLabel} active with {flow.AmmoRemaining} shots and 0% destruction.", this);
+        }
+
+        private void InitializeTargets()
+        {
+            foreach (StageTargetPiece target in targetPieces)
+            {
+                target.InitializeReferenceState();
+            }
+        }
+
+        private void HandleProjectileFired()
+        {
+            if (!flow.RegisterShot())
+            {
+                return;
+            }
+
+            RefreshHud();
+            if (flow.AmmoRemaining == 0)
+            {
+                BeginSettling();
             }
         }
 
@@ -126,14 +182,13 @@ namespace DemolitionLab
             PlayDust(position);
         }
 
-        private void BeginResolution()
+        private void BeginSettling()
         {
-            if (state != StageState.Playing)
+            if (!flow.BeginSettling())
             {
                 return;
             }
 
-            state = StageState.Resolving;
             launcher.SetGameplayEnabled(false);
             StartCoroutine(ResolveAfterCollapse());
         }
@@ -141,22 +196,17 @@ namespace DemolitionLab
         private IEnumerator ResolveAfterCollapse()
         {
             yield return new WaitForSeconds(collapseSettleDelay);
-            float destruction = CalculateDestructionPercentage();
+            float destruction = DestructionPercentage;
             bool cleared = destruction >= clearThreshold * 100f;
-            state = StageState.Ended;
+            flow.Complete(cleared);
             resultTitleText.text = cleared ? "STAGE CLEAR" : "STAGE FAILED";
-            resultDetailsText.text = $"Shots Used: {startingShots - shotsRemaining}\nDestruction: {destruction:0}%";
-            nextButton.gameObject.SetActive(cleared);
+            resultDetailsText.text = $"Shots Used: {flow.ShotsUsed}\nDestruction: {destruction:0}%";
+            nextButton.gameObject.SetActive(cleared && HasNextScene);
             endPanel.SetActive(true);
         }
 
-        private float CalculateDestructionPercentage()
+        private int CountDestroyedTargets()
         {
-            if (targetPieces.Count == 0)
-            {
-                return 0f;
-            }
-
             int destroyed = 0;
             foreach (StageTargetPiece target in targetPieces)
             {
@@ -166,13 +216,38 @@ namespace DemolitionLab
                 }
             }
 
-            return destroyed * 100f / targetPieces.Count;
+            return destroyed;
+        }
+
+        private float CalculateDestructionPercentage()
+        {
+            return targetPieces.Count == 0
+                ? 0f
+                : CountDestroyedTargets() * 100f / targetPieces.Count;
         }
 
         private void RefreshHud()
         {
-            shotsText.text = $"Shots: {shotsRemaining}";
-            destructionText.text = $"Destruction: {CalculateDestructionPercentage():0}%";
+            shotsText.text = $"Shots: {flow.AmmoRemaining}";
+            destructionText.text = $"Destruction: {DestructionPercentage:0}%";
+        }
+
+        private void LogInitialTargetState()
+        {
+            var message = new StringBuilder();
+            message.AppendLine($"{stageLabel} initialized targets:");
+            foreach (StageTargetPiece target in targetPieces)
+            {
+                message.AppendLine(
+                    $"- {target.name}: initial={target.InitialPosition}, current={target.CurrentPosition}, "
+                    + $"fallen={target.HasFallen}, destroyed={target.IsDestroyed}, "
+                    + $"evaluationEnabled={target.EvaluationEnabled}, counts=false");
+            }
+
+            message.Append(
+                $"Destruction: {CountDestroyedTargets()}/{targetPieces.Count} "
+                + $"({CalculateDestructionPercentage():0}%)");
+            Debug.Log(message.ToString(), this);
         }
 
         private void PlayDust(Vector3 position)
@@ -196,6 +271,7 @@ namespace DemolitionLab
         {
             bool isValid = true;
             isValid &= ValidateReference(launcher, nameof(launcher));
+            isValid &= ValidateReference(stageLabelText, nameof(stageLabelText));
             isValid &= ValidateReference(shotsText, nameof(shotsText));
             isValid &= ValidateReference(destructionText, nameof(destructionText));
             isValid &= ValidateReference(endPanel, nameof(endPanel));
@@ -203,9 +279,11 @@ namespace DemolitionLab
             isValid &= ValidateReference(resultDetailsText, nameof(resultDetailsText));
             isValid &= ValidateReference(nextButton, nameof(nextButton));
 
-            if (targetPieces.Count == 0)
+            if (targetPieces.Count == 0 || targetPieces.Exists(target => target == null))
             {
-                Debug.LogError($"{nameof(VerticalSliceStageController)} requires target pieces.", this);
+                Debug.LogError(
+                    $"{nameof(VerticalSliceStageController)} requires non-null target pieces.",
+                    this);
                 isValid = false;
             }
 
@@ -223,13 +301,6 @@ namespace DemolitionLab
                 $"{nameof(VerticalSliceStageController)} on {name} is missing '{fieldName}'.",
                 this);
             return false;
-        }
-
-        private enum StageState
-        {
-            Playing,
-            Resolving,
-            Ended
         }
     }
 }

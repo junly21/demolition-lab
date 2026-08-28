@@ -94,6 +94,11 @@ public static class VerticalSliceSceneBuilder
                 + $"and {ExpectedJointCount} critical joints.");
         }
 
+        if (Object.FindObjectsByType<VerticalSliceStageController>().Length != 1)
+        {
+            throw new UnityException("Stage 01 must contain exactly one stage controller.");
+        }
+
         if (Object.FindAnyObjectByType<StructureManager>() != null
             || Object.FindAnyObjectByType<StructuralBlock>() != null
             || Object.FindAnyObjectByType<StructuralConnection>() != null)
@@ -102,6 +107,7 @@ public static class VerticalSliceSceneBuilder
         }
 
         ValidateRequiredReferences(controller, launcher);
+        ValidateStageFlowRules(controller);
 
         int weakJoints = 0;
         int reinforcedJoints = 0;
@@ -133,8 +139,9 @@ public static class VerticalSliceSceneBuilder
         }
 
         Debug.Log(
-            "Vertical-slice Stage 01 validation passed: piece count, objective targets, "
-            + "four critical joints, projectile tuning, UI controller, and collider separation verified.");
+            "Vertical-slice Stage 01 validation passed: initial 0%, ammo decrement, state transitions, "
+            + "clear/fail rules, Retry/Next configuration, serialized references, critical joints, "
+            + "projectile tuning, and collider separation verified.");
     }
 
     private static Dictionary<string, GameObject> BuildStructure(
@@ -256,11 +263,14 @@ public static class VerticalSliceSceneBuilder
         UiReferences ui = CreateUi(controller);
 
         var serializedController = new SerializedObject(controller);
+        serializedController.FindProperty("stageLabel").stringValue = "STAGE 01";
         serializedController.FindProperty("startingShots").intValue = 3;
         serializedController.FindProperty("clearThreshold").floatValue = 0.7f;
         serializedController.FindProperty("collapseSettleDelay").floatValue = 2.75f;
+        serializedController.FindProperty("nextSceneName").stringValue = string.Empty;
         serializedController.FindProperty("launcher").objectReferenceValue = launcher;
         AssignObjectList(serializedController.FindProperty("targetPieces"), targets);
+        serializedController.FindProperty("stageLabelText").objectReferenceValue = ui.StageLabel;
         serializedController.FindProperty("shotsText").objectReferenceValue = ui.Shots;
         serializedController.FindProperty("destructionText").objectReferenceValue = ui.Destruction;
         serializedController.FindProperty("endPanel").objectReferenceValue = ui.EndPanel;
@@ -272,7 +282,7 @@ public static class VerticalSliceSceneBuilder
         serializedController.ApplyModifiedPropertiesWithoutUndo();
 
         UnityEventTools.AddPersistentListener(ui.RetryButton.onClick, controller.RetryStage);
-        UnityEventTools.AddPersistentListener(ui.NextButton.onClick, controller.ShowNextPlaceholder);
+        UnityEventTools.AddPersistentListener(ui.NextButton.onClick, controller.LoadNextStage);
         return controller;
     }
 
@@ -315,7 +325,7 @@ public static class VerticalSliceSceneBuilder
             eventSystemObject.AddComponent<InputSystemUIInputModule>();
         }
 
-        return new UiReferences(shots, destruction, panel, resultTitle, resultDetails, retry, next);
+        return new UiReferences(stage, shots, destruction, panel, resultTitle, resultDetails, retry, next);
     }
 
     private static Text CreateText(
@@ -506,6 +516,7 @@ public static class VerticalSliceSceneBuilder
         string[] controllerReferences =
         {
             "launcher",
+            "stageLabelText",
             "shotsText",
             "destructionText",
             "endPanel",
@@ -529,6 +540,14 @@ public static class VerticalSliceSceneBuilder
             throw new UnityException("Stage controller target-piece wiring is incomplete.");
         }
 
+        if (serializedController.FindProperty("stageLabel").stringValue != "STAGE 01"
+            || serializedController.FindProperty("startingShots").intValue != 3
+            || !Mathf.Approximately(serializedController.FindProperty("clearThreshold").floatValue, 0.7f)
+            || !string.IsNullOrEmpty(serializedController.FindProperty("nextSceneName").stringValue))
+        {
+            throw new UnityException("Stage 01 reusable configuration is incorrect.");
+        }
+
         var serializedLauncher = new SerializedObject(launcher);
         string[] launcherReferences = { "yawPivot", "pitchPivot", "muzzle", "projectilePrefab", "aimLine" };
         foreach (string propertyName in launcherReferences)
@@ -537,6 +556,84 @@ public static class VerticalSliceSceneBuilder
             {
                 throw new UnityException($"Stage launcher is missing '{propertyName}'.");
             }
+        }
+    }
+
+    private static void ValidateStageFlowRules(VerticalSliceStageController controller)
+    {
+        var flow = new StageFlowStateMachine();
+        flow.Initialize(3);
+        if (flow.State != StageState.Initializing || flow.AmmoRemaining != 3)
+        {
+            throw new UnityException("Stage flow must start Initializing with full ammo.");
+        }
+
+        if (!flow.MarkReady() || !flow.Activate() || flow.State != StageState.Active)
+        {
+            throw new UnityException("Stage flow failed Initializing -> Ready -> Active.");
+        }
+
+        if (!flow.RegisterShot() || flow.AmmoRemaining != 2 || flow.ShotsUsed != 1)
+        {
+            throw new UnityException("One accepted shot must decrement ammo exactly once.");
+        }
+
+        if (!flow.BeginSettling() || !flow.Complete(true) || flow.State != StageState.Clear)
+        {
+            throw new UnityException("Stage flow failed the legitimate clear transition.");
+        }
+
+        flow.Initialize(3);
+        flow.MarkReady();
+        flow.Activate();
+        flow.RegisterShot();
+        flow.RegisterShot();
+        flow.RegisterShot();
+        if (flow.AmmoRemaining != 0
+            || !flow.BeginSettling()
+            || !flow.Complete(false)
+            || flow.State != StageState.Failed)
+        {
+            throw new UnityException("Stage flow failed the exhausted-ammo failure transition.");
+        }
+
+        GameObject targetObject = new("Stage Flow Validation Target");
+        targetObject.transform.position = new Vector3(0f, 4f, 0f);
+        targetObject.AddComponent<Rigidbody>().isKinematic = true;
+        StageTargetPiece target = targetObject.AddComponent<StageTargetPiece>();
+        target.InitializeReferenceState();
+        if (target.EvaluateDestroyed())
+        {
+            Object.DestroyImmediate(targetObject);
+            throw new UnityException("A target must not count during initialization.");
+        }
+
+        target.BeginEvaluation();
+        if (target.EvaluateDestroyed())
+        {
+            Object.DestroyImmediate(targetObject);
+            throw new UnityException("An unchanged active target must start at 0% destruction.");
+        }
+
+        targetObject.transform.position += Vector3.down * 2f;
+        if (!target.EvaluateDestroyed())
+        {
+            Object.DestroyImmediate(targetObject);
+            throw new UnityException("A fallen target must count toward destruction.");
+        }
+
+        Object.DestroyImmediate(targetObject);
+
+        int requiredTargets = Mathf.CeilToInt(ExpectedTargetCount * 0.7f);
+        if (requiredTargets != 6 || controller.HasNextScene)
+        {
+            throw new UnityException("Stage threshold or empty next-scene behavior is incorrect.");
+        }
+
+        if (!new List<EditorBuildSettingsScene>(EditorBuildSettings.scenes).Exists(
+                scene => scene.enabled && scene.path == ScenePath))
+        {
+            throw new UnityException("Stage 01 must be enabled in build settings for Retry.");
         }
     }
 
@@ -587,6 +684,7 @@ public static class VerticalSliceSceneBuilder
     private readonly struct UiReferences
     {
         public UiReferences(
+            Text stageLabel,
             Text shots,
             Text destruction,
             GameObject endPanel,
@@ -595,6 +693,7 @@ public static class VerticalSliceSceneBuilder
             Button retryButton,
             Button nextButton)
         {
+            StageLabel = stageLabel;
             Shots = shots;
             Destruction = destruction;
             EndPanel = endPanel;
@@ -604,6 +703,7 @@ public static class VerticalSliceSceneBuilder
             NextButton = nextButton;
         }
 
+        public Text StageLabel { get; }
         public Text Shots { get; }
         public Text Destruction { get; }
         public GameObject EndPanel { get; }

@@ -36,11 +36,12 @@ namespace DemolitionLab
 
         public float ProjectileSpeed => projectileSpeed;
         public float ProjectileMass => projectileMass;
+        public bool GameplayEnabled => gameplayEnabled;
 
         private void Awake()
         {
             hasValidReferences = ValidateRequiredReferences();
-            if (!hasValidReferences || !gameplayEnabled)
+            if (!hasValidReferences)
             {
                 return;
             }
@@ -96,7 +97,7 @@ namespace DemolitionLab
 
             if (keyboard.spaceKey.wasPressedThisFrame)
             {
-                Fire();
+                TryFire();
             }
 
             UpdateAimLine();
@@ -113,12 +114,18 @@ namespace DemolitionLab
             gameplayEnabled = isEnabled;
         }
 
-        private void Fire()
+        public bool TryFire()
         {
+            if (!hasValidReferences || !gameplayEnabled)
+            {
+                return false;
+            }
+
             Projectile projectile = Instantiate(projectilePrefab, muzzle.position, muzzle.rotation);
             projectile.Launch(muzzle.forward * projectileSpeed, projectileMass, projectileLifetime);
             ProjectileFired?.Invoke();
             Debug.Log($"Projectile fired at {projectileSpeed:0.0} m/s.", this);
+            return true;
         }
 
         private void UpdateAimLine()

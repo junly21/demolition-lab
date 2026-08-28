@@ -11,7 +11,7 @@ Stage 01 tests the complete 20–60 second loop: aim, identify a weak support, s
 - Objective target pieces: 8
 - Critical breakable joints: 4 (`2 Weak`, `2 Reinforced`)
 - Ammunition: 3 shots
-- Clear condition: at least 70% of target pieces fall, move, or rotate beyond their objective threshold
+- Clear condition: after at least one accepted shot, at least 70% of target pieces fall, move, or rotate beyond their objective threshold
 - Projectile: 2 kg at 18 m/s
 - Weak joints: 350 N break force, 140 N·m break torque
 - Reinforced joints: 900 N break force, 400 N·m break torque
@@ -27,25 +27,38 @@ Orange supports communicate weak connections. Blue supports communicate reinforc
 
 ## Flow And Feedback
 
-The HUD shows the stage number, remaining shots, and live destruction percentage. After all ammunition is spent or the objective threshold is reached, input stops for a 2.75-second collapse-settle delay. The result panel then shows clear/fail, shots used, destruction percentage, Retry, and a Stage 02 placeholder on success.
+The reusable controller follows `Initializing -> Ready -> Active -> Settling -> Clear/Failed`. Target reference transforms are explicitly captured during initialization, and targets cannot count until Active gameplay begins. The HUD shows the configured stage label, remaining shots, and live destruction percentage.
+
+After all ammunition is spent or the objective threshold is reached following a shot, input stops for a 2.75-second collapse-settle delay. The result panel then shows clear/fail, shots used, destruction percentage, and Retry. `nextSceneName` is configurable; NEXT stays hidden when it is empty or unavailable. Stage01 intentionally has no next scene configured.
 
 Meaningful projectile impacts trigger a brief camera shake and reusable dust burst. A critical support break changes its support material and triggers stronger feedback. Projectiles destroy themselves 1.25 seconds after their first destructible impact.
 
 ## Automated Validation
 
-Use `DemolitionLab > Validate Vertical Slice Stage 01`. It checks piece and target counts, four critical joints and their thresholds, all stage-controller and launcher references, projectile tuning, collider separation, and absence of the M1–M5 structural simulation stack.
+Use `DemolitionLab > Validate Vertical Slice Stage 01`. It checks piece and target counts, four critical joints and their thresholds, all stage-controller and launcher references, projectile tuning, collider separation, and absence of the M1–M5 structural simulation stack. It also checks initial 0% target evaluation, ammo decrement, Initializing/Ready/Active/Settling/Clear/Failed transitions, fallen-target counting, the 70% threshold, Retry build configuration, and empty-next-scene behavior.
 
 Automated checks establish scene-state correctness only. They do not establish that collapse quality or difficulty feels good.
 
 ## Manual Play Mode Validation
 
-1. **A — Good clear:** Aim at an orange critical support. Confirm one or two well-placed hits can reach at least 70% destruction and show `STAGE CLEAR`.
-2. **B — Miss:** Fire away from the structure. Confirm one shot is consumed and the HUD updates.
-3. **C — Failure:** Spend all three shots poorly. Confirm input stops, the collapse settles, and `STAGE FAILED` shows the final percentage.
-4. **D — Retry:** Click `RETRY` after either result. Confirm the scene, ammunition, targets, and HUD reset immediately.
-5. **E — Critical collapse:** Hit a weak lower or upper support well. Confirm local impact transfers into a large upper-structure collapse while the blue side is more resistant.
-6. **F — No sticky structures:** Observe fallen pieces. Confirm there are no impossible hanging clusters, rubber-chain motion, or unrelated remote joint failures.
+1. **A — Idle startup:** Enter Play Mode and wait 10 seconds without input. Confirm destruction remains 0%, shots remain 3, and no result panel appears.
+2. **B — One shot:** Press `Space` once. Confirm exactly one projectile appears and ammunition changes from 3 to 2 once.
+3. **C — Destruction update:** Hit an objective piece or weak support. Confirm destruction rises only after a target falls, moves, or rotates beyond its threshold.
+4. **D — Legitimate clear:** Reach at least 70% after firing. Confirm input stops during settling and `STAGE CLEAR` appears afterward.
+5. **E — Exhausted failure:** Use all three shots poorly. Confirm the final projectile gets time to resolve, then `STAGE FAILED` appears.
+6. **F — Retry:** Click `RETRY`. Confirm a completely fresh Stage01 loads with 3 shots, 0% destruction, and no result panel.
+7. **G — No next stage:** Clear Stage01. Confirm NEXT is absent because `nextSceneName` is empty and Stage02 does not exist.
+
+## Stage Template Configuration
+
+Each future stage configures its label, starting ammunition, target list, success threshold, settle duration, and optional next-scene name on `VerticalSliceStageController`. Weak and reinforced break values remain stage content configured on the four physical joints; they are not hardcoded into the shared runtime controller.
+
+## Stage-Flow Fix
+
+The original controller calculated HUD destruction in `Awake`. Unity does not guarantee `Awake` order between scene objects, so target pieces could still have default reference transforms. Their real world positions then exceeded the displacement threshold and latched as destroyed, causing the first update to enter resolution and disable launcher input. The launcher also skipped aim initialization when the stage controller disabled gameplay before launcher `Awake` ran.
+
+Targets now explicitly establish reference state before Ready, ignore evaluation until Active, and require at least one accepted shot before success evaluation. Launcher aim initialization no longer depends on whether gameplay input is currently enabled.
 
 ## Known Validation Gap
 
-Manual Play Mode is still required to judge whether the support thresholds reliably produce a satisfying one- or two-shot clear, whether the weakness is readable from the game camera, and whether retry encourages another attempt. No gameplay-feel claim is made from batch validation.
+Manual Play Mode is still required to verify actual keyboard delivery, projectile spawning, scene reload timing, and gameplay feel. Batch validation cannot prove that collapse thresholds reliably produce a satisfying one- or two-shot clear.
