@@ -11,7 +11,7 @@ namespace DemolitionLab
         private Rigidbody projectileRigidbody;
         private bool hasReportedImpact;
 
-        public static event Action<Vector3, float> MeaningfulImpact;
+        public static event Action<GameObject, Vector3, float> MeaningfulImpact;
 
         private void Awake()
         {
@@ -43,7 +43,7 @@ namespace DemolitionLab
                 structuralBlock.HandleProjectileImpact(impactImpulse, impactPoint);
             }
 
-            MeaningfulImpact?.Invoke(impactPoint, collision.impulse.magnitude);
+            MeaningfulImpact?.Invoke(collision.gameObject, impactPoint, collision.impulse.magnitude);
 
             Debug.Log(
                 $"Projectile impacted {collision.gameObject.name} at "

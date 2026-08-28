@@ -17,8 +17,8 @@ public static class VerticalSliceSceneBuilder
     private const int ExpectedPieceCount = 20;
     private const int ExpectedTargetCount = 8;
     private const int ExpectedJointCount = 4;
-    private const float WeakBreakForce = 350f;
-    private const float WeakBreakTorque = 140f;
+    private const float WeakBreakForce = 220f;
+    private const float WeakBreakTorque = 90f;
     private const float ReinforcedBreakForce = 900f;
     private const float ReinforcedBreakTorque = 400f;
 
@@ -158,7 +158,7 @@ public static class VerticalSliceSceneBuilder
         AddPiece(result, pieces, targets, root, "Right_Reinforced_Lower", new Vector3(2f, 1.5f, 4f), Vector3.one, 2f, false, false, materials.Reinforced);
         AddPiece(result, pieces, targets, root, "Left_Weak_Upper", new Vector3(-2f, 2.5f, 4f), Vector3.one, 2f, false, false, materials.Weak);
         AddPiece(result, pieces, targets, root, "Right_Reinforced_Upper", new Vector3(2f, 2.5f, 4f), Vector3.one, 2f, false, false, materials.Reinforced);
-        AddPiece(result, pieces, targets, root, "Upper_Platform", new Vector3(0f, 3.25f, 4f), new Vector3(7f, 0.5f, 1.5f), 6f, false, true, materials.Concrete);
+        AddPiece(result, pieces, targets, root, "Upper_Platform", new Vector3(0f, 3.25f, 4f), new Vector3(7f, 0.5f, 1.5f), 8f, false, true, materials.Concrete);
 
         float[] wallX = { -2.5f, -1.5f, -0.5f, 0.5f, 1.5f, 2.5f };
         foreach (float x in wallX)
@@ -166,7 +166,7 @@ public static class VerticalSliceSceneBuilder
             AddPiece(result, pieces, targets, root, $"Upper_Wall_{x:0.0}", new Vector3(x, 4.25f, 4f), new Vector3(0.8f, 1.5f, 1f), 1f, false, true, materials.Concrete);
         }
 
-        AddPiece(result, pieces, targets, root, "Roof", new Vector3(0f, 5.25f, 4f), new Vector3(7f, 0.5f, 1.5f), 5f, false, true, materials.Concrete);
+        AddPiece(result, pieces, targets, root, "Roof", new Vector3(0f, 5.25f, 4f), new Vector3(7f, 0.5f, 1.5f), 6f, false, true, materials.Concrete);
         float[] crateX = { -2.4f, -0.8f, 0.8f, 2.4f };
         foreach (float x in crateX)
         {
@@ -268,7 +268,7 @@ public static class VerticalSliceSceneBuilder
         serializedController.FindProperty("startingShots").intValue = 3;
         serializedController.FindProperty("clearThreshold").floatValue = 0.7f;
         serializedController.FindProperty("collapseSettleDelay").floatValue = 2.75f;
-        serializedController.FindProperty("nextSceneName").stringValue = string.Empty;
+        serializedController.FindProperty("nextSceneName").stringValue = "VerticalSlice_Stage02";
         serializedController.FindProperty("launcher").objectReferenceValue = launcher;
         AssignObjectList(serializedController.FindProperty("targetPieces"), targets);
         serializedController.FindProperty("stageLabelText").objectReferenceValue = ui.StageLabel;
@@ -545,7 +545,7 @@ public static class VerticalSliceSceneBuilder
         if (serializedController.FindProperty("stageLabel").stringValue != "STAGE 01"
             || serializedController.FindProperty("startingShots").intValue != 3
             || !Mathf.Approximately(serializedController.FindProperty("clearThreshold").floatValue, 0.7f)
-            || !string.IsNullOrEmpty(serializedController.FindProperty("nextSceneName").stringValue))
+            || serializedController.FindProperty("nextSceneName").stringValue != "VerticalSlice_Stage02")
         {
             throw new UnityException("Stage 01 reusable configuration is incorrect.");
         }
@@ -627,9 +627,9 @@ public static class VerticalSliceSceneBuilder
         Object.DestroyImmediate(targetObject);
 
         int requiredTargets = Mathf.CeilToInt(ExpectedTargetCount * 0.7f);
-        if (requiredTargets != 6 || controller.HasNextScene)
+        if (requiredTargets != 6)
         {
-            throw new UnityException("Stage threshold or empty next-scene behavior is incorrect.");
+            throw new UnityException("Stage threshold behavior is incorrect.");
         }
 
         if (!new List<EditorBuildSettingsScene>(EditorBuildSettings.scenes).Exists(

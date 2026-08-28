@@ -14,7 +14,7 @@ Stage 01 tests the complete 20–60 second loop: aim, identify a weak support, s
 - Clear condition: after at least one accepted shot, at least 70% of target pieces fall, move, or rotate beyond their objective threshold
 - Projectile: 2 kg at 18 m/s
 - Launcher: faces the structure along +Z with an 18° default pitch
-- Weak joints: 350 N break force, 140 N·m break torque
+- Weak joints: 220 N break force, 90 N·m break torque
 - Reinforced joints: 900 N break force, 400 N·m break torque
 
 Orange supports communicate weak connections. Blue supports communicate reinforced connections. The concrete upper platform, walls, and roof form the objective set; brown pieces are non-critical debris.
@@ -30,7 +30,7 @@ Orange supports communicate weak connections. Blue supports communicate reinforc
 
 The reusable controller follows `Initializing -> Ready -> Active -> Settling -> Clear/Failed`. Target reference transforms are explicitly captured during initialization, and targets cannot count until Active gameplay begins. The HUD shows the configured stage label, remaining shots, and live destruction percentage.
 
-After all ammunition is spent or the objective threshold is reached following a shot, input stops for a 2.75-second collapse-settle delay. The result panel then shows clear/fail, shots used, destruction percentage, and Retry. `nextSceneName` is configurable; NEXT stays hidden when it is empty or unavailable. Stage01 intentionally has no next scene configured.
+After all ammunition is spent or the objective threshold is reached following a shot, input stops for a 2.75-second collapse-settle delay. The result panel then shows clear/fail, shots used, destruction percentage, and Retry. Stage01 configures `VerticalSlice_Stage02` as its next scene.
 
 Meaningful projectile impacts trigger a brief camera shake and reusable dust burst. A critical support break changes its support material and triggers stronger feedback. Projectiles destroy themselves 1.25 seconds after their first destructible impact.
 
@@ -48,7 +48,7 @@ Automated checks establish scene-state correctness only. They do not establish t
 4. **D — Legitimate clear:** Reach at least 70% after firing. Confirm input stops during settling and `STAGE CLEAR` appears afterward.
 5. **E — Exhausted failure:** Use all three shots poorly. Confirm the final projectile gets time to resolve, then `STAGE FAILED` appears.
 6. **F — Retry:** Click `RETRY`. Confirm a completely fresh Stage01 loads with 3 shots, 0% destruction, and no result panel.
-7. **G — No next stage:** Clear Stage01. Confirm NEXT is absent because `nextSceneName` is empty and Stage02 does not exist.
+7. **G — Next stage:** Clear Stage01 and confirm NEXT loads Stage02.
 
 ## Stage Template Configuration
 

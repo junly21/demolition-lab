@@ -113,6 +113,9 @@ namespace DemolitionLab
         {
             cameraShake?.Shake(weakConnection ? 0.18f : 0.24f, 0.3f);
             PlayDust(position);
+            Debug.Log(
+                $"{stageLabel} {(weakConnection ? "Weak" : "Reinforced")} critical joint broke.",
+                this);
         }
 
         public void RetryStage()
@@ -163,6 +166,7 @@ namespace DemolitionLab
                 return;
             }
 
+            Debug.Log($"{stageLabel} shot {flow.ShotsUsed}/{flow.StartingAmmo} fired.", this);
             RefreshHud();
             if (flow.AmmoRemaining == 0)
             {
@@ -170,7 +174,7 @@ namespace DemolitionLab
             }
         }
 
-        private void HandleImpact(Vector3 position, float impulseMagnitude)
+        private void HandleImpact(GameObject impactedObject, Vector3 position, float impulseMagnitude)
         {
             if (impulseMagnitude < 1f)
             {
@@ -180,6 +184,10 @@ namespace DemolitionLab
             float shakeIntensity = Mathf.Lerp(0.025f, 0.12f, Mathf.InverseLerp(2f, 18f, impulseMagnitude));
             cameraShake?.Shake(shakeIntensity, 0.16f);
             PlayDust(position);
+            Debug.Log(
+                $"{stageLabel} shot {flow.ShotsUsed} impacted {impactedObject.name} "
+                + $"with {impulseMagnitude:0.00} N·s impulse.",
+                this);
         }
 
         private void BeginSettling()
@@ -203,6 +211,11 @@ namespace DemolitionLab
             resultDetailsText.text = $"Shots Used: {flow.ShotsUsed}\nDestruction: {destruction:0}%";
             nextButton.gameObject.SetActive(cleared && HasNextScene);
             endPanel.SetActive(true);
+            Debug.Log(
+                $"{stageLabel} {(cleared ? "CLEAR" : "FAILED")}: "
+                + $"destruction {DestroyedTargetCount}/{targetPieces.Count} ({destruction:0}%), "
+                + $"shots used {flow.ShotsUsed}.",
+                this);
         }
 
         private int CountDestroyedTargets()
