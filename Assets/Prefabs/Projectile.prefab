@@ -153,3 +153,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f47ed390156de470e854ae7ea4c57ff1, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::DemolitionLab.Projectile
+  postImpactLifetime: 1.25

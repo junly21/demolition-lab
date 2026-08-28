@@ -198,25 +198,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -256,17 +256,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 2600
-  m_BreakTorque: 1300
+  m_BreakForce: 1200
+  m_BreakTorque: 500
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -383,13 +383,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 1
   physicalJoint: {fileID: 22536580}
-  physicalBreakForce: 2600
-  physicalBreakTorque: 1300
+  physicalBreakForce: 1200
+  physicalBreakTorque: 500
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &22536586
 MonoBehaviour:
@@ -454,13 +458,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 1
   physicalJoint: {fileID: 39451513}
-  physicalBreakForce: 2600
-  physicalBreakTorque: 1300
+  physicalBreakForce: 1200
+  physicalBreakTorque: 500
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!153 &39451513
 ConfigurableJoint:
@@ -491,25 +499,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -549,17 +557,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 2600
-  m_BreakTorque: 1300
+  m_BreakForce: 1200
+  m_BreakTorque: 500
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -593,25 +601,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -651,17 +659,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 2600
-  m_BreakTorque: 1300
+  m_BreakForce: 1200
+  m_BreakTorque: 500
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -805,13 +813,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 1
   physicalJoint: {fileID: 39451514}
-  physicalBreakForce: 2600
-  physicalBreakTorque: 1300
+  physicalBreakForce: 1200
+  physicalBreakTorque: 500
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &39451521
 MonoBehaviour:
@@ -911,25 +923,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -969,17 +981,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 1100
-  m_BreakTorque: 550
+  m_BreakForce: 450
+  m_BreakTorque: 180
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -1096,13 +1108,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 0
   physicalJoint: {fileID: 41514761}
-  physicalBreakForce: 1100
-  physicalBreakTorque: 550
+  physicalBreakForce: 450
+  physicalBreakTorque: 180
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &41514767
 MonoBehaviour:
@@ -1202,25 +1218,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -1260,17 +1276,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 2600
-  m_BreakTorque: 1300
+  m_BreakForce: 1200
+  m_BreakTorque: 500
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -1387,13 +1403,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 1
   physicalJoint: {fileID: 136516386}
-  physicalBreakForce: 2600
-  physicalBreakTorque: 1300
+  physicalBreakForce: 1200
+  physicalBreakTorque: 500
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &136516392
 MonoBehaviour:
@@ -1653,25 +1673,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -1711,17 +1731,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 1100
-  m_BreakTorque: 550
+  m_BreakForce: 450
+  m_BreakTorque: 180
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -1838,13 +1858,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 0
   physicalJoint: {fileID: 243400745}
-  physicalBreakForce: 1100
-  physicalBreakTorque: 550
+  physicalBreakForce: 450
+  physicalBreakTorque: 180
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &243400751
 MonoBehaviour:
@@ -2123,25 +2147,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -2181,17 +2205,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 2600
-  m_BreakTorque: 1300
+  m_BreakForce: 1200
+  m_BreakTorque: 500
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -2308,13 +2332,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 1
   physicalJoint: {fileID: 253885636}
-  physicalBreakForce: 2600
-  physicalBreakTorque: 1300
+  physicalBreakForce: 1200
+  physicalBreakTorque: 500
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &253885642
 MonoBehaviour:
@@ -2414,25 +2442,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -2472,17 +2500,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 1100
-  m_BreakTorque: 550
+  m_BreakForce: 450
+  m_BreakTorque: 180
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -2599,13 +2627,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 0
   physicalJoint: {fileID: 296964788}
-  physicalBreakForce: 1100
-  physicalBreakTorque: 550
+  physicalBreakForce: 450
+  physicalBreakTorque: 180
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &296964794
 MonoBehaviour:
@@ -2705,25 +2737,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -2763,17 +2795,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 1100
-  m_BreakTorque: 550
+  m_BreakForce: 450
+  m_BreakTorque: 180
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -2890,13 +2922,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 0
   physicalJoint: {fileID: 322069156}
-  physicalBreakForce: 1100
-  physicalBreakTorque: 550
+  physicalBreakForce: 450
+  physicalBreakTorque: 180
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &322069162
 MonoBehaviour:
@@ -2996,25 +3032,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -3054,17 +3090,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 1100
-  m_BreakTorque: 550
+  m_BreakForce: 450
+  m_BreakTorque: 180
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -3181,13 +3217,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 0
   physicalJoint: {fileID: 396546226}
-  physicalBreakForce: 1100
-  physicalBreakTorque: 550
+  physicalBreakForce: 450
+  physicalBreakTorque: 180
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &396546232
 MonoBehaviour:
@@ -3287,25 +3327,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -3345,17 +3385,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 2600
-  m_BreakTorque: 1300
+  m_BreakForce: 1200
+  m_BreakTorque: 500
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -3472,13 +3512,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 1
   physicalJoint: {fileID: 421351900}
-  physicalBreakForce: 2600
-  physicalBreakTorque: 1300
+  physicalBreakForce: 1200
+  physicalBreakTorque: 500
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &421351906
 MonoBehaviour:
@@ -3543,13 +3587,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 0
   physicalJoint: {fileID: 518224399}
-  physicalBreakForce: 1100
-  physicalBreakTorque: 550
+  physicalBreakForce: 450
+  physicalBreakTorque: 180
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!153 &518224399
 ConfigurableJoint:
@@ -3580,25 +3628,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -3638,17 +3686,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 1100
-  m_BreakTorque: 550
+  m_BreakForce: 450
+  m_BreakTorque: 180
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -3682,25 +3730,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -3740,17 +3788,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 1100
-  m_BreakTorque: 550
+  m_BreakForce: 450
+  m_BreakTorque: 180
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -3894,13 +3942,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 0
   physicalJoint: {fileID: 518224400}
-  physicalBreakForce: 1100
-  physicalBreakTorque: 550
+  physicalBreakForce: 450
+  physicalBreakTorque: 180
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &518224407
 MonoBehaviour:
@@ -4000,25 +4052,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -4058,17 +4110,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 2600
-  m_BreakTorque: 1300
+  m_BreakForce: 1200
+  m_BreakTorque: 500
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -4185,13 +4237,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 1
   physicalJoint: {fileID: 529044689}
-  physicalBreakForce: 2600
-  physicalBreakTorque: 1300
+  physicalBreakForce: 1200
+  physicalBreakTorque: 500
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &529044695
 MonoBehaviour:
@@ -4291,25 +4347,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -4349,17 +4405,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 2600
-  m_BreakTorque: 1300
+  m_BreakForce: 1200
+  m_BreakTorque: 500
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -4476,13 +4532,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 1
   physicalJoint: {fileID: 531616496}
-  physicalBreakForce: 2600
-  physicalBreakTorque: 1300
+  physicalBreakForce: 1200
+  physicalBreakTorque: 500
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &531616502
 MonoBehaviour:
@@ -4582,25 +4642,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -4640,17 +4700,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 1100
-  m_BreakTorque: 550
+  m_BreakForce: 450
+  m_BreakTorque: 180
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -4767,13 +4827,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 0
   physicalJoint: {fileID: 560806547}
-  physicalBreakForce: 1100
-  physicalBreakTorque: 550
+  physicalBreakForce: 450
+  physicalBreakTorque: 180
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &560806553
 MonoBehaviour:
@@ -4873,25 +4937,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -4931,17 +4995,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 2600
-  m_BreakTorque: 1300
+  m_BreakForce: 1200
+  m_BreakTorque: 500
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -5058,13 +5122,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 1
   physicalJoint: {fileID: 570073161}
-  physicalBreakForce: 2600
-  physicalBreakTorque: 1300
+  physicalBreakForce: 1200
+  physicalBreakTorque: 500
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &570073167
 MonoBehaviour:
@@ -5164,25 +5232,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -5222,17 +5290,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 1100
-  m_BreakTorque: 550
+  m_BreakForce: 450
+  m_BreakTorque: 180
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -5349,13 +5417,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 0
   physicalJoint: {fileID: 665533193}
-  physicalBreakForce: 1100
-  physicalBreakTorque: 550
+  physicalBreakForce: 450
+  physicalBreakTorque: 180
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &665533199
 MonoBehaviour:
@@ -5457,25 +5529,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -5515,17 +5587,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 2600
-  m_BreakTorque: 1300
+  m_BreakForce: 1200
+  m_BreakTorque: 500
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -5559,25 +5631,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -5617,17 +5689,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 2600
-  m_BreakTorque: 1300
+  m_BreakForce: 1200
+  m_BreakTorque: 500
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -5744,13 +5816,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 1
   physicalJoint: {fileID: 731845029}
-  physicalBreakForce: 2600
-  physicalBreakTorque: 1300
+  physicalBreakForce: 1200
+  physicalBreakTorque: 500
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &731845036
 MonoBehaviour:
@@ -5771,13 +5847,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 1
   physicalJoint: {fileID: 731845030}
-  physicalBreakForce: 2600
-  physicalBreakTorque: 1300
+  physicalBreakForce: 1200
+  physicalBreakTorque: 500
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &731845037
 MonoBehaviour:
@@ -5934,13 +6014,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 0
   physicalJoint: {fileID: 866003012}
-  physicalBreakForce: 1100
-  physicalBreakTorque: 550
+  physicalBreakForce: 450
+  physicalBreakTorque: 180
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!153 &866003012
 ConfigurableJoint:
@@ -5971,25 +6055,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -6029,17 +6113,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 1100
-  m_BreakTorque: 550
+  m_BreakForce: 450
+  m_BreakTorque: 180
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -6073,25 +6157,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -6131,17 +6215,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 1100
-  m_BreakTorque: 550
+  m_BreakForce: 450
+  m_BreakTorque: 180
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -6285,13 +6369,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 0
   physicalJoint: {fileID: 866003013}
-  physicalBreakForce: 1100
-  physicalBreakTorque: 550
+  physicalBreakForce: 450
+  physicalBreakTorque: 180
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &866003020
 MonoBehaviour:
@@ -6356,13 +6444,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 0
   physicalJoint: {fileID: 879303310}
-  physicalBreakForce: 1100
-  physicalBreakTorque: 550
+  physicalBreakForce: 450
+  physicalBreakTorque: 180
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!153 &879303310
 ConfigurableJoint:
@@ -6393,25 +6485,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -6451,17 +6543,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 1100
-  m_BreakTorque: 550
+  m_BreakForce: 450
+  m_BreakTorque: 180
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -6495,25 +6587,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -6553,17 +6645,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 1100
-  m_BreakTorque: 550
+  m_BreakForce: 450
+  m_BreakTorque: 180
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -6707,13 +6799,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 0
   physicalJoint: {fileID: 879303311}
-  physicalBreakForce: 1100
-  physicalBreakTorque: 550
+  physicalBreakForce: 450
+  physicalBreakTorque: 180
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &879303318
 MonoBehaviour:
@@ -6813,25 +6909,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -6871,17 +6967,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 1100
-  m_BreakTorque: 550
+  m_BreakForce: 450
+  m_BreakTorque: 180
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -6998,13 +7094,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 0
   physicalJoint: {fileID: 895880759}
-  physicalBreakForce: 1100
-  physicalBreakTorque: 550
+  physicalBreakForce: 450
+  physicalBreakTorque: 180
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &895880765
 MonoBehaviour:
@@ -7264,25 +7364,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -7322,17 +7422,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 1100
-  m_BreakTorque: 550
+  m_BreakForce: 450
+  m_BreakTorque: 180
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -7449,13 +7549,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 0
   physicalJoint: {fileID: 919897216}
-  physicalBreakForce: 1100
-  physicalBreakTorque: 550
+  physicalBreakForce: 450
+  physicalBreakTorque: 180
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &919897222
 MonoBehaviour:
@@ -7520,13 +7624,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 1
   physicalJoint: {fileID: 942257170}
-  physicalBreakForce: 2600
-  physicalBreakTorque: 1300
+  physicalBreakForce: 1200
+  physicalBreakTorque: 500
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!153 &942257170
 ConfigurableJoint:
@@ -7557,25 +7665,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -7615,17 +7723,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 2600
-  m_BreakTorque: 1300
+  m_BreakForce: 1200
+  m_BreakTorque: 500
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -7659,25 +7767,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -7717,17 +7825,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 2600
-  m_BreakTorque: 1300
+  m_BreakForce: 1200
+  m_BreakTorque: 500
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -7871,13 +7979,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 1
   physicalJoint: {fileID: 942257171}
-  physicalBreakForce: 2600
-  physicalBreakTorque: 1300
+  physicalBreakForce: 1200
+  physicalBreakTorque: 500
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &942257178
 MonoBehaviour:
@@ -7977,25 +8089,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -8035,17 +8147,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 2600
-  m_BreakTorque: 1300
+  m_BreakForce: 1200
+  m_BreakTorque: 500
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -8162,13 +8274,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 1
   physicalJoint: {fileID: 951046623}
-  physicalBreakForce: 2600
-  physicalBreakTorque: 1300
+  physicalBreakForce: 1200
+  physicalBreakTorque: 500
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &951046629
 MonoBehaviour:
@@ -8313,25 +8429,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -8371,17 +8487,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 1100
-  m_BreakTorque: 550
+  m_BreakForce: 450
+  m_BreakTorque: 180
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -8498,13 +8614,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 0
   physicalJoint: {fileID: 1089666615}
-  physicalBreakForce: 1100
-  physicalBreakTorque: 550
+  physicalBreakForce: 450
+  physicalBreakTorque: 180
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &1089666621
 MonoBehaviour:
@@ -8604,25 +8724,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -8662,17 +8782,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 1100
-  m_BreakTorque: 550
+  m_BreakForce: 450
+  m_BreakTorque: 180
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -8789,13 +8909,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 0
   physicalJoint: {fileID: 1089902377}
-  physicalBreakForce: 1100
-  physicalBreakTorque: 550
+  physicalBreakForce: 450
+  physicalBreakTorque: 180
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &1089902383
 MonoBehaviour:
@@ -9009,25 +9133,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -9067,17 +9191,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 2600
-  m_BreakTorque: 1300
+  m_BreakForce: 1200
+  m_BreakTorque: 500
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -9194,13 +9318,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 1
   physicalJoint: {fileID: 1121813769}
-  physicalBreakForce: 2600
-  physicalBreakTorque: 1300
+  physicalBreakForce: 1200
+  physicalBreakTorque: 500
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &1121813775
 MonoBehaviour:
@@ -9300,25 +9428,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -9358,17 +9486,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 1100
-  m_BreakTorque: 550
+  m_BreakForce: 450
+  m_BreakTorque: 180
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -9485,13 +9613,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 0
   physicalJoint: {fileID: 1136026935}
-  physicalBreakForce: 1100
-  physicalBreakTorque: 550
+  physicalBreakForce: 450
+  physicalBreakTorque: 180
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &1136026941
 MonoBehaviour:
@@ -9591,25 +9723,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -9649,17 +9781,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 2600
-  m_BreakTorque: 1300
+  m_BreakForce: 1200
+  m_BreakTorque: 500
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -9776,13 +9908,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 1
   physicalJoint: {fileID: 1176820946}
-  physicalBreakForce: 2600
-  physicalBreakTorque: 1300
+  physicalBreakForce: 1200
+  physicalBreakTorque: 500
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &1176820952
 MonoBehaviour:
@@ -9915,25 +10051,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -9973,17 +10109,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 1100
-  m_BreakTorque: 550
+  m_BreakForce: 450
+  m_BreakTorque: 180
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -10100,13 +10236,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 0
   physicalJoint: {fileID: 1269789377}
-  physicalBreakForce: 1100
-  physicalBreakTorque: 550
+  physicalBreakForce: 450
+  physicalBreakTorque: 180
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &1269789383
 MonoBehaviour:
@@ -10208,25 +10348,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -10266,17 +10406,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 1100
-  m_BreakTorque: 550
+  m_BreakForce: 450
+  m_BreakTorque: 180
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -10310,25 +10450,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -10368,17 +10508,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 1100
-  m_BreakTorque: 550
+  m_BreakForce: 450
+  m_BreakTorque: 180
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -10495,13 +10635,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 0
   physicalJoint: {fileID: 1362652388}
-  physicalBreakForce: 1100
-  physicalBreakTorque: 550
+  physicalBreakForce: 450
+  physicalBreakTorque: 180
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &1362652395
 MonoBehaviour:
@@ -10522,13 +10666,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 0
   physicalJoint: {fileID: 1362652389}
-  physicalBreakForce: 1100
-  physicalBreakTorque: 550
+  physicalBreakForce: 450
+  physicalBreakTorque: 180
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &1362652396
 MonoBehaviour:
@@ -10742,25 +10890,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -10800,17 +10948,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 1100
-  m_BreakTorque: 550
+  m_BreakForce: 450
+  m_BreakTorque: 180
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -10927,13 +11075,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 0
   physicalJoint: {fileID: 1414697935}
-  physicalBreakForce: 1100
-  physicalBreakTorque: 550
+  physicalBreakForce: 450
+  physicalBreakTorque: 180
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &1414697941
 MonoBehaviour:
@@ -11096,25 +11248,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -11154,17 +11306,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 1100
-  m_BreakTorque: 550
+  m_BreakForce: 450
+  m_BreakTorque: 180
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -11281,13 +11433,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 0
   physicalJoint: {fileID: 1584357097}
-  physicalBreakForce: 1100
-  physicalBreakTorque: 550
+  physicalBreakForce: 450
+  physicalBreakTorque: 180
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &1584357103
 MonoBehaviour:
@@ -11499,25 +11655,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -11557,17 +11713,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 2600
-  m_BreakTorque: 1300
+  m_BreakForce: 1200
+  m_BreakTorque: 500
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -11684,13 +11840,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 1
   physicalJoint: {fileID: 1668155119}
-  physicalBreakForce: 2600
-  physicalBreakTorque: 1300
+  physicalBreakForce: 1200
+  physicalBreakTorque: 500
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &1668155125
 MonoBehaviour:
@@ -11755,13 +11915,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 1
   physicalJoint: {fileID: 1729999938}
-  physicalBreakForce: 2600
-  physicalBreakTorque: 1300
+  physicalBreakForce: 1200
+  physicalBreakTorque: 500
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!153 &1729999938
 ConfigurableJoint:
@@ -11792,25 +11956,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -11850,17 +12014,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 2600
-  m_BreakTorque: 1300
+  m_BreakForce: 1200
+  m_BreakTorque: 500
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -11894,25 +12058,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -11952,17 +12116,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 2600
-  m_BreakTorque: 1300
+  m_BreakForce: 1200
+  m_BreakTorque: 500
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -12106,13 +12270,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 1
   physicalJoint: {fileID: 1729999939}
-  physicalBreakForce: 2600
-  physicalBreakTorque: 1300
+  physicalBreakForce: 1200
+  physicalBreakTorque: 500
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &1729999946
 MonoBehaviour:
@@ -12771,25 +12939,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -12829,17 +12997,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 2600
-  m_BreakTorque: 1300
+  m_BreakForce: 1200
+  m_BreakTorque: 500
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -12956,13 +13124,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 1
   physicalJoint: {fileID: 1886045941}
-  physicalBreakForce: 2600
-  physicalBreakTorque: 1300
+  physicalBreakForce: 1200
+  physicalBreakTorque: 500
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &1886045947
 MonoBehaviour:
@@ -13062,25 +13234,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -13120,17 +13292,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 2600
-  m_BreakTorque: 1300
+  m_BreakForce: 1200
+  m_BreakTorque: 500
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -13247,13 +13419,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 1
   physicalJoint: {fileID: 1959421664}
-  physicalBreakForce: 2600
-  physicalBreakTorque: 1300
+  physicalBreakForce: 1200
+  physicalBreakTorque: 500
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &1959421670
 MonoBehaviour:
@@ -13318,13 +13494,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 1
   physicalJoint: {fileID: 1970016169}
-  physicalBreakForce: 2600
-  physicalBreakTorque: 1300
+  physicalBreakForce: 1200
+  physicalBreakTorque: 500
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!153 &1970016169
 ConfigurableJoint:
@@ -13355,25 +13535,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -13413,17 +13593,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 2600
-  m_BreakTorque: 1300
+  m_BreakForce: 1200
+  m_BreakTorque: 500
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -13457,25 +13637,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -13515,17 +13695,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 2600
-  m_BreakTorque: 1300
+  m_BreakForce: 1200
+  m_BreakTorque: 500
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -13669,13 +13849,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 1
   physicalJoint: {fileID: 1970016170}
-  physicalBreakForce: 2600
-  physicalBreakTorque: 1300
+  physicalBreakForce: 1200
+  physicalBreakTorque: 500
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &1970016177
 MonoBehaviour:
@@ -13775,25 +13959,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -13833,17 +14017,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 2600
-  m_BreakTorque: 1300
+  m_BreakForce: 1200
+  m_BreakTorque: 500
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -13960,13 +14144,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 1
   physicalJoint: {fileID: 1989328409}
-  physicalBreakForce: 2600
-  physicalBreakTorque: 1300
+  physicalBreakForce: 1200
+  physicalBreakTorque: 500
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &1989328415
 MonoBehaviour:
@@ -14066,25 +14254,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -14124,17 +14312,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 2600
-  m_BreakTorque: 1300
+  m_BreakForce: 1200
+  m_BreakTorque: 500
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -14251,13 +14439,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 1
   physicalJoint: {fileID: 1993710565}
-  physicalBreakForce: 2600
-  physicalBreakTorque: 1300
+  physicalBreakForce: 1200
+  physicalBreakTorque: 500
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &1993710571
 MonoBehaviour:
@@ -14357,25 +14549,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -14415,17 +14607,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 1100
-  m_BreakTorque: 550
+  m_BreakForce: 450
+  m_BreakTorque: 180
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -14542,13 +14734,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 0
   physicalJoint: {fileID: 2000905578}
-  physicalBreakForce: 1100
-  physicalBreakTorque: 550
+  physicalBreakForce: 450
+  physicalBreakTorque: 180
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &2000905584
 MonoBehaviour:
@@ -14648,25 +14844,25 @@ ConfigurableJoint:
     bounciness: 0
     contactDistance: 0
   m_AngularXLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_LowAngularXLimit:
-    limit: -3
+    limit: -0.5
     bounciness: 0
     contactDistance: 0
   m_HighAngularXLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularYZLimitSpring:
-    spring: 1200
-    damper: 90
+    spring: 5000
+    damper: 300
   m_AngularYLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_AngularZLimit:
-    limit: 3
+    limit: 0.5
     bounciness: 0
     contactDistance: 0
   m_TargetPosition: {x: 0, y: 0, z: 0}
@@ -14706,17 +14902,17 @@ ConfigurableJoint:
     useAcceleration: 0
   m_SlerpDrive:
     serializedVersion: 4
-    positionSpring: 900
-    positionDamper: 80
-    maximumForce: 3000
+    positionSpring: 4000
+    positionDamper: 250
+    maximumForce: 10000
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.03
-  m_ProjectionAngle: 3
+  m_ProjectionDistance: 0.01
+  m_ProjectionAngle: 0.5
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
-  m_BreakForce: 1100
-  m_BreakTorque: 550
+  m_BreakForce: 450
+  m_BreakTorque: 180
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
   m_MassScale: 1
@@ -14833,13 +15029,17 @@ MonoBehaviour:
   isActive: 1
   connectionType: 0
   physicalJoint: {fileID: 2087620594}
-  physicalBreakForce: 1100
-  physicalBreakTorque: 550
+  physicalBreakForce: 450
+  physicalBreakTorque: 180
   currentGravityLoad: 0
   currentImpactImpulse: 0
   gravityUtilization: 0
   impactUtilization: 0
   failureScore: 0
+  currentJointForce: 0
+  currentJointTorque: 0
+  peakJointForce: 0
+  peakJointTorque: 0
   drawConnectionGizmo: 1
 --- !u!114 &2087620600
 MonoBehaviour:

@@ -29,6 +29,10 @@ namespace DemolitionLab
         [SerializeField] private float gravityUtilization;
         [SerializeField] private float impactUtilization;
         [SerializeField] private float failureScore;
+        [SerializeField] private float currentJointForce;
+        [SerializeField] private float currentJointTorque;
+        [SerializeField] private float peakJointForce;
+        [SerializeField] private float peakJointTorque;
         [SerializeField] private bool drawConnectionGizmo = true;
 
         private StructureManager structureManager;
@@ -51,6 +55,10 @@ namespace DemolitionLab
         public float GravityUtilization => gravityUtilization;
         public float ImpactUtilization => impactUtilization;
         public float FailureScore => failureScore;
+        public float CurrentJointForce => currentJointForce;
+        public float CurrentJointTorque => currentJointTorque;
+        public float PeakJointForce => peakJointForce;
+        public float PeakJointTorque => peakJointTorque;
 
         public bool Connects(StructuralBlock block)
         {
@@ -134,7 +142,23 @@ namespace DemolitionLab
 
         private void FixedUpdate()
         {
+            UpdatePhysicalJointDebugState();
             ResolvePhysicalJointBreak();
+        }
+
+        private void UpdatePhysicalJointDebugState()
+        {
+            if (physicalJoint == null)
+            {
+                currentJointForce = 0f;
+                currentJointTorque = 0f;
+                return;
+            }
+
+            currentJointForce = physicalJoint.currentForce.magnitude;
+            currentJointTorque = physicalJoint.currentTorque.magnitude;
+            peakJointForce = Mathf.Max(peakJointForce, currentJointForce);
+            peakJointTorque = Mathf.Max(peakJointTorque, currentJointTorque);
         }
 
         private void ResolvePhysicalJointBreak()

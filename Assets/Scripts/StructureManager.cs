@@ -107,7 +107,9 @@ namespace DemolitionLab
             RebuildActiveAdjacency();
             RecalculateSupport(
                 $"Physical joint broke between '{connection.BlockA.NodeId}' and "
-                + $"'{connection.BlockB.NodeId}' at {measuredBreakForce:0.00} N.");
+                + $"'{connection.BlockB.NodeId}' at {measuredBreakForce:0.00} N; "
+                + $"sampled peaks were {connection.PeakJointForce:0.00} N and "
+                + $"{connection.PeakJointTorque:0.00} N·m.");
             LogEvaluationCounts(0);
         }
 

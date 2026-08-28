@@ -10,6 +10,12 @@ The root conclusion is:
 
 `StructuralConnection` described authored adjacency, capacity, and support semantics, but a logical edge could not transmit force or torque between Rigidbody components. M5 preserves that model and adds a built-in Unity physical constraint for the dedicated M5 scene.
 
+## M5.1 Manual Calibration Finding
+
+Manual M5 testing confirmed force transmission, but the initial `3 degree` limit accumulated visibly across many joints and made the frame behave like an articulated rubber chain. The original Weak `1100 N / 550 N·m` and Reinforced `2600 N / 1300 N·m` thresholds were also too high for actual gameplay. The latest 40-hit manual sequence ranged from near zero to `17.55 N·s` with a `5.5 N·s` median; useful direct hits reached roughly `12-17.5 N·s`, substantially below the earlier automated `30 N·s` input.
+
+M5.1 therefore targets a mostly rigid intact frame with subtle local response, followed by decisive Weak failure under a well-placed gameplay hit. It does not return supported blocks to kinematic mode.
+
 ## Physical Joint Representation
 
 Each M5 `StructuralConnection` references one `ConfigurableJoint` attached to one endpoint Rigidbody and connected to the other endpoint Rigidbody.
@@ -17,10 +23,10 @@ Each M5 `StructuralConnection` references one `ConfigurableJoint` attached to on
 The joint configuration is intentionally small:
 
 - linear X/Y/Z motion is locked
-- angular X/Y/Z motion is limited to `3 degrees`
-- angular limit spring is `1200`, with damper `90`
-- Slerp drive spring is `900`, damper `80`, maximum force `3000`
-- position-and-rotation projection uses `0.03 m` and `3 degrees`
+- angular X/Y/Z motion is limited to `0.5 degrees`
+- angular limit spring is `5000`, with damper `300`
+- Slerp drive spring is `4000`, damper `250`, maximum force `10000`
+- position-and-rotation projection uses `0.01 m` and `0.5 degrees`
 - connected-body collision is disabled
 
 `ConfigurableJoint` was selected instead of a perfectly rigid `FixedJoint` so the prototype can show small controlled angular response before complete failure while still transmitting linear force and torque. It remains a standard Unity constraint; no custom solver is implemented.
@@ -49,10 +55,18 @@ Physical thresholds are calibrated separately because Unity joint force and torq
 
 | Profile | Joint break force | Joint break torque |
 | --- | ---: | ---: |
-| Weak | `1100 N` | `550 N·m` |
-| Reinforced | `2600 N` | `1300 N·m` |
+| Weak | `450 N` | `180 N·m` |
+| Reinforced | `1200 N` | `500 N·m` |
 
-The physical values preserve an explainable stronger/weaker relationship without reinterpreting `28 N·s` as `28 N`. Automated PhysX simulation verifies that a representative `30 N·s` impulse can break at least one Weak joint while the equivalent Reinforced target transmits motion without breaking a Reinforced joint.
+The physical values preserve an explainable stronger/weaker relationship without reinterpreting `28 N·s` as `28 N`. Automated PhysX simulation now uses the measured gameplay range: a centered `8 N·s` Weak hit survives, a well-placed `15 N·s` hit breaks at least one Weak joint, and the equivalent Reinforced target transmits motion without breaking a Reinforced joint.
+
+`StructuralConnection` samples `ConfigurableJoint.currentForce` and `currentTorque` during Play Mode and exposes current and peak values in the Inspector. These values support later manual calibration but are not treated as a new failure model.
+
+## Projectile Baseline and Cleanup
+
+Projectile power remains unchanged at `2 kg` and `18 m/s`. M5.1 solves the mismatch through physical threshold calibration rather than an exaggerated projectile. The latest manual sequence showed collision impulses from `0-17.55 N·s`, with stronger useful contacts around `12-17.5 N·s`.
+
+After its first collision with a tagged structural block, a projectile is destroyed after `1.25 seconds`. This preserves short impact feedback while preventing already-spent red projectiles from remaining for the full `10 second` launch lifetime.
 
 ## Break Authority and Synchronization
 
@@ -93,9 +107,10 @@ All authored cubes touch without initial collider penetration. Orange joint Gizm
 - no initial collider penetration greater than `0.0001 m`
 - anchors initialize kinematic and all 41 non-anchors initialize dynamic
 - all blocks initially pass graph, COM, and local-support evaluation
-- 150 fixed physics steps remain within idle speed/drift limits without joint failure
-- a `30 N·s` Weak impact propagates to a neighbor and breaks a Weak joint
-- the same Reinforced-side impact propagates motion without breaking a Reinforced joint
+- 500 fixed physics steps, equivalent to 10 seconds, remain within idle speed/drift limits without joint failure
+- a centered `8 N·s` Weak impact survives
+- a well-placed `15 N·s` Weak impact propagates to a neighbor and breaks a Weak joint
+- the same `15 N·s` Reinforced-side impact propagates motion without breaking a Reinforced joint
 - a destroyed physical joint cannot remain logically active
 
 These tests verify deterministic state and basic stability. They do not prove final visual quality.

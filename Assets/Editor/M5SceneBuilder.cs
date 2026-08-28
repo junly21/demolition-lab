@@ -14,10 +14,13 @@ public static class M5SceneBuilder
     private const float WeakImpactCapacity = 28f;
     private const float ReinforcedGravityCapacity = 240f;
     private const float ReinforcedImpactCapacity = 60f;
-    private const float WeakBreakForce = 1100f;
-    private const float WeakBreakTorque = 550f;
-    private const float ReinforcedBreakForce = 2600f;
-    private const float ReinforcedBreakTorque = 1300f;
+    private const float WeakBreakForce = 450f;
+    private const float WeakBreakTorque = 180f;
+    private const float ReinforcedBreakForce = 1200f;
+    private const float ReinforcedBreakTorque = 500f;
+    private const float AngularLimit = 0.5f;
+    private const float RepresentativeGameplayImpulse = 15f;
+    private const float MediocreGameplayImpulse = 8f;
     private const int ExpectedBlockCount = 45;
     private const int ExpectedConnectionCount = 50;
 
@@ -78,6 +81,7 @@ public static class M5SceneBuilder
         ValidateAuthoredConfiguration();
         ValidateRuntimeInitialization();
         ValidateIdlePhysics();
+        ValidateMediocreWeakImpactSurvival();
         ValidateWeakImpactResponse();
         ValidateReinforcedImpactResponse();
         EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
@@ -313,22 +317,22 @@ public static class M5SceneBuilder
         joint.angularXMotion = ConfigurableJointMotion.Limited;
         joint.angularYMotion = ConfigurableJointMotion.Limited;
         joint.angularZMotion = ConfigurableJointMotion.Limited;
-        joint.lowAngularXLimit = new SoftJointLimit { limit = -3f };
-        joint.highAngularXLimit = new SoftJointLimit { limit = 3f };
-        joint.angularYLimit = new SoftJointLimit { limit = 3f };
-        joint.angularZLimit = new SoftJointLimit { limit = 3f };
-        joint.angularXLimitSpring = new SoftJointLimitSpring { spring = 1200f, damper = 90f };
-        joint.angularYZLimitSpring = new SoftJointLimitSpring { spring = 1200f, damper = 90f };
+        joint.lowAngularXLimit = new SoftJointLimit { limit = -AngularLimit };
+        joint.highAngularXLimit = new SoftJointLimit { limit = AngularLimit };
+        joint.angularYLimit = new SoftJointLimit { limit = AngularLimit };
+        joint.angularZLimit = new SoftJointLimit { limit = AngularLimit };
+        joint.angularXLimitSpring = new SoftJointLimitSpring { spring = 5000f, damper = 300f };
+        joint.angularYZLimitSpring = new SoftJointLimitSpring { spring = 5000f, damper = 300f };
         joint.rotationDriveMode = RotationDriveMode.Slerp;
         joint.slerpDrive = new JointDrive
         {
-            positionSpring = 900f,
-            positionDamper = 80f,
-            maximumForce = 3000f
+            positionSpring = 4000f,
+            positionDamper = 250f,
+            maximumForce = 10000f
         };
         joint.projectionMode = JointProjectionMode.PositionAndRotation;
-        joint.projectionDistance = 0.03f;
-        joint.projectionAngle = 3f;
+        joint.projectionDistance = 0.01f;
+        joint.projectionAngle = 0.5f;
         joint.enableCollision = false;
         joint.enablePreprocessing = true;
         joint.breakForce = breakForce;
@@ -488,7 +492,7 @@ public static class M5SceneBuilder
             initialPositions.Add(block, block.transform.position);
         }
 
-        SimulatePhysics(context.Connections, 150);
+        SimulatePhysics(context.Connections, 500);
 
         float maxSpeed = 0f;
         float maxDrift = 0f;
@@ -509,6 +513,23 @@ public static class M5SceneBuilder
         AssertNoBrokenConnections(context.Connections, "M5 idle simulation broke a joint.");
     }
 
+    private static void ValidateMediocreWeakImpactSurvival()
+    {
+        RuntimeContext context = LoadAndInitializeRuntimeScene();
+        StructuralBlock target = context.Blocks["Column_0_Level_1"];
+
+        target.GetComponent<Rigidbody>().AddForceAtPosition(
+            Vector3.forward * MediocreGameplayImpulse,
+            target.transform.position,
+            ForceMode.Impulse);
+        SimulatePhysics(context.Connections, 30);
+
+        if (CountBrokenConnections(context.Connections, StructuralConnectionType.Weak) > 0)
+        {
+            throw new UnityException("M5.1 mediocre centered Weak impact unexpectedly broke a joint.");
+        }
+    }
+
     private static void ValidateWeakImpactResponse()
     {
         RuntimeContext context = LoadAndInitializeRuntimeScene();
@@ -517,7 +538,7 @@ public static class M5SceneBuilder
         Vector3 neighborStart = neighbor.transform.position;
 
         target.GetComponent<Rigidbody>().AddForceAtPosition(
-            Vector3.forward * 30f,
+            Vector3.forward * RepresentativeGameplayImpulse,
             target.transform.position + Vector3.up * 0.4f,
             ForceMode.Impulse);
         SimulatePhysics(context.Connections, 30);
@@ -532,7 +553,7 @@ public static class M5SceneBuilder
             StructuralConnectionType.Weak);
         if (brokenWeak == 0)
         {
-            throw new UnityException("M5 representative 30 N·s weak impact did not break a weak physical joint.");
+            throw new UnityException("M5 representative 15 N·s weak impact did not break a weak physical joint.");
         }
 
         foreach (StructuralConnection connection in context.Connections)
@@ -552,7 +573,7 @@ public static class M5SceneBuilder
         Vector3 neighborStart = neighbor.transform.position;
 
         target.GetComponent<Rigidbody>().AddForceAtPosition(
-            Vector3.forward * 30f,
+            Vector3.forward * RepresentativeGameplayImpulse,
             target.transform.position + Vector3.up * 0.4f,
             ForceMode.Impulse);
         SimulatePhysics(context.Connections, 30);
@@ -564,7 +585,7 @@ public static class M5SceneBuilder
 
         if (CountBrokenConnections(context.Connections, StructuralConnectionType.Reinforced) > 0)
         {
-            throw new UnityException("M5 reinforced joint failed under the representative weak-section hit.");
+            throw new UnityException("M5 reinforced joint failed under the representative 15 N·s hit.");
         }
     }
 

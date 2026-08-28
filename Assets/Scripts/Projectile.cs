@@ -5,6 +5,8 @@ namespace DemolitionLab
     [RequireComponent(typeof(Rigidbody))]
     public sealed class Projectile : MonoBehaviour
     {
+        [SerializeField, Min(0.1f)] private float postImpactLifetime = 1.25f;
+
         private Rigidbody projectileRigidbody;
         private bool hasReportedImpact;
 
@@ -28,6 +30,7 @@ namespace DemolitionLab
             }
 
             hasReportedImpact = true;
+            Destroy(gameObject, postImpactLifetime);
             if (collision.gameObject.TryGetComponent(out StructuralBlock structuralBlock))
             {
                 Vector3 impactImpulse = -collision.impulse;
