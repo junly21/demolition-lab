@@ -79,6 +79,7 @@ public static class VerticalSliceStage02Builder
         ValidateJoints(joints);
         ValidateNoInitialPenetration(pieces);
         ValidateNoResearchSystems();
+        ValidateIdleStability();
 
         int leftTargets = 0;
         int rightTargets = 0;
@@ -112,12 +113,12 @@ public static class VerticalSliceStage02Builder
         ICollection<GameObject> pieces,
         ICollection<StageTargetPiece> targets)
     {
-        AddPiece(structure, pieces, targets, root, "Left_Foundation", new Vector3(-3.25f, 0.4f, 4f), new Vector3(1.6f, 0.8f, 1.8f), 8f, true, false, materials.Concrete);
-        AddPiece(structure, pieces, targets, root, "Right_Foundation", new Vector3(3.25f, 0.4f, 4f), new Vector3(1.6f, 0.8f, 1.8f), 8f, true, false, materials.Concrete);
-        AddPiece(structure, pieces, targets, root, "Left_Weak_Lower", new Vector3(-3.25f, 1.2f, 4f), new Vector3(0.65f, 0.8f, 1f), 1.4f, false, false, materials.Weak);
-        AddPiece(structure, pieces, targets, root, "Left_Weak_Upper", new Vector3(-3.25f, 2f, 4f), new Vector3(0.85f, 0.8f, 1.15f), 1.8f, false, false, materials.Weak);
-        AddPiece(structure, pieces, targets, root, "Right_Weak_Lower", new Vector3(3.25f, 1.2f, 4f), new Vector3(0.65f, 0.8f, 1f), 1.4f, false, false, materials.Weak);
-        AddPiece(structure, pieces, targets, root, "Right_Weak_Upper", new Vector3(3.25f, 2f, 4f), new Vector3(0.85f, 0.8f, 1.15f), 1.8f, false, false, materials.Weak);
+        AddPiece(structure, pieces, targets, root, "Left_Foundation", new Vector3(-2f, 0.4f, 4f), new Vector3(1.6f, 0.8f, 1.8f), 8f, true, false, materials.Concrete);
+        AddPiece(structure, pieces, targets, root, "Right_Foundation", new Vector3(2f, 0.4f, 4f), new Vector3(1.6f, 0.8f, 1.8f), 8f, true, false, materials.Concrete);
+        AddPiece(structure, pieces, targets, root, "Left_Weak_Lower", new Vector3(-2f, 1.2f, 4f), new Vector3(0.65f, 0.8f, 1f), 1.4f, false, false, materials.Weak);
+        AddPiece(structure, pieces, targets, root, "Left_Weak_Upper", new Vector3(-2f, 2f, 4f), new Vector3(0.85f, 0.8f, 1.15f), 1.8f, false, false, materials.Weak);
+        AddPiece(structure, pieces, targets, root, "Right_Weak_Lower", new Vector3(2f, 1.2f, 4f), new Vector3(0.65f, 0.8f, 1f), 1.4f, false, false, materials.Weak);
+        AddPiece(structure, pieces, targets, root, "Right_Weak_Upper", new Vector3(2f, 2f, 4f), new Vector3(0.85f, 0.8f, 1.15f), 1.8f, false, false, materials.Weak);
         AddWeakPlate(structure["Left_Weak_Lower"].transform, materials.Weak);
         AddWeakPlate(structure["Right_Weak_Lower"].transform, materials.Weak);
 
@@ -147,7 +148,7 @@ public static class VerticalSliceStage02Builder
 
         float direction = side == "Left" ? -1f : 1f;
         AddPiece(structure, pieces, targets, root, $"{side}_Approach_Decor", new Vector3(direction * 4.7f, 0.3f, 3.2f), new Vector3(0.6f, 0.6f, 0.6f), 0.6f, false, false, materials.Decor);
-        AddPiece(structure, pieces, targets, root, $"{side}_Underpass_Decor", new Vector3(direction * 1.4f, 0.35f, 4.2f), new Vector3(0.7f, 0.7f, 0.7f), 0.7f, false, false, materials.Decor);
+        AddPiece(structure, pieces, targets, root, $"{side}_Underpass_Decor", new Vector3(direction * 3.6f, 0.35f, 4.2f), new Vector3(0.7f, 0.7f, 0.7f), 0.7f, false, false, materials.Decor);
     }
 
     private static void AddWeakPlate(Transform parent, Material material)
@@ -368,6 +369,68 @@ public static class VerticalSliceStage02Builder
                 }
             }
         }
+    }
+
+    private static void ValidateIdleStability()
+    {
+        GameObject[] corePieces = GameObject.FindGameObjectsWithTag("Destructible");
+        var initialPositions = new Dictionary<Rigidbody, Vector3>();
+        var initialRotations = new Dictionary<Rigidbody, Quaternion>();
+        foreach (GameObject piece in corePieces)
+        {
+            if (piece.name.Contains("Decor"))
+            {
+                continue;
+            }
+
+            Rigidbody body = piece.GetComponent<Rigidbody>();
+            initialPositions.Add(body, body.position);
+            initialRotations.Add(body, body.rotation);
+        }
+
+        SimulationMode previousMode = Physics.simulationMode;
+        Physics.simulationMode = SimulationMode.Script;
+        Physics.SyncTransforms();
+        try
+        {
+            for (int step = 0; step < 500; step++)
+            {
+                Physics.Simulate(0.02f);
+            }
+        }
+        finally
+        {
+            Physics.simulationMode = previousMode;
+        }
+
+        float maximumDisplacement = 0f;
+        float maximumRotation = 0f;
+        string leastStablePiece = string.Empty;
+        foreach (KeyValuePair<Rigidbody, Vector3> pair in initialPositions)
+        {
+            float displacement = Vector3.Distance(pair.Value, pair.Key.position);
+            float rotation = Quaternion.Angle(initialRotations[pair.Key], pair.Key.rotation);
+            if (displacement > maximumDisplacement || rotation > maximumRotation)
+            {
+                maximumDisplacement = Mathf.Max(maximumDisplacement, displacement);
+                maximumRotation = Mathf.Max(maximumRotation, rotation);
+                leastStablePiece = pair.Key.name;
+            }
+        }
+
+        int survivingJoints = Object.FindObjectsByType<FixedJoint>(FindObjectsSortMode.None).Length;
+        if (maximumDisplacement > 0.05f || maximumRotation > 2f || survivingJoints != ExpectedJointCount)
+        {
+            throw new UnityException(
+                $"Stage02 idle stability failed at '{leastStablePiece}': "
+                + $"displacement={maximumDisplacement:0.000} m, rotation={maximumRotation:0.0}°, "
+                + $"joints={survivingJoints}/{ExpectedJointCount}.");
+        }
+
+        Debug.Log(
+            $"Stage02 10-second idle stability passed: maximum displacement "
+            + $"{maximumDisplacement:0.000} m, rotation {maximumRotation:0.0}°, "
+            + $"joints {survivingJoints}/{ExpectedJointCount}.");
     }
 
     private static StageMaterials LoadMaterials()

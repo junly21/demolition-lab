@@ -15,7 +15,7 @@ Stage02 teaches redundant support through a long bridge silhouette rather than a
 - Clear threshold: 70%
 - Next scene: `VerticalSlice_Stage03`
 
-Each side contains one foundation, a thin two-block orange pier with an exposed plate, one long deck target, one back rail, four front barriers, and two ground-level decorative pieces. The broad horizontal span is now the dominant shape. Destroying one pier can remove approximately half of the objective but should not clear the stage; the second pier still carries its half until attacked.
+Each side contains one foundation, a thin two-block orange pier with an exposed plate, one long deck target, one back rail, four front barriers, and two ground-level decorative pieces. Each pier is centered beneath its deck half so the intact bridge has a valid gravity support footprint. The broad horizontal span remains the dominant shape. Destroying one pier can remove approximately half of the objective but should not clear the stage; the second pier still carries its half until attacked.
 
 ## Manual Validation
 
