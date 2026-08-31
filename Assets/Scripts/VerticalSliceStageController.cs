@@ -30,6 +30,7 @@ namespace DemolitionLab
         [Header("Feedback")]
         [SerializeField] private SimpleCameraShake cameraShake;
         [SerializeField] private ParticleSystem impactDust;
+        [SerializeField] private bool logImpactDiagnostics = true;
 
         private readonly StageFlowStateMachine flow = new();
         private bool hasValidReferences;
@@ -53,6 +54,9 @@ namespace DemolitionLab
             }
 
             launcher.SetGameplayEnabled(false);
+            ParticleSystem.MainModule dustMain = impactDust.main;
+            dustMain.simulationSpace = ParticleSystemSimulationSpace.World;
+            impactDust.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             endPanel.SetActive(false);
             nextButton.gameObject.SetActive(false);
             stageLabelText.text = stageLabel;
@@ -66,6 +70,8 @@ namespace DemolitionLab
                 return;
             }
 
+            launcher.ProjectileFired -= HandleProjectileFired;
+            Projectile.MeaningfulImpact -= HandleImpact;
             launcher.ProjectileFired += HandleProjectileFired;
             Projectile.MeaningfulImpact += HandleImpact;
         }
@@ -111,8 +117,6 @@ namespace DemolitionLab
 
         public void NotifyCriticalSupportBroken(Vector3 position, bool weakConnection)
         {
-            cameraShake?.Shake(weakConnection ? 0.18f : 0.24f, 0.3f);
-            PlayDust(position);
             Debug.Log(
                 $"{stageLabel} {(weakConnection ? "Weak" : "Reinforced")} critical joint broke.",
                 this);
@@ -174,20 +178,41 @@ namespace DemolitionLab
             }
         }
 
-        private void HandleImpact(GameObject impactedObject, Vector3 position, float impulseMagnitude)
+        private void HandleImpact(ProjectileImpact impact)
         {
-            if (impulseMagnitude < 1f)
+            Scene activeScene = SceneManager.GetActiveScene();
+            bool validState = flow.State == StageState.Active || flow.State == StageState.Settling;
+            bool accepted = impact.WasPlayerFired
+                && impact.LaunchSceneName == activeScene.name
+                && validState
+                && impact.ImpulseMagnitude >= 1f;
+
+            if (logImpactDiagnostics)
+            {
+                Debug.Log(
+                    $"Impact feedback {(accepted ? "ACCEPTED" : "REJECTED")}: "
+                    + $"scene={activeScene.name}, launchScene={impact.LaunchSceneName}, "
+                    + $"frame={impact.Frame}, time={impact.Time:0.000}, "
+                    + $"projectileId={impact.ProjectileInstanceId}, projectilePosition={impact.ProjectilePosition}, "
+                    + $"collider={impact.ImpactedObject.name}, contact={impact.ContactPosition}, "
+                    + $"particle={(accepted ? impact.ContactPosition.ToString() : "none")}, "
+                    + $"shakeSource={(accepted ? impact.ContactPosition.ToString() : "none")}, "
+                    + $"state={flow.State}, playerFired={impact.WasPlayerFired}, "
+                    + $"impulse={impact.ImpulseMagnitude:0.00} N·s.",
+                    this);
+            }
+
+            if (!accepted)
             {
                 return;
             }
 
-            float shakeIntensity = Mathf.Lerp(0.025f, 0.12f, Mathf.InverseLerp(2f, 18f, impulseMagnitude));
+            float shakeIntensity = Mathf.Lerp(
+                0.025f,
+                0.12f,
+                Mathf.InverseLerp(2f, 18f, impact.ImpulseMagnitude));
             cameraShake?.Shake(shakeIntensity, 0.16f);
-            PlayDust(position);
-            Debug.Log(
-                $"{stageLabel} shot {flow.ShotsUsed} impacted {impactedObject.name} "
-                + $"with {impulseMagnitude:0.00} N·s impulse.",
-                this);
+            PlayDust(impact.ContactPosition);
         }
 
         private void BeginSettling()
@@ -270,6 +295,7 @@ namespace DemolitionLab
                 return;
             }
 
+            impactDust.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             impactDust.transform.position = position;
             impactDust.Play(true);
         }

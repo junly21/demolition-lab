@@ -396,6 +396,7 @@ public static class VerticalSliceSceneBuilder
         main.startSize = 0.22f;
         main.startColor = new Color(0.64f, 0.55f, 0.44f, 0.85f);
         main.maxParticles = 32;
+        main.simulationSpace = ParticleSystemSimulationSpace.World;
         ParticleSystem.EmissionModule emission = particles.emission;
         emission.rateOverTime = 0f;
         emission.SetBursts(new[] { new ParticleSystem.Burst(0f, 14) });

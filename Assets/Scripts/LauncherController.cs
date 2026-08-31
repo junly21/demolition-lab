@@ -124,7 +124,11 @@ namespace DemolitionLab
             }
 
             Projectile projectile = Instantiate(projectilePrefab, muzzle.position, muzzle.rotation);
-            projectile.Launch(muzzle.forward * projectileSpeed, projectileMass, projectileLifetime);
+            projectile.Launch(
+                muzzle.forward * projectileSpeed,
+                projectileMass,
+                projectileLifetime,
+                true);
             ProjectileFired?.Invoke();
             Debug.Log($"Projectile fired at {projectileSpeed:0.0} m/s.", this);
             return true;
