@@ -62,6 +62,7 @@ public static class VerticalSliceSceneBuilder
             dust);
         AddCriticalJoints(structure, stageController, materials.Broken);
         ConfigureCameraAndLauncher(camera, launcher);
+        VerticalSlicePresentationBuilder.ApplyEnvironmentToOpenScene();
 
         EditorSceneManager.SaveScene(scene);
         AddSceneToBuildSettings();
