@@ -38,7 +38,7 @@ public static class VerticalSliceStage02Builder
         var pieces = new List<GameObject>();
         var targets = new List<StageTargetPiece>();
         var structure = new Dictionary<string, GameObject>();
-        GameObject root = new("Stage 02 Dual Support Structure");
+        GameObject root = new("Stage 02 Bridge Structure");
         BuildStructure(root.transform, materials, structure, pieces, targets);
 
         VerticalSliceStageController controller = Object.FindAnyObjectByType<VerticalSliceStageController>();
@@ -49,6 +49,7 @@ public static class VerticalSliceStage02Builder
 
         ConfigureController(controller, targets);
         AddJoints(structure, controller, materials.Broken);
+        ConfigureCamera();
         EditorSceneManager.SaveScene(scene);
         AddSceneToBuildSettings();
         AssetDatabase.SaveAssets();
@@ -100,7 +101,7 @@ public static class VerticalSliceStage02Builder
         }
 
         Debug.Log(
-            "Stage02 validation passed: 24 pieces, two six-target halves, four critical joints, "
+            "Stage02 validation passed: 24-piece bridge, two six-target deck halves, four critical joints, "
             + "three shots, Stage03 progression, references, and collider separation verified.");
     }
 
@@ -111,21 +112,23 @@ public static class VerticalSliceStage02Builder
         ICollection<GameObject> pieces,
         ICollection<StageTargetPiece> targets)
     {
-        AddPiece(structure, pieces, targets, root, "Left_Foundation", new Vector3(-2.4f, 0.5f, 4f), new Vector3(1.5f, 1f, 1.5f), 8f, true, false, materials.Concrete);
-        AddPiece(structure, pieces, targets, root, "Right_Foundation", new Vector3(2.4f, 0.5f, 4f), new Vector3(1.5f, 1f, 1.5f), 8f, true, false, materials.Concrete);
-        AddPiece(structure, pieces, targets, root, "Left_Weak_Lower", new Vector3(-2.4f, 1.5f, 4f), Vector3.one, 2f, false, false, materials.Weak);
-        AddPiece(structure, pieces, targets, root, "Left_Weak_Upper", new Vector3(-2.4f, 2.5f, 4f), Vector3.one, 2f, false, false, materials.Weak);
-        AddPiece(structure, pieces, targets, root, "Right_Weak_Lower", new Vector3(2.4f, 1.5f, 4f), Vector3.one, 2f, false, false, materials.Weak);
-        AddPiece(structure, pieces, targets, root, "Right_Weak_Upper", new Vector3(2.4f, 2.5f, 4f), Vector3.one, 2f, false, false, materials.Weak);
+        AddPiece(structure, pieces, targets, root, "Left_Foundation", new Vector3(-3.25f, 0.4f, 4f), new Vector3(1.6f, 0.8f, 1.8f), 8f, true, false, materials.Concrete);
+        AddPiece(structure, pieces, targets, root, "Right_Foundation", new Vector3(3.25f, 0.4f, 4f), new Vector3(1.6f, 0.8f, 1.8f), 8f, true, false, materials.Concrete);
+        AddPiece(structure, pieces, targets, root, "Left_Weak_Lower", new Vector3(-3.25f, 1.2f, 4f), new Vector3(0.65f, 0.8f, 1f), 1.4f, false, false, materials.Weak);
+        AddPiece(structure, pieces, targets, root, "Left_Weak_Upper", new Vector3(-3.25f, 2f, 4f), new Vector3(0.85f, 0.8f, 1.15f), 1.8f, false, false, materials.Weak);
+        AddPiece(structure, pieces, targets, root, "Right_Weak_Lower", new Vector3(3.25f, 1.2f, 4f), new Vector3(0.65f, 0.8f, 1f), 1.4f, false, false, materials.Weak);
+        AddPiece(structure, pieces, targets, root, "Right_Weak_Upper", new Vector3(3.25f, 2f, 4f), new Vector3(0.85f, 0.8f, 1.15f), 1.8f, false, false, materials.Weak);
+        AddWeakPlate(structure["Left_Weak_Lower"].transform, materials.Weak);
+        AddWeakPlate(structure["Right_Weak_Lower"].transform, materials.Weak);
 
-        AddSide(root, materials, structure, pieces, targets, "Left", -1.75f, new[] { -3f, -2.25f, -1.5f, -0.75f });
-        AddSide(root, materials, structure, pieces, targets, "Right", 1.75f, new[] { 0.75f, 1.5f, 2.25f, 3f });
+        AddBridgeHalf(root, materials, structure, pieces, targets, "Left", -2f, new[] { -3.5f, -2.5f, -1.5f, -0.5f });
+        AddBridgeHalf(root, materials, structure, pieces, targets, "Right", 2f, new[] { 0.5f, 1.5f, 2.5f, 3.5f });
 
-        AddPiece(structure, pieces, targets, root, "Left_Ground_Decor", new Vector3(-4.6f, 0.5f, 4f), Vector3.one, 1.5f, false, false, materials.Decor);
-        AddPiece(structure, pieces, targets, root, "Right_Ground_Decor", new Vector3(4.6f, 0.5f, 4f), Vector3.one, 1.5f, false, false, materials.Decor);
+        AddPiece(structure, pieces, targets, root, "Left_Ground_Decor", new Vector3(-5.8f, 0.4f, 4f), new Vector3(0.8f, 0.8f, 0.8f), 1f, false, false, materials.Decor);
+        AddPiece(structure, pieces, targets, root, "Right_Ground_Decor", new Vector3(5.8f, 0.4f, 4f), new Vector3(0.8f, 0.8f, 0.8f), 1f, false, false, materials.Decor);
     }
 
-    private static void AddSide(
+    private static void AddBridgeHalf(
         Transform root,
         StageMaterials materials,
         IDictionary<string, GameObject> structure,
@@ -133,17 +136,42 @@ public static class VerticalSliceStage02Builder
         ICollection<StageTargetPiece> targets,
         string side,
         float centerX,
-        IReadOnlyList<float> wallPositions)
+        IReadOnlyList<float> barrierPositions)
     {
-        AddPiece(structure, pieces, targets, root, $"{side}_Platform", new Vector3(centerX, 3.25f, 4f), new Vector3(3.5f, 0.5f, 1.5f), 5f, false, true, materials.Concrete);
-        foreach (float wallX in wallPositions)
+        AddPiece(structure, pieces, targets, root, $"{side}_Deck", new Vector3(centerX, 2.65f, 4f), new Vector3(4f, 0.5f, 1.8f), 6f, false, true, materials.Concrete);
+        AddPiece(structure, pieces, targets, root, $"{side}_Back_Rail", new Vector3(centerX, 3.075f, 4.75f), new Vector3(4f, 0.35f, 0.3f), 1.5f, false, true, materials.Concrete);
+        foreach (float barrierX in barrierPositions)
         {
-            AddPiece(structure, pieces, targets, root, $"{side}_Wall_{wallX:0.00}", new Vector3(wallX, 4.25f, 4f), new Vector3(0.6f, 1.5f, 1f), 1f, false, true, materials.Concrete);
+            AddPiece(structure, pieces, targets, root, $"{side}_Barrier_{barrierX:0.00}", new Vector3(barrierX, 3.125f, 3.3f), new Vector3(0.65f, 0.45f, 0.35f), 0.7f, false, true, materials.Concrete);
         }
 
-        AddPiece(structure, pieces, targets, root, $"{side}_Roof", new Vector3(centerX, 5.25f, 4f), new Vector3(3.5f, 0.5f, 1.5f), 4f, false, true, materials.Concrete);
-        AddPiece(structure, pieces, targets, root, $"{side}_Roof_Decor_A", new Vector3(centerX - 0.7f, 5.8f, 4f), Vector3.one * 0.6f, 0.8f, false, false, materials.Decor);
-        AddPiece(structure, pieces, targets, root, $"{side}_Roof_Decor_B", new Vector3(centerX + 0.7f, 5.8f, 4f), Vector3.one * 0.6f, 0.8f, false, false, materials.Decor);
+        float direction = side == "Left" ? -1f : 1f;
+        AddPiece(structure, pieces, targets, root, $"{side}_Approach_Decor", new Vector3(direction * 4.7f, 0.3f, 3.2f), new Vector3(0.6f, 0.6f, 0.6f), 0.6f, false, false, materials.Decor);
+        AddPiece(structure, pieces, targets, root, $"{side}_Underpass_Decor", new Vector3(direction * 1.4f, 0.35f, 4.2f), new Vector3(0.7f, 0.7f, 0.7f), 0.7f, false, false, materials.Decor);
+    }
+
+    private static void AddWeakPlate(Transform parent, Material material)
+    {
+        GameObject plate = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        plate.name = "Exposed_Weak_Plate";
+        plate.transform.SetParent(parent, false);
+        plate.transform.localPosition = new Vector3(0f, 0.28f, -0.54f);
+        plate.transform.localScale = new Vector3(1.25f, 0.16f, 0.12f);
+        plate.GetComponent<Renderer>().sharedMaterial = material;
+        Object.DestroyImmediate(plate.GetComponent<Collider>());
+    }
+
+    private static void ConfigureCamera()
+    {
+        Camera camera = Camera.main;
+        if (camera == null)
+        {
+            throw new UnityException("Stage02 is missing the Main Camera.");
+        }
+
+        camera.transform.position = new Vector3(10.5f, 5.8f, -15.5f);
+        camera.transform.LookAt(new Vector3(0f, 2f, 4f));
+        camera.fieldOfView = 54f;
     }
 
     private static void AddPiece(

@@ -2,7 +2,7 @@
 
 ## Goal
 
-Stage03 teaches target selection. The thick blue center support is visually prominent and resistant, while the orange side supports are the efficient solution.
+Stage03 teaches target selection through a low, wide bunker silhouette. The thick blue center support is visually prominent and resistant, while the thin orange side supports are the efficient solution.
 
 ## Configuration
 
@@ -17,7 +17,7 @@ Stage03 teaches target selection. The thick blue center support is visually prom
 - Clear threshold: 70%
 - Next scene: none
 
-The reinforced center uses thicker blue geometry and visible blue bands. Weak side columns remain orange. Each upper half spans from the center support to one outer Weak support. Removing an outer support leaves that half balanced beyond the center edge so it can tilt and fall without graph or load-simulation logic.
+The reinforced center now has a wider foundation, substantially thicker geometry, visible bands, and two diagonal braces. Weak side columns are physically thinner and show exposed plates rather than relying only on orange color. Low armor blocks and broad roof slabs keep the structure squat. Each half still spans from the center support to one outer Weak support, preserving the existing side-target lesson without graph or load-simulation logic.
 
 ## Manual Validation
 

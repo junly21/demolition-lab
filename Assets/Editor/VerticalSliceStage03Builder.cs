@@ -43,7 +43,7 @@ public static class VerticalSliceStage03Builder
         var pieces = new List<GameObject>();
         var targets = new List<StageTargetPiece>();
         var structure = new Dictionary<string, GameObject>();
-        GameObject root = new("Stage 03 Reinforced Center Structure");
+        GameObject root = new("Stage 03 Reinforced Bunker Structure");
         BuildStructure(root.transform, materials, structure, pieces, targets);
 
         VerticalSliceStageController controller = Object.FindAnyObjectByType<VerticalSliceStageController>();
@@ -54,6 +54,7 @@ public static class VerticalSliceStage03Builder
 
         ConfigureController(controller, targets);
         AddJoints(structure, controller, materials.Broken);
+        ConfigureCamera();
         EditorSceneManager.SaveScene(scene);
         AddSceneToBuildSettings();
         AssetDatabase.SaveAssets();
@@ -105,7 +106,7 @@ public static class VerticalSliceStage03Builder
         }
 
         Debug.Log(
-            "Stage03 validation passed: 31 pieces, two eight-target halves, four Weak and two "
+            "Stage03 validation passed: 31-piece low reinforced bunker, two eight-target halves, four Weak and two "
             + "Reinforced joints, four shots, no next scene, references, and collider separation verified.");
     }
 
@@ -145,24 +146,28 @@ public static class VerticalSliceStage03Builder
         ICollection<GameObject> pieces,
         ICollection<StageTargetPiece> targets)
     {
-        AddPiece(structure, pieces, targets, root, "Left_Foundation", new Vector3(-3f, 0.5f, 4f), new Vector3(1.5f, 1f, 1.5f), 8f, true, false, materials.Concrete);
-        AddPiece(structure, pieces, targets, root, "Center_Foundation", new Vector3(0f, 0.5f, 4f), new Vector3(1.8f, 1f, 1.6f), 10f, true, false, materials.Reinforced);
-        AddPiece(structure, pieces, targets, root, "Right_Foundation", new Vector3(3f, 0.5f, 4f), new Vector3(1.5f, 1f, 1.5f), 8f, true, false, materials.Concrete);
+        AddPiece(structure, pieces, targets, root, "Left_Foundation", new Vector3(-3.8f, 0.4f, 4f), new Vector3(1.6f, 0.8f, 1.8f), 8f, true, false, materials.Concrete);
+        AddPiece(structure, pieces, targets, root, "Center_Foundation", new Vector3(0f, 0.4f, 4f), new Vector3(2.4f, 0.8f, 2.1f), 12f, true, false, materials.Reinforced);
+        AddPiece(structure, pieces, targets, root, "Right_Foundation", new Vector3(3.8f, 0.4f, 4f), new Vector3(1.6f, 0.8f, 1.8f), 8f, true, false, materials.Concrete);
 
-        AddPiece(structure, pieces, targets, root, "Left_Weak_Lower", new Vector3(-3f, 1.5f, 4f), Vector3.one, 2f, false, false, materials.Weak);
-        AddPiece(structure, pieces, targets, root, "Left_Weak_Upper", new Vector3(-3f, 2.5f, 4f), Vector3.one, 2f, false, false, materials.Weak);
-        AddPiece(structure, pieces, targets, root, "Right_Weak_Lower", new Vector3(3f, 1.5f, 4f), Vector3.one, 2f, false, false, materials.Weak);
-        AddPiece(structure, pieces, targets, root, "Right_Weak_Upper", new Vector3(3f, 2.5f, 4f), Vector3.one, 2f, false, false, materials.Weak);
-        AddPiece(structure, pieces, targets, root, "Center_Reinforced_Lower", new Vector3(0f, 1.5f, 4f), new Vector3(1.2f, 1f, 1.3f), 3f, false, false, materials.Reinforced);
-        AddPiece(structure, pieces, targets, root, "Center_Reinforced_Upper", new Vector3(0f, 2.5f, 4f), new Vector3(1.2f, 1f, 1.3f), 3f, false, false, materials.Reinforced);
+        AddPiece(structure, pieces, targets, root, "Left_Weak_Lower", new Vector3(-3.8f, 1.2f, 4f), new Vector3(0.65f, 0.8f, 1f), 1.4f, false, false, materials.Weak);
+        AddPiece(structure, pieces, targets, root, "Left_Weak_Upper", new Vector3(-3.8f, 2.25f, 4f), new Vector3(0.85f, 1.3f, 1.15f), 2f, false, false, materials.Weak);
+        AddPiece(structure, pieces, targets, root, "Right_Weak_Lower", new Vector3(3.8f, 1.2f, 4f), new Vector3(0.65f, 0.8f, 1f), 1.4f, false, false, materials.Weak);
+        AddPiece(structure, pieces, targets, root, "Right_Weak_Upper", new Vector3(3.8f, 2.25f, 4f), new Vector3(0.85f, 1.3f, 1.15f), 2f, false, false, materials.Weak);
+        AddPiece(structure, pieces, targets, root, "Center_Reinforced_Lower", new Vector3(0f, 1.5f, 4f), new Vector3(1.8f, 1.4f, 1.7f), 5f, false, false, materials.Reinforced);
+        AddPiece(structure, pieces, targets, root, "Center_Reinforced_Upper", new Vector3(0f, 2.55f, 4f), new Vector3(1.8f, 0.7f, 1.7f), 4f, false, false, materials.Reinforced);
         AddReinforcementBand(structure["Center_Reinforced_Lower"].transform, materials.Reinforced, "Lower_Band");
         AddReinforcementBand(structure["Center_Reinforced_Upper"].transform, materials.Reinforced, "Upper_Band");
+        AddWeakPlate(structure["Left_Weak_Lower"].transform, materials.Weak);
+        AddWeakPlate(structure["Right_Weak_Lower"].transform, materials.Weak);
+        AddBrace(root, materials.Reinforced, "Left_Center_Brace", new Vector3(-1.25f, 2.15f, 3.25f), 30f);
+        AddBrace(root, materials.Reinforced, "Right_Center_Brace", new Vector3(1.25f, 2.15f, 3.25f), -30f);
 
-        AddSide(root, materials, structure, pieces, targets, "Left", -1.75f, new[] { -3.15f, -2.58f, -2.01f, -1.44f, -0.87f, -0.3f });
-        AddSide(root, materials, structure, pieces, targets, "Right", 1.75f, new[] { 0.3f, 0.87f, 1.44f, 2.01f, 2.58f, 3.15f });
+        AddSide(root, materials, structure, pieces, targets, "Left", -2.25f, new[] { -4.05f, -3.35f, -2.65f, -1.95f, -1.25f, -0.55f });
+        AddSide(root, materials, structure, pieces, targets, "Right", 2.25f, new[] { 0.55f, 1.25f, 1.95f, 2.65f, 3.35f, 4.05f });
 
-        AddPiece(structure, pieces, targets, root, "Left_Ground_Decor", new Vector3(-4.8f, 0.5f, 4f), Vector3.one, 1.5f, false, false, materials.Decor);
-        AddPiece(structure, pieces, targets, root, "Right_Ground_Decor", new Vector3(4.8f, 0.5f, 4f), Vector3.one, 1.5f, false, false, materials.Decor);
+        AddPiece(structure, pieces, targets, root, "Left_Ground_Decor", new Vector3(-5.3f, 0.4f, 4f), new Vector3(0.8f, 0.8f, 0.8f), 1f, false, false, materials.Decor);
+        AddPiece(structure, pieces, targets, root, "Right_Ground_Decor", new Vector3(5.3f, 0.4f, 4f), new Vector3(0.8f, 0.8f, 0.8f), 1f, false, false, materials.Decor);
     }
 
     private static void AddSide(
@@ -175,15 +180,15 @@ public static class VerticalSliceStage03Builder
         float centerX,
         IReadOnlyList<float> wallPositions)
     {
-        AddPiece(structure, pieces, targets, root, $"{side}_Platform", new Vector3(centerX, 3.25f, 4f), new Vector3(3.5f, 0.5f, 1.5f), 6f, false, true, materials.Concrete);
+        AddPiece(structure, pieces, targets, root, $"{side}_Platform", new Vector3(centerX, 3.15f, 4f), new Vector3(4.5f, 0.5f, 2f), 7f, false, true, materials.Concrete);
         foreach (float wallX in wallPositions)
         {
-            AddPiece(structure, pieces, targets, root, $"{side}_Wall_{wallX:0.00}", new Vector3(wallX, 4.25f, 4f), new Vector3(0.45f, 1.5f, 1f), 0.9f, false, true, materials.Concrete);
+            AddPiece(structure, pieces, targets, root, $"{side}_Armor_{wallX:0.00}", new Vector3(wallX, 3.75f, 4f), new Vector3(0.58f, 0.7f, 1.4f), 1f, false, true, materials.Concrete);
         }
 
-        AddPiece(structure, pieces, targets, root, $"{side}_Roof", new Vector3(centerX, 5.25f, 4f), new Vector3(3.5f, 0.5f, 1.5f), 4f, false, true, materials.Concrete);
-        AddPiece(structure, pieces, targets, root, $"{side}_Roof_Decor_A", new Vector3(centerX - 0.7f, 5.8f, 4f), Vector3.one * 0.6f, 0.8f, false, false, materials.Decor);
-        AddPiece(structure, pieces, targets, root, $"{side}_Roof_Decor_B", new Vector3(centerX + 0.7f, 5.8f, 4f), Vector3.one * 0.6f, 0.8f, false, false, materials.Decor);
+        AddPiece(structure, pieces, targets, root, $"{side}_Roof", new Vector3(centerX, 4.35f, 4f), new Vector3(4.5f, 0.5f, 2f), 5f, false, true, materials.Concrete);
+        AddPiece(structure, pieces, targets, root, $"{side}_Roof_Decor_A", new Vector3(centerX - 0.75f, 4.8f, 4f), new Vector3(0.6f, 0.4f, 0.6f), 0.5f, false, false, materials.Decor);
+        AddPiece(structure, pieces, targets, root, $"{side}_Roof_Decor_B", new Vector3(centerX + 0.75f, 4.8f, 4f), new Vector3(0.6f, 0.4f, 0.6f), 0.5f, false, false, materials.Decor);
     }
 
     private static void AddPiece(
@@ -235,6 +240,47 @@ public static class VerticalSliceStage03Builder
         band.transform.localScale = new Vector3(1.12f, 0.16f, 1.12f);
         band.GetComponent<Renderer>().sharedMaterial = material;
         Object.DestroyImmediate(band.GetComponent<Collider>());
+    }
+
+    private static void AddWeakPlate(Transform parent, Material material)
+    {
+        GameObject plate = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        plate.name = "Exposed_Weak_Plate";
+        plate.transform.SetParent(parent, false);
+        plate.transform.localPosition = new Vector3(0f, 0.28f, -0.54f);
+        plate.transform.localScale = new Vector3(1.25f, 0.16f, 0.12f);
+        plate.GetComponent<Renderer>().sharedMaterial = material;
+        Object.DestroyImmediate(plate.GetComponent<Collider>());
+    }
+
+    private static void AddBrace(
+        Transform root,
+        Material material,
+        string name,
+        Vector3 position,
+        float zRotation)
+    {
+        GameObject brace = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        brace.name = name;
+        brace.transform.SetParent(root, false);
+        brace.transform.position = position;
+        brace.transform.rotation = Quaternion.Euler(0f, 0f, zRotation);
+        brace.transform.localScale = new Vector3(2.4f, 0.22f, 0.3f);
+        brace.GetComponent<Renderer>().sharedMaterial = material;
+        Object.DestroyImmediate(brace.GetComponent<Collider>());
+    }
+
+    private static void ConfigureCamera()
+    {
+        Camera camera = Camera.main;
+        if (camera == null)
+        {
+            throw new UnityException("Stage03 is missing the Main Camera.");
+        }
+
+        camera.transform.position = new Vector3(11f, 6.3f, -16.5f);
+        camera.transform.LookAt(new Vector3(0f, 2.5f, 4f));
+        camera.fieldOfView = 54f;
     }
 
     private static void AddJoints(
