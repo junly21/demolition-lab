@@ -14,6 +14,7 @@ namespace DemolitionLab
         [SerializeField, Min(1)] private int startingShots = 3;
         [SerializeField, Range(0.1f, 1f)] private float clearThreshold = 0.7f;
         [SerializeField, Min(0f)] private float collapseSettleDelay = 2.75f;
+        [SerializeField, Min(0f)] private float postClearPresentationDelay;
         [SerializeField] private string nextSceneName;
         [SerializeField, Min(0.1f)] private float projectileSpeedMultiplier = 1f;
         [SerializeField, Min(0.1f)] private float projectileMassMultiplier = 1f;
@@ -36,6 +37,7 @@ namespace DemolitionLab
 
         private readonly StageFlowStateMachine flow = new();
         private bool hasValidReferences;
+        private bool clearLockedIn;
 
         public StageState CurrentState => flow.State;
         public int ShotsRemaining => flow.AmmoRemaining;
@@ -108,15 +110,22 @@ namespace DemolitionLab
 
         private void Update()
         {
-            if (flow.State != StageState.Active)
+            bool canEvaluate = flow.State == StageState.Active || flow.State == StageState.Settling;
+            if (!canEvaluate)
             {
                 return;
             }
 
             RefreshHud();
-            if (flow.ShotsUsed > 0 && DestructionPercentage >= clearThreshold * 100f)
+            if (!clearLockedIn
+                && flow.ShotsUsed > 0
+                && DestructionPercentage >= clearThreshold * 100f)
             {
-                BeginSettling();
+                LockInClear();
+                if (flow.State == StageState.Active)
+                {
+                    BeginSettling();
+                }
             }
         }
 
@@ -239,7 +248,18 @@ namespace DemolitionLab
         {
             yield return new WaitForSeconds(collapseSettleDelay);
             float destruction = DestructionPercentage;
-            bool cleared = destruction >= clearThreshold * 100f;
+            bool cleared = clearLockedIn || destruction >= clearThreshold * 100f;
+            if (cleared && !clearLockedIn)
+            {
+                LockInClear();
+            }
+
+            if (cleared && postClearPresentationDelay > 0f)
+            {
+                yield return new WaitForSeconds(postClearPresentationDelay);
+                destruction = DestructionPercentage;
+            }
+
             flow.Complete(cleared);
             resultTitleText.text = cleared ? "STAGE CLEAR" : "STAGE FAILED";
             resultDetailsText.text = $"Shots Used: {flow.ShotsUsed}\nDestruction: {destruction:0}%";
@@ -249,6 +269,15 @@ namespace DemolitionLab
                 $"{stageLabel} {(cleared ? "CLEAR" : "FAILED")}: "
                 + $"destruction {DestroyedTargetCount}/{targetPieces.Count} ({destruction:0}%), "
                 + $"shots used {flow.ShotsUsed}.",
+                this);
+        }
+
+        private void LockInClear()
+        {
+            clearLockedIn = true;
+            Debug.Log(
+                $"{stageLabel} clear locked at {DestructionPercentage:0}% destruction; "
+                + $"result presentation delay {postClearPresentationDelay:0.00}s.",
                 this);
         }
 

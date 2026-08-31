@@ -24,6 +24,7 @@ public static class VerticalSliceStage04Builder
     private const float CenterUpperTorque = 340f;
     private const float ProjectileSpeedMultiplier = 1.1f;
     private const float ProjectileMassMultiplier = 1.15f;
+    private const float PostClearPresentationDelay = 2f;
 
     [MenuItem("DemolitionLab/Build Vertical Slice Stage 04")]
     public static void BuildScene()
@@ -96,7 +97,8 @@ public static class VerticalSliceStage04Builder
 
         Debug.Log(
             "Stage04 validation passed: 36-piece tower, 21 targets, three support paths, "
-            + "six critical joints, four shots, Stage05 progression, references, and collider separation verified.");
+            + "six critical joints, four shots, 2-second post-clear view, Stage05 progression, "
+            + "references, and collider separation verified.");
     }
 
     public static void ValidateAllStages()
@@ -316,6 +318,7 @@ public static class VerticalSliceStage04Builder
         serializedController.FindProperty("startingShots").intValue = 4;
         serializedController.FindProperty("clearThreshold").floatValue = 0.7f;
         serializedController.FindProperty("collapseSettleDelay").floatValue = 3.25f;
+        serializedController.FindProperty("postClearPresentationDelay").floatValue = PostClearPresentationDelay;
         serializedController.FindProperty("nextSceneName").stringValue = "VerticalSlice_Stage05";
         serializedController.FindProperty("projectileSpeedMultiplier").floatValue = ProjectileSpeedMultiplier;
         serializedController.FindProperty("projectileMassMultiplier").floatValue = ProjectileMassMultiplier;
@@ -344,6 +347,9 @@ public static class VerticalSliceStage04Builder
         if (serializedController.FindProperty("stageLabel").stringValue != "STAGE 04"
             || serializedController.FindProperty("startingShots").intValue != 4
             || !Mathf.Approximately(serializedController.FindProperty("clearThreshold").floatValue, 0.7f)
+            || !Mathf.Approximately(
+                serializedController.FindProperty("postClearPresentationDelay").floatValue,
+                PostClearPresentationDelay)
             || serializedController.FindProperty("nextSceneName").stringValue != "VerticalSlice_Stage05"
             || !Mathf.Approximately(
                 serializedController.FindProperty("projectileSpeedMultiplier").floatValue,

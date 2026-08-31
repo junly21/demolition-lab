@@ -10,6 +10,18 @@
 
 Difficulty comes from structure layout, redundant support, and target selection. It does not come from uniformly increasing every joint threshold.
 
+## Final Balance Lock
+
+| Stage | Intended Good Clear | Ammo | Recovery Margin |
+| --- | --- | ---: | --- |
+| Stage01 | 1–2 shots | 3 | Tutorial forgiveness |
+| Stage02 | 2 shots | 3 | One recovery shot |
+| Stage03 | 2–3 deliberate shots | 4 | One poor center attempt |
+| Stage04 | 2–3 strategic shots | 4 | One recovery shot |
+| Stage05 | About 3 good shots | 4 | Final shot as recovery |
+
+Stage03 final tuning lowers only the four Weak joint thresholds so a successful first hit leaves a persistent broken support; no rapid-fire window or damage accumulation exists. Stage04 separates successful gameplay determination from result presentation: reaching 70% locks Clear and disables firing, while a stage-specific 2.0-second post-clear delay lets the major collapse remain visible before the panel appears. Stage01, Stage02, and Stage05 retain their existing ammunition and physics calibration.
+
 ## Full Manual Procedure
 
 ### Impact Feedback Stability
@@ -44,9 +56,10 @@ Feedback is accepted only for a player-fired projectile launched in the active s
 2. Confirm visible impact transfer but that the center usually survives.
 3. Retry Stage03.
 4. Shoot one lower orange side support and compare the larger local failure.
-5. Shoot the opposite side support and confirm the intended side-target strategy produces a large collapse.
-6. Confirm the four-shot allowance permits one poor center attempt plus the intended recovery.
-7. Clear and click NEXT; confirm Stage04 loads.
+5. Wait and observe without firing immediately; confirm the partial failure remains and aiming stays useful.
+6. Shoot the opposite side deliberately and confirm the intended strategy clears in two or three shots.
+7. Confirm the four-shot allowance permits one poor center attempt plus the intended recovery.
+8. Clear and click NEXT; confirm Stage04 loads.
 
 ### Stage04
 
@@ -55,7 +68,9 @@ Feedback is accepted only for a player-fired projectile launched in the active s
 3. Choose a second lower support based on the new lean and fire again.
 4. Confirm the stacked floors produce the largest cascading collapse in the sequence.
 5. Confirm a strong solution normally uses two or three of the four shots.
-6. Clear and click NEXT; confirm Stage05 loads.
+6. Confirm the stage locks successful at 70% and firing stops while the collapse remains visible.
+7. Confirm the result panel appears after the normal 3.25-second settle plus the Stage04-only 2.0-second viewing delay without feeling sluggish.
+8. Clear and click NEXT; confirm Stage05 loads.
 
 ### Stage05
 

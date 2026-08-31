@@ -259,6 +259,7 @@ public static class VerticalSliceStage02Builder
         serializedController.FindProperty("startingShots").intValue = 3;
         serializedController.FindProperty("clearThreshold").floatValue = 0.7f;
         serializedController.FindProperty("collapseSettleDelay").floatValue = 2.75f;
+        serializedController.FindProperty("postClearPresentationDelay").floatValue = 0f;
         serializedController.FindProperty("nextSceneName").stringValue = "VerticalSlice_Stage03";
         serializedController.FindProperty("projectileSpeedMultiplier").floatValue = 1f;
         serializedController.FindProperty("projectileMassMultiplier").floatValue = 1f;
@@ -274,6 +275,7 @@ public static class VerticalSliceStage02Builder
         if (serializedController.FindProperty("stageLabel").stringValue != "STAGE 02"
             || serializedController.FindProperty("startingShots").intValue != 3
             || !Mathf.Approximately(serializedController.FindProperty("clearThreshold").floatValue, 0.7f)
+            || !Mathf.Approximately(serializedController.FindProperty("postClearPresentationDelay").floatValue, 0f)
             || !Mathf.Approximately(serializedController.FindProperty("projectileSpeedMultiplier").floatValue, 1f)
             || !Mathf.Approximately(serializedController.FindProperty("projectileMassMultiplier").floatValue, 1f)
             || serializedController.FindProperty("nextSceneName").stringValue != "VerticalSlice_Stage03"

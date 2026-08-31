@@ -14,10 +14,10 @@ public static class VerticalSliceStage03Builder
     private const int ExpectedPieceCount = 31;
     private const int ExpectedTargetCount = 16;
     private const int ExpectedJointCount = 6;
-    private const float WeakLowerForce = 210f;
-    private const float WeakLowerTorque = 80f;
-    private const float WeakUpperForce = 260f;
-    private const float WeakUpperTorque = 100f;
+    private const float WeakLowerForce = 185f;
+    private const float WeakLowerTorque = 70f;
+    private const float WeakUpperForce = 230f;
+    private const float WeakUpperTorque = 90f;
     private const float ReinforcedLowerForce = 1200f;
     private const float ReinforcedLowerTorque = 500f;
     private const float ReinforcedUpperForce = 1400f;
@@ -107,7 +107,8 @@ public static class VerticalSliceStage03Builder
 
         Debug.Log(
             "Stage03 validation passed: 31-piece low reinforced bunker, two eight-target halves, four Weak and two "
-            + "Reinforced joints, four shots, Stage04 progression, references, and collider separation verified.");
+            + "Reinforced joints, forgiving Weak calibration, four shots, Stage04 progression, references, "
+            + "and collider separation verified.");
     }
 
     [MenuItem("DemolitionLab/Validate All Vertical Slice Stages")]
@@ -307,6 +308,7 @@ public static class VerticalSliceStage03Builder
         serializedController.FindProperty("startingShots").intValue = 4;
         serializedController.FindProperty("clearThreshold").floatValue = 0.7f;
         serializedController.FindProperty("collapseSettleDelay").floatValue = 2.75f;
+        serializedController.FindProperty("postClearPresentationDelay").floatValue = 0f;
         serializedController.FindProperty("nextSceneName").stringValue = "VerticalSlice_Stage04";
         serializedController.FindProperty("projectileSpeedMultiplier").floatValue = 1f;
         serializedController.FindProperty("projectileMassMultiplier").floatValue = 1f;
@@ -322,6 +324,7 @@ public static class VerticalSliceStage03Builder
         if (serializedController.FindProperty("stageLabel").stringValue != "STAGE 03"
             || serializedController.FindProperty("startingShots").intValue != 4
             || !Mathf.Approximately(serializedController.FindProperty("clearThreshold").floatValue, 0.7f)
+            || !Mathf.Approximately(serializedController.FindProperty("postClearPresentationDelay").floatValue, 0f)
             || !Mathf.Approximately(serializedController.FindProperty("projectileSpeedMultiplier").floatValue, 1f)
             || !Mathf.Approximately(serializedController.FindProperty("projectileMassMultiplier").floatValue, 1f)
             || serializedController.FindProperty("nextSceneName").stringValue != "VerticalSlice_Stage04"
