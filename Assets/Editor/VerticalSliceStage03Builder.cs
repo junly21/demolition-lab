@@ -14,10 +14,10 @@ public static class VerticalSliceStage03Builder
     private const int ExpectedPieceCount = 31;
     private const int ExpectedTargetCount = 16;
     private const int ExpectedJointCount = 6;
-    private const float WeakLowerForce = 240f;
-    private const float WeakLowerTorque = 95f;
-    private const float WeakUpperForce = 300f;
-    private const float WeakUpperTorque = 120f;
+    private const float WeakLowerForce = 210f;
+    private const float WeakLowerTorque = 80f;
+    private const float WeakUpperForce = 260f;
+    private const float WeakUpperTorque = 100f;
     private const float ReinforcedLowerForce = 1200f;
     private const float ReinforcedLowerTorque = 500f;
     private const float ReinforcedUpperForce = 1400f;
@@ -127,10 +127,10 @@ public static class VerticalSliceStage03Builder
         AddPiece(structure, pieces, targets, root, "Center_Foundation", new Vector3(0f, 0.4f, 4f), new Vector3(2.4f, 0.8f, 2.1f), 12f, true, false, materials.Reinforced);
         AddPiece(structure, pieces, targets, root, "Right_Foundation", new Vector3(3.8f, 0.4f, 4f), new Vector3(1.6f, 0.8f, 1.8f), 8f, true, false, materials.Concrete);
 
-        AddPiece(structure, pieces, targets, root, "Left_Weak_Lower", new Vector3(-3.8f, 1.2f, 4f), new Vector3(0.65f, 0.8f, 1f), 1.4f, false, false, materials.Weak);
-        AddPiece(structure, pieces, targets, root, "Left_Weak_Upper", new Vector3(-3.8f, 2.25f, 4f), new Vector3(0.85f, 1.3f, 1.15f), 2f, false, false, materials.Weak);
-        AddPiece(structure, pieces, targets, root, "Right_Weak_Lower", new Vector3(3.8f, 1.2f, 4f), new Vector3(0.65f, 0.8f, 1f), 1.4f, false, false, materials.Weak);
-        AddPiece(structure, pieces, targets, root, "Right_Weak_Upper", new Vector3(3.8f, 2.25f, 4f), new Vector3(0.85f, 1.3f, 1.15f), 2f, false, false, materials.Weak);
+        AddPiece(structure, pieces, targets, root, "Left_Weak_Lower", new Vector3(-3.8f, 1.2f, 4f), new Vector3(0.8f, 0.8f, 1f), 1.5f, false, false, materials.Weak);
+        AddPiece(structure, pieces, targets, root, "Left_Weak_Upper", new Vector3(-3.8f, 2.25f, 4f), new Vector3(0.95f, 1.3f, 1.15f), 2.1f, false, false, materials.Weak);
+        AddPiece(structure, pieces, targets, root, "Right_Weak_Lower", new Vector3(3.8f, 1.2f, 4f), new Vector3(0.8f, 0.8f, 1f), 1.5f, false, false, materials.Weak);
+        AddPiece(structure, pieces, targets, root, "Right_Weak_Upper", new Vector3(3.8f, 2.25f, 4f), new Vector3(0.95f, 1.3f, 1.15f), 2.1f, false, false, materials.Weak);
         AddPiece(structure, pieces, targets, root, "Center_Reinforced_Lower", new Vector3(0f, 1.5f, 4f), new Vector3(1.8f, 1.4f, 1.7f), 5f, false, false, materials.Reinforced);
         AddPiece(structure, pieces, targets, root, "Center_Reinforced_Upper", new Vector3(0f, 2.55f, 4f), new Vector3(1.8f, 0.7f, 1.7f), 4f, false, false, materials.Reinforced);
         AddReinforcementBand(structure["Center_Reinforced_Lower"].transform, materials.Reinforced, "Lower_Band");
@@ -225,7 +225,7 @@ public static class VerticalSliceStage03Builder
         plate.name = "Exposed_Weak_Plate";
         plate.transform.SetParent(parent, false);
         plate.transform.localPosition = new Vector3(0f, 0.28f, -0.54f);
-        plate.transform.localScale = new Vector3(1.25f, 0.16f, 0.12f);
+        plate.transform.localScale = new Vector3(1.4f, 0.16f, 0.12f);
         plate.GetComponent<Renderer>().sharedMaterial = material;
         Object.DestroyImmediate(plate.GetComponent<Collider>());
     }

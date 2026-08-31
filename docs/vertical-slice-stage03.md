@@ -9,15 +9,15 @@ Stage03 teaches target selection through a low, wide bunker silhouette. The thic
 - Physical pieces: 31
 - Objective targets: 16, split evenly across left and right upper halves
 - Critical joints: 4 Weak and 2 Reinforced
-- Weak lower joints: 240 N break force, 95 N·m break torque
-- Weak upper joints: 300 N break force, 120 N·m break torque
+- Weak lower joints: 210 N break force, 80 N·m break torque
+- Weak upper joints: 260 N break force, 100 N·m break torque
 - Reinforced lower joint: 1200 N break force, 500 N·m break torque
 - Reinforced upper joint: 1400 N break force, 600 N·m break torque
 - Ammunition: 4 shots
 - Clear threshold: 70%
 - Next scene: `VerticalSlice_Stage04`
 
-The reinforced center now has a wider foundation, substantially thicker geometry, visible bands, and two diagonal braces. Weak side columns are physically thinner and show exposed plates rather than relying only on orange color. Low armor blocks and broad roof slabs keep the structure squat. Each half still spans from the center support to one outer Weak support, preserving the existing side-target lesson without graph or load-simulation logic.
+The reinforced center has a wider foundation, substantially thicker geometry, visible bands, and two diagonal braces. Weak side columns remain much thinner but are slightly wider than the first bunker pass, with larger exposed plates and moderately lower break thresholds so a good intended hit registers more reliably. Low armor blocks and broad roof slabs keep the structure squat. Each half still spans from the center support to one outer Weak support, preserving the existing side-target lesson without graph or load-simulation logic.
 
 ## Manual Validation
 
