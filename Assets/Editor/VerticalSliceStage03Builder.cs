@@ -107,36 +107,13 @@ public static class VerticalSliceStage03Builder
 
         Debug.Log(
             "Stage03 validation passed: 31-piece low reinforced bunker, two eight-target halves, four Weak and two "
-            + "Reinforced joints, four shots, no next scene, references, and collider separation verified.");
+            + "Reinforced joints, four shots, Stage04 progression, references, and collider separation verified.");
     }
 
     [MenuItem("DemolitionLab/Validate All Vertical Slice Stages")]
     public static void ValidateAllStages()
     {
-        VerticalSliceSceneBuilder.ValidateScene();
-        VerticalSliceStage02Builder.ValidateScene();
-        ValidateScene();
-
-        var enabledScenes = new List<string>();
-        foreach (EditorBuildSettingsScene scene in EditorBuildSettings.scenes)
-        {
-            if (scene.enabled)
-            {
-                enabledScenes.Add(scene.path);
-            }
-        }
-
-        int stageOneIndex = enabledScenes.IndexOf(SourceScenePath);
-        int stageTwoIndex = enabledScenes.IndexOf(Stage02ScenePath);
-        int stageThreeIndex = enabledScenes.IndexOf(ScenePath);
-        if (stageOneIndex < 0
-            || stageTwoIndex != stageOneIndex + 1
-            || stageThreeIndex != stageTwoIndex + 1)
-        {
-            throw new UnityException("Vertical-slice build order must be Stage01 -> Stage02 -> Stage03.");
-        }
-
-        Debug.Log("All vertical-slice stages and Stage01 -> Stage02 -> Stage03 progression validated.");
+        VerticalSliceStage04Builder.ValidateAllStages();
     }
 
     private static void BuildStructure(
@@ -330,7 +307,7 @@ public static class VerticalSliceStage03Builder
         serializedController.FindProperty("startingShots").intValue = 4;
         serializedController.FindProperty("clearThreshold").floatValue = 0.7f;
         serializedController.FindProperty("collapseSettleDelay").floatValue = 2.75f;
-        serializedController.FindProperty("nextSceneName").stringValue = string.Empty;
+        serializedController.FindProperty("nextSceneName").stringValue = "VerticalSlice_Stage04";
         AssignObjectList(serializedController.FindProperty("targetPieces"), targets);
         Text label = (Text)serializedController.FindProperty("stageLabelText").objectReferenceValue;
         label.text = "STAGE 03";
@@ -343,9 +320,8 @@ public static class VerticalSliceStage03Builder
         if (serializedController.FindProperty("stageLabel").stringValue != "STAGE 03"
             || serializedController.FindProperty("startingShots").intValue != 4
             || !Mathf.Approximately(serializedController.FindProperty("clearThreshold").floatValue, 0.7f)
-            || !string.IsNullOrEmpty(serializedController.FindProperty("nextSceneName").stringValue)
-            || serializedController.FindProperty("targetPieces").arraySize != ExpectedTargetCount
-            || controller.HasNextScene)
+            || serializedController.FindProperty("nextSceneName").stringValue != "VerticalSlice_Stage04"
+            || serializedController.FindProperty("targetPieces").arraySize != ExpectedTargetCount)
         {
             throw new UnityException("Stage03 controller configuration is invalid.");
         }

@@ -1,14 +1,24 @@
-# Three-Stage Vertical Slice Playtest
+# Four-Stage Vertical Slice Playtest
 
 ## Intended Difficulty Curve
 
 - Stage01: identify one orange critical support and cause a large collapse in one strong hit or two mediocre hits.
 - Stage02: collapse one six-target half, then remove the second independent support path to finish the stage.
 - Stage03: avoid wasting ammunition on the thick blue reinforced center and remove the orange side supports.
+- Stage04: read the three lower support paths, create a partial lean, then choose the next support for a cascading tower collapse.
 
 Difficulty comes from structure layout, redundant support, and target selection. It does not come from uniformly increasing every joint threshold.
 
 ## Full Manual Procedure
+
+### Impact Feedback Stability
+
+1. Enter each stage, wait 10 seconds without input, and confirm no unexplained dust or camera shake occurs.
+2. Fire at the far-right target and confirm dust originates at the actual right-side contact.
+3. Repeat Stage01 → Stage02 → Stage03 → Stage04 transitions several times.
+4. If an anomaly occurs, enable `logImpactDiagnostics` on the stage controller and inspect the accepted/rejected event line.
+
+Feedback is accepted only for a player-fired projectile launched in the active scene while the stage is `Active` or appropriately `Settling`. The diagnostic line includes scene, frame/time, projectile ID and position, collision object, contact, particle and shake source positions, stage state, player-fired provenance, impulse, and acceptance result.
 
 ### Stage01
 
@@ -35,12 +45,21 @@ Difficulty comes from structure layout, redundant support, and target selection.
 4. Shoot one lower orange side support and compare the larger local failure.
 5. Shoot the opposite side support and confirm the intended side-target strategy produces a large collapse.
 6. Confirm the four-shot allowance permits one poor center attempt plus the intended recovery.
-7. Clear and confirm NEXT is hidden.
+7. Clear and click NEXT; confirm Stage04 loads.
+
+### Stage04
+
+1. Wait 10 seconds and confirm the tall tower remains idle without impact feedback.
+2. Hit one outer lower support well and confirm a partial failure or lean rather than an automatic clear.
+3. Choose a second lower support based on the new lean and fire again.
+4. Confirm the stacked floors produce the largest cascading collapse in the sequence.
+5. Confirm a strong solution normally uses two or three of the four shots.
+6. Clear and confirm NEXT is hidden.
 
 ## Tuning Logs
 
-The Console reports stage label, shot number, impacted object, collision impulse, critical joint break type, settled destruction numerator/percentage, clear/fail, and shots used. These logs are for manual calibration only and are not an analytics system.
+The Console reports stage label, shot number, collision impulse, critical joint break type, settled destruction numerator/percentage, clear/fail, and shots used. Optional impact diagnostics additionally report the complete accepted/rejected feedback path. These logs are for manual calibration only and are not an analytics system.
 
 ## Acceptance Question
 
-After playing Stage01 → Stage02 → Stage03, judge whether the sequence feels like one small demolition puzzle game. Automated validation establishes configuration correctness only; it does not establish collapse quality, difficulty, or fun.
+After playing Stage01 → Stage02 → Stage03 → Stage04, judge whether the sequence reads at a glance as gate, bridge, bunker, and tower. Automated validation establishes configuration correctness only; it does not establish collapse quality, difficulty, or fun.
