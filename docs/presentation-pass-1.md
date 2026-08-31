@@ -48,6 +48,12 @@ The inherited M0 `OnGUI` controls are disabled only in Stage01–05. The current
 
 Use the `DemolitionLab/Presentation` Editor menu to apply or validate the environment, structural presentation, and camera framing. The same presentation builder is also called by every vertical-slice scene builder.
 
+## Physics And Presentation Separation
+
+Every Stage01–05 object tagged `Destructible` keeps its Transform, Rigidbody, Collider, FixedJoint, target component, and critical-support component on the physical root. Its prototype MeshFilter, MeshRenderer, and connection details live below a local-identity `VisualRoot` child. `PresentationVisual` records a presentation-only category for later prefab or material assignment and contains no gameplay behavior.
+
+Imported structural art must be placed below `VisualRoot` without Rigidbody, Collider, Joint, or gameplay components. Mesh offsets and scale corrections belong on an additional child, never on the physical root or `VisualRoot`. Use `DemolitionLab/Presentation/Validate Physics And Visuals` after replacing any geometry.
+
 ## Gameplay Lock
 
 Presentation Pass 1 does not change projectile settings, Rigidbody values, colliders, joint thresholds, target rules, ammunition, success thresholds, settle timing, or stage progression. Manual Play Mode remains required to judge final screenshot composition and collapse framing.

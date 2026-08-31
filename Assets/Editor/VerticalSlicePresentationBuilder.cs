@@ -119,6 +119,7 @@ public static class VerticalSlicePresentationBuilder
         AddConnectionDetails(materials);
         AddLauncherPresentation(materials);
         ConfigureHudPresentation();
+        PhysicsPresentationSeparationBuilder.ApplyToOpenScene();
         EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
     }
 
@@ -166,7 +167,9 @@ public static class VerticalSlicePresentationBuilder
     {
         foreach (CriticalSupportJoint joint in Object.FindObjectsByType<CriticalSupportJoint>())
         {
-            Transform existing = joint.transform.Find(ConnectionDetailName);
+            Transform existing = PhysicsPresentationSeparationBuilder.FindDescendant(
+                joint.transform,
+                ConnectionDetailName);
             if (existing != null)
             {
                 Object.DestroyImmediate(existing.gameObject);
@@ -574,7 +577,9 @@ public static class VerticalSlicePresentationBuilder
 
         foreach (CriticalSupportJoint joint in joints)
         {
-            Transform detail = joint.transform.Find(ConnectionDetailName);
+            Transform detail = PhysicsPresentationSeparationBuilder.FindDescendant(
+                joint.transform,
+                ConnectionDetailName);
             int expectedRenderers = joint.IsWeak ? 5 : 4;
             if (detail == null
                 || detail.GetComponentsInChildren<Renderer>().Length != expectedRenderers
@@ -629,6 +634,8 @@ public static class VerticalSlicePresentationBuilder
                 throw new UnityException($"{scenePath} HUD presentation is incomplete.");
             }
         }
+
+        PhysicsPresentationSeparationBuilder.ValidateOpenScene(scenePath);
     }
 
     private static void ValidateCameraFramingInOpenScene(string scenePath)
