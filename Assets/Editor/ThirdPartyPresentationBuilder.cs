@@ -111,7 +111,7 @@ public static class ThirdPartyPresentationBuilder
 
             renderer.sharedMaterial = visual.Category switch
             {
-                PresentationCategory.Concrete => LoadMaterial("DL_Concrete"),
+                PresentationCategory.Concrete => SelectConcreteMaterial(visual.transform.parent?.name),
                 PresentationCategory.Steel => LoadMaterial("DL_Steel"),
                 PresentationCategory.Weak => LoadMaterial("DL_WeakSteel"),
                 PresentationCategory.Reinforced => LoadMaterial("DL_ReinforcedSteel"),
@@ -224,25 +224,44 @@ public static class ThirdPartyPresentationBuilder
             $"{AsphaltRoot}/asphalt_01_nor_gl_4k.exr",
             asphaltMask,
             new Color(0.48f, 0.5f, 0.5f),
-            new Vector2(4f, 4f));
+            new Vector2(4f, 4f),
+            0.42f);
         CreateSurfaceMaterial(
             "DL_Concrete",
             $"{ConcreteRoot}/concrete_diff_4k.jpg",
             $"{ConcreteRoot}/concrete_nor_gl_4k.exr",
             concreteMask,
-            new Color(0.86f, 0.88f, 0.88f),
-            new Vector2(1.35f, 1.35f));
+            new Color(0.82f, 0.85f, 0.87f),
+            new Vector2(1.7f, 1.7f),
+            0.32f);
+        CreateSurfaceMaterial(
+            "DL_ConcreteDark",
+            $"{ConcreteRoot}/concrete_diff_4k.jpg",
+            $"{ConcreteRoot}/concrete_nor_gl_4k.exr",
+            concreteMask,
+            new Color(0.68f, 0.71f, 0.73f),
+            new Vector2(1.55f, 1.55f),
+            0.28f);
+        CreateSurfaceMaterial(
+            "DL_ConcreteWorn",
+            $"{ConcreteRoot}/concrete_diff_4k.jpg",
+            $"{ConcreteRoot}/concrete_nor_gl_4k.exr",
+            concreteMask,
+            new Color(0.72f, 0.72f, 0.69f),
+            new Vector2(1.9f, 1.9f),
+            0.38f);
         CreateSurfaceMaterial(
             "DL_FoundationConcrete",
             $"{ConcreteRoot}/concrete_diff_4k.jpg",
             $"{ConcreteRoot}/concrete_nor_gl_4k.exr",
             concreteMask,
-            new Color(0.62f, 0.65f, 0.65f),
-            Vector2.one);
+            new Color(0.56f, 0.58f, 0.59f),
+            new Vector2(1.25f, 1.25f),
+            0.36f);
 
-        CreateSimpleMaterial("DL_Steel", new Color(0.16f, 0.19f, 0.2f), 0.78f, 0.34f);
-        CreateSimpleMaterial("DL_WeakSteel", new Color(0.27f, 0.18f, 0.11f), 0.62f, 0.27f);
-        CreateSimpleMaterial("DL_ReinforcedSteel", new Color(0.055f, 0.13f, 0.18f), 0.86f, 0.4f);
+        CreateSimpleMaterial("DL_Steel", new Color(0.11f, 0.15f, 0.18f), 0.82f, 0.32f);
+        CreateSimpleMaterial("DL_WeakSteel", new Color(0.17f, 0.13f, 0.105f), 0.72f, 0.24f);
+        CreateSimpleMaterial("DL_ReinforcedSteel", new Color(0.04f, 0.105f, 0.15f), 0.9f, 0.38f);
         CreateSimpleMaterial("DL_LauncherMetal", new Color(0.055f, 0.07f, 0.075f), 0.9f, 0.42f);
         CreateColorMapMaterial(
             "DL_KenneyCity",
@@ -489,7 +508,8 @@ public static class ThirdPartyPresentationBuilder
         string normalMapPath,
         string maskMapPath,
         Color tint,
-        Vector2 tiling)
+        Vector2 tiling,
+        float bumpScale)
     {
         Material material = GetOrCreateMaterial(name);
         material.SetTexture("_BaseMap", AssetDatabase.LoadAssetAtPath<Texture2D>(baseMapPath));
@@ -501,7 +521,7 @@ public static class ThirdPartyPresentationBuilder
         material.SetColor("_BaseColor", tint);
         material.SetFloat("_Metallic", 0f);
         material.SetFloat("_Smoothness", 1f);
-        material.SetFloat("_BumpScale", 0.65f);
+        material.SetFloat("_BumpScale", bumpScale);
         material.EnableKeyword("_NORMALMAP");
         material.EnableKeyword("_METALLICSPECGLOSSMAP");
         EditorUtility.SetDirty(material);
@@ -565,6 +585,25 @@ public static class ThirdPartyPresentationBuilder
         }
 
         return material;
+    }
+
+    private static Material SelectConcreteMaterial(string objectName)
+    {
+        int stableValue = 0;
+        if (!string.IsNullOrEmpty(objectName))
+        {
+            foreach (char character in objectName)
+            {
+                stableValue += character;
+            }
+        }
+
+        return (stableValue % 3) switch
+        {
+            1 => LoadMaterial("DL_ConcreteDark"),
+            2 => LoadMaterial("DL_ConcreteWorn"),
+            _ => LoadMaterial("DL_Concrete")
+        };
     }
 
     private static void RemovePrototypeBackground(Transform environment)

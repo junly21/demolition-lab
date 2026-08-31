@@ -110,6 +110,7 @@ public static class VerticalSlicePresentationBuilder
         ConfigureGround(materials.YardConcrete);
         ConfigureLighting(materials.Skybox);
         ThirdPartyPresentationBuilder.ApplyEnvironmentToOpenScene();
+        FinalVisualPolishBuilder.ApplyLightingAndPostToOpenScene();
         EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
     }
 
@@ -423,26 +424,26 @@ public static class VerticalSlicePresentationBuilder
             throw new UnityException("Vertical-slice scene is missing its directional key light.");
         }
 
-        keyLight.transform.rotation = Quaternion.Euler(48f, -32f, 0f);
-        keyLight.color = new Color(1f, 0.93f, 0.82f);
-        keyLight.intensity = 1.35f;
+        keyLight.transform.rotation = Quaternion.Euler(52f, -38f, 0f);
+        keyLight.color = new Color(1f, 0.9f, 0.76f);
+        keyLight.intensity = 1.55f;
         keyLight.shadows = LightShadows.Soft;
-        keyLight.shadowStrength = 0.82f;
+        keyLight.shadowStrength = 0.88f;
         keyLight.shadowBias = 0.035f;
         keyLight.shadowNormalBias = 0.25f;
 
         RenderSettings.sun = keyLight;
         RenderSettings.skybox = skybox;
         RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
-        RenderSettings.ambientSkyColor = new Color(0.48f, 0.56f, 0.66f);
-        RenderSettings.ambientEquatorColor = new Color(0.29f, 0.33f, 0.36f);
-        RenderSettings.ambientGroundColor = new Color(0.12f, 0.13f, 0.14f);
-        RenderSettings.ambientIntensity = 0.9f;
+        RenderSettings.ambientSkyColor = new Color(0.38f, 0.47f, 0.57f);
+        RenderSettings.ambientEquatorColor = new Color(0.24f, 0.29f, 0.34f);
+        RenderSettings.ambientGroundColor = new Color(0.14f, 0.16f, 0.18f);
+        RenderSettings.ambientIntensity = 0.82f;
         RenderSettings.fog = true;
         RenderSettings.fogMode = FogMode.Linear;
-        RenderSettings.fogColor = new Color(0.52f, 0.59f, 0.64f);
-        RenderSettings.fogStartDistance = 24f;
-        RenderSettings.fogEndDistance = 58f;
+        RenderSettings.fogColor = new Color(0.42f, 0.49f, 0.55f);
+        RenderSettings.fogStartDistance = 22f;
+        RenderSettings.fogEndDistance = 55f;
     }
 
     private static PresentationMaterials CreateEnvironmentMaterials()
@@ -502,11 +503,11 @@ public static class VerticalSlicePresentationBuilder
             AssetDatabase.CreateAsset(material, path);
         }
 
-        material.SetColor("_SkyTint", new Color(0.38f, 0.53f, 0.66f));
-        material.SetColor("_GroundColor", new Color(0.23f, 0.25f, 0.26f));
-        material.SetFloat("_AtmosphereThickness", 0.72f);
+        material.SetColor("_SkyTint", new Color(0.28f, 0.39f, 0.5f));
+        material.SetColor("_GroundColor", new Color(0.16f, 0.19f, 0.22f));
+        material.SetFloat("_AtmosphereThickness", 0.64f);
         material.SetFloat("_SunSize", 0.03f);
-        material.SetFloat("_Exposure", 1.05f);
+        material.SetFloat("_Exposure", 0.92f);
         EditorUtility.SetDirty(material);
         return material;
     }
@@ -641,6 +642,7 @@ public static class VerticalSlicePresentationBuilder
 
         PhysicsPresentationSeparationBuilder.ValidateOpenScene(scenePath);
         ThirdPartyPresentationBuilder.ValidateOpenScene(scenePath);
+        FinalVisualPolishBuilder.ValidateLightingAndPostInOpenScene(scenePath);
     }
 
     private static void ValidateCameraFramingInOpenScene(string scenePath)
