@@ -123,7 +123,9 @@ namespace DemolitionLab
         public void NotifyCriticalSupportBroken(Vector3 position, bool weakConnection)
         {
             Debug.Log(
-                $"{stageLabel} {(weakConnection ? "Weak" : "Reinforced")} critical joint broke.",
+                $"{stageLabel} {(weakConnection ? "Weak" : "Reinforced")} critical joint broke; "
+                + $"shot={flow.ShotsUsed}, remainingAmmo={flow.AmmoRemaining}, "
+                + $"destruction={DestructionPercentage:0}%.",
                 this);
         }
 
@@ -203,6 +205,8 @@ namespace DemolitionLab
                     + $"particle={(accepted ? impact.ContactPosition.ToString() : "none")}, "
                     + $"shakeSource={(accepted ? impact.ContactPosition.ToString() : "none")}, "
                     + $"state={flow.State}, playerFired={impact.WasPlayerFired}, "
+                    + $"shot={flow.ShotsUsed}, remainingAmmo={flow.AmmoRemaining}, "
+                    + $"destruction={DestructionPercentage:0}%, "
                     + $"impulse={impact.ImpulseMagnitude:0.00} N·s.",
                     this);
             }

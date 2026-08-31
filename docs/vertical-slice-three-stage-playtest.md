@@ -1,4 +1,4 @@
-# Four-Stage Vertical Slice Playtest
+# Five-Stage Vertical Slice Playtest
 
 ## Intended Difficulty Curve
 
@@ -6,6 +6,7 @@
 - Stage02: collapse one six-target half, then remove the second independent support path to finish the stage.
 - Stage03: avoid wasting ammunition on the thick blue reinforced center and remove the orange side supports.
 - Stage04: read the three lower support paths, create a partial lean, then choose the next support for a cascading tower collapse.
+- Stage05: combine previous lessons across a reinforced main column, remote cantilever, and three Weak support decisions.
 
 Difficulty comes from structure layout, redundant support, and target selection. It does not come from uniformly increasing every joint threshold.
 
@@ -54,7 +55,18 @@ Feedback is accepted only for a player-fired projectile launched in the active s
 3. Choose a second lower support based on the new lean and fire again.
 4. Confirm the stacked floors produce the largest cascading collapse in the sequence.
 5. Confirm a strong solution normally uses two or three of the four shots.
-6. Clear and confirm NEXT is hidden.
+6. Clear and click NEXT; confirm Stage05 loads.
+
+### Stage05
+
+1. Wait 10 seconds and confirm the asymmetric industrial frame remains fully stable.
+2. Hit the reinforced main column and confirm it usually survives.
+3. Retry and remove the remote right Weak support.
+4. Remove the middle Weak support and confirm the two fallen five-target sections do not trivially clear.
+5. Remove the exposed transfer support beside the main column and confirm the final large collapse.
+6. Confirm a good solution normally takes three shots, with four available.
+7. Retry, choose poor reinforced/decorative targets, and confirm four shots are barely sufficient or fail.
+8. Clear and confirm NEXT is hidden.
 
 ## Tuning Logs
 
@@ -62,4 +74,4 @@ The Console reports stage label, shot number, collision impulse, critical joint 
 
 ## Acceptance Question
 
-After playing Stage01 → Stage02 → Stage03 → Stage04, judge whether the sequence reads at a glance as gate, bridge, bunker, and tower. Automated validation establishes configuration correctness only; it does not establish collapse quality, difficulty, or fun.
+After playing Stage01 → Stage02 → Stage03 → Stage04 → Stage05, judge whether the sequence reads at a glance as gate, bridge, bunker, tower, and asymmetric industrial gantry. Automated validation establishes configuration correctness only; it does not establish collapse quality, difficulty, or fun.

@@ -9599,7 +9599,7 @@ MonoBehaviour:
   startingShots: 4
   clearThreshold: 0.7
   collapseSettleDelay: 3.25
-  nextSceneName: 
+  nextSceneName: VerticalSlice_Stage05
   projectileSpeedMultiplier: 1.1
   projectileMassMultiplier: 1.15
   launcher: {fileID: 1689179600}

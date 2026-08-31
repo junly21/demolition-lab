@@ -96,40 +96,12 @@ public static class VerticalSliceStage04Builder
 
         Debug.Log(
             "Stage04 validation passed: 36-piece tower, 21 targets, three support paths, "
-            + "six critical joints, four shots, hidden Next, references, and collider separation verified.");
+            + "six critical joints, four shots, Stage05 progression, references, and collider separation verified.");
     }
 
-    [MenuItem("DemolitionLab/Validate All Vertical Slice Stages 01-04")]
     public static void ValidateAllStages()
     {
-        VerticalSliceSceneBuilder.ValidateScene();
-        VerticalSliceStage02Builder.ValidateScene();
-        VerticalSliceStage03Builder.ValidateScene();
-        ValidateScene();
-
-        var enabledScenes = new List<string>();
-        foreach (EditorBuildSettingsScene scene in EditorBuildSettings.scenes)
-        {
-            if (scene.enabled)
-            {
-                enabledScenes.Add(scene.path);
-            }
-        }
-
-        int stageOneIndex = enabledScenes.IndexOf(SourceScenePath);
-        int stageTwoIndex = enabledScenes.IndexOf("Assets/Scenes/VerticalSlice_Stage02.unity");
-        int stageThreeIndex = enabledScenes.IndexOf(Stage03ScenePath);
-        int stageFourIndex = enabledScenes.IndexOf(ScenePath);
-        if (stageOneIndex < 0
-            || stageTwoIndex != stageOneIndex + 1
-            || stageThreeIndex != stageTwoIndex + 1
-            || stageFourIndex != stageThreeIndex + 1)
-        {
-            throw new UnityException(
-                "Vertical-slice build order must be Stage01 -> Stage02 -> Stage03 -> Stage04.");
-        }
-
-        Debug.Log("All four vertical-slice stages and progression validated.");
+        VerticalSliceStage05Builder.ValidateAllStages();
     }
 
     private static void BuildStructure(
@@ -344,7 +316,7 @@ public static class VerticalSliceStage04Builder
         serializedController.FindProperty("startingShots").intValue = 4;
         serializedController.FindProperty("clearThreshold").floatValue = 0.7f;
         serializedController.FindProperty("collapseSettleDelay").floatValue = 3.25f;
-        serializedController.FindProperty("nextSceneName").stringValue = string.Empty;
+        serializedController.FindProperty("nextSceneName").stringValue = "VerticalSlice_Stage05";
         serializedController.FindProperty("projectileSpeedMultiplier").floatValue = ProjectileSpeedMultiplier;
         serializedController.FindProperty("projectileMassMultiplier").floatValue = ProjectileMassMultiplier;
         AssignObjectList(serializedController.FindProperty("targetPieces"), targets);
@@ -372,15 +344,14 @@ public static class VerticalSliceStage04Builder
         if (serializedController.FindProperty("stageLabel").stringValue != "STAGE 04"
             || serializedController.FindProperty("startingShots").intValue != 4
             || !Mathf.Approximately(serializedController.FindProperty("clearThreshold").floatValue, 0.7f)
-            || !string.IsNullOrEmpty(serializedController.FindProperty("nextSceneName").stringValue)
+            || serializedController.FindProperty("nextSceneName").stringValue != "VerticalSlice_Stage05"
             || !Mathf.Approximately(
                 serializedController.FindProperty("projectileSpeedMultiplier").floatValue,
                 ProjectileSpeedMultiplier)
             || !Mathf.Approximately(
                 serializedController.FindProperty("projectileMassMultiplier").floatValue,
                 ProjectileMassMultiplier)
-            || serializedController.FindProperty("targetPieces").arraySize != ExpectedTargetCount
-            || controller.HasNextScene)
+            || serializedController.FindProperty("targetPieces").arraySize != ExpectedTargetCount)
         {
             throw new UnityException("Stage04 controller configuration is invalid.");
         }

@@ -1,8 +1,8 @@
 # DemolitionLab
 
-**Current build:** Four-stage playable vertical slice — Stage 01–04
+**Current build:** Five-stage playable vertical slice — Stage 01–05
 
-DemolitionLab is a short demolition puzzle where limited shots and readable weak points drive four increasingly selective collapses.
+DemolitionLab is a short demolition puzzle where limited shots and readable weak points drive five increasingly selective collapses.
 
 ## Controls
 
@@ -16,7 +16,8 @@ DemolitionLab is a short demolition puzzle where limited shots and readable weak
 - `VerticalSlice_Stage01`: final-game prototype with three shots, a destruction objective, HUD, result flow, and four critical support joints
 - `VerticalSlice_Stage02`: long bridge puzzle where two separated weak piers carry independent deck halves
 - `VerticalSlice_Stage03`: low reinforced bunker puzzle with a thick braced center and thinner side supports
-- `VerticalSlice_Stage04`: tall tower finale with three lower support paths and four stacked upper levels
+- `VerticalSlice_Stage04`: tall tower stage with three lower support paths and four stacked upper levels
+- `VerticalSlice_Stage05`: asymmetric industrial gantry combining three Weak support decisions around a reinforced main column
 - `M0_DemolitionLab`: baseline stacked-block scene using only Rigidbody physics
 - `M1_StructuralGraph`: support-graph scene with two anchored pillars, a bridge, and a non-critical upper block
 - `M2_StructuralStability`: side-view structure that adds center-of-mass stability to graph connectivity
