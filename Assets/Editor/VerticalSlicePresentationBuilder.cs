@@ -1,13 +1,18 @@
 using System.Collections.Generic;
+using DemolitionLab;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public static class VerticalSlicePresentationBuilder
 {
     private const string MaterialFolder = "Assets/Materials/Presentation";
     private const string EnvironmentRootName = "Presentation Environment";
+    private const string ConnectionDetailName = "Presentation Connection Detail";
+    private const string LauncherPresentationName = "Launcher Presentation";
+    private const string BarrelPresentationName = "Barrel Presentation";
 
     private static readonly string[] StageScenePaths =
     {
@@ -44,6 +49,32 @@ public static class VerticalSlicePresentationBuilder
         Debug.Log("Industrial demolition environment validation passed for Stage01-05.");
     }
 
+    [MenuItem("DemolitionLab/Presentation/Apply Structural Presentation")]
+    public static void ApplyStructuralPresentation()
+    {
+        foreach (string scenePath in StageScenePaths)
+        {
+            EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
+            ApplyStructuralPresentationToOpenScene();
+            EditorSceneManager.SaveOpenScenes();
+        }
+
+        AssetDatabase.SaveAssets();
+        Debug.Log("Applied structural, launcher, and HUD presentation to Stage01-05.");
+    }
+
+    [MenuItem("DemolitionLab/Presentation/Validate Structural Presentation")]
+    public static void ValidateStructuralPresentation()
+    {
+        foreach (string scenePath in StageScenePaths)
+        {
+            EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
+            ValidateStructuralPresentationInOpenScene(scenePath);
+        }
+
+        Debug.Log("Structural presentation validation passed for Stage01-05.");
+    }
+
     internal static void ApplyEnvironmentToOpenScene()
     {
         PresentationMaterials materials = CreateEnvironmentMaterials();
@@ -54,6 +85,223 @@ public static class VerticalSlicePresentationBuilder
         ConfigureGround(materials.YardConcrete);
         ConfigureLighting(materials.Skybox);
         EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+    }
+
+    internal static void ApplyStructuralPresentationToOpenScene()
+    {
+        StructuralPresentationMaterials materials = CreateStructuralMaterials();
+        RemapStructuralMaterials(materials);
+        AddConnectionDetails(materials);
+        AddLauncherPresentation(materials);
+        ConfigureHudPresentation();
+        EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+    }
+
+    private static void RemapStructuralMaterials(StructuralPresentationMaterials materials)
+    {
+        foreach (GameObject piece in GameObject.FindGameObjectsWithTag("Destructible"))
+        {
+            foreach (Renderer renderer in piece.GetComponentsInChildren<Renderer>(true))
+            {
+                Material source = renderer.sharedMaterial;
+                if (source == null)
+                {
+                    continue;
+                }
+
+                renderer.sharedMaterial = source.name switch
+                {
+                    "Concrete" => materials.Concrete,
+                    "Weak" => materials.WeakSteel,
+                    "Reinforced" => materials.ReinforcedSteel,
+                    "Decor" => materials.UtilitySteel,
+                    "Broken" => materials.BrokenSteel,
+                    _ => source
+                };
+            }
+        }
+    }
+
+    private static void AddConnectionDetails(StructuralPresentationMaterials materials)
+    {
+        foreach (CriticalSupportJoint joint in Object.FindObjectsByType<CriticalSupportJoint>())
+        {
+            Transform existing = joint.transform.Find(ConnectionDetailName);
+            if (existing != null)
+            {
+                Object.DestroyImmediate(existing.gameObject);
+            }
+
+            Transform root = new GameObject(ConnectionDetailName).transform;
+            root.SetParent(joint.transform, false);
+            if (joint.IsWeak)
+            {
+                AddLocalPrimitive(root, PrimitiveType.Cube, "Exposed Connector Plate", new Vector3(0f, 0.08f, -0.56f), Quaternion.identity, new Vector3(1.18f, 0.16f, 0.08f), materials.WeakSteel);
+                AddLocalPrimitive(root, PrimitiveType.Cube, "Hazard Strap Left", new Vector3(-0.3f, 0.08f, -0.61f), Quaternion.identity, new Vector3(0.13f, 0.62f, 0.035f), materials.SafetyYellow);
+                AddLocalPrimitive(root, PrimitiveType.Cube, "Hazard Strap Right", new Vector3(0.3f, 0.08f, -0.61f), Quaternion.identity, new Vector3(0.13f, 0.62f, 0.035f), materials.SafetyYellow);
+                AddLocalPrimitive(root, PrimitiveType.Sphere, "Bolt Left", new Vector3(-0.32f, 0.08f, -0.65f), Quaternion.identity, Vector3.one * 0.11f, materials.BarrierSteel);
+                AddLocalPrimitive(root, PrimitiveType.Sphere, "Bolt Right", new Vector3(0.32f, 0.08f, -0.65f), Quaternion.identity, Vector3.one * 0.11f, materials.BarrierSteel);
+            }
+            else
+            {
+                AddLocalPrimitive(root, PrimitiveType.Cube, "Upper Reinforcement Collar", new Vector3(0f, 0.42f, 0f), Quaternion.identity, new Vector3(1.14f, 0.13f, 1.14f), materials.ReinforcedSteel);
+                AddLocalPrimitive(root, PrimitiveType.Cube, "Lower Reinforcement Collar", new Vector3(0f, -0.42f, 0f), Quaternion.identity, new Vector3(1.14f, 0.13f, 1.14f), materials.ReinforcedSteel);
+                AddLocalPrimitive(root, PrimitiveType.Cube, "Front Brace A", new Vector3(0f, 0f, -0.57f), Quaternion.Euler(0f, 0f, 35f), new Vector3(0.14f, 0.92f, 0.07f), materials.BarrierSteel);
+                AddLocalPrimitive(root, PrimitiveType.Cube, "Front Brace B", new Vector3(0f, 0f, -0.58f), Quaternion.Euler(0f, 0f, -35f), new Vector3(0.14f, 0.92f, 0.07f), materials.BarrierSteel);
+            }
+        }
+    }
+
+    private static void AddLauncherPresentation(StructuralPresentationMaterials materials)
+    {
+        LauncherController launcher = Object.FindAnyObjectByType<LauncherController>();
+        if (launcher == null)
+        {
+            throw new UnityException("Vertical-slice scene is missing its launcher.");
+        }
+
+        Transform existing = launcher.transform.Find(LauncherPresentationName);
+        if (existing != null)
+        {
+            Object.DestroyImmediate(existing.gameObject);
+        }
+
+        foreach (MeshRenderer renderer in launcher.GetComponentsInChildren<MeshRenderer>(true))
+        {
+            renderer.sharedMaterial = materials.LauncherMetal;
+        }
+
+        Transform root = new GameObject(LauncherPresentationName).transform;
+        root.SetParent(launcher.transform, false);
+        AddLocalPrimitive(root, PrimitiveType.Cube, "Base Housing", new Vector3(0f, 0.42f, 0f), Quaternion.identity, new Vector3(1.75f, 0.42f, 1.35f), materials.LauncherMetal);
+        AddLocalPrimitive(root, PrimitiveType.Cube, "Turntable Deck", new Vector3(0f, 0.72f, 0f), Quaternion.identity, new Vector3(1.25f, 0.16f, 1.05f), materials.LauncherAccent);
+        AddLocalPrimitive(root, PrimitiveType.Cylinder, "Yaw Ring", new Vector3(0f, 0.82f, 0f), Quaternion.identity, new Vector3(0.72f, 0.12f, 0.72f), materials.BarrierSteel);
+        AddLocalPrimitive(root, PrimitiveType.Cube, "Support Leg FL", new Vector3(-0.78f, 0.18f, -0.58f), Quaternion.Euler(0f, 0f, -12f), new Vector3(0.22f, 0.55f, 0.25f), materials.BarrierSteel);
+        AddLocalPrimitive(root, PrimitiveType.Cube, "Support Leg FR", new Vector3(0.78f, 0.18f, -0.58f), Quaternion.Euler(0f, 0f, 12f), new Vector3(0.22f, 0.55f, 0.25f), materials.BarrierSteel);
+        AddLocalPrimitive(root, PrimitiveType.Cube, "Support Leg RL", new Vector3(-0.78f, 0.18f, 0.58f), Quaternion.Euler(0f, 0f, -12f), new Vector3(0.22f, 0.55f, 0.25f), materials.BarrierSteel);
+        AddLocalPrimitive(root, PrimitiveType.Cube, "Support Leg RR", new Vector3(0.78f, 0.18f, 0.58f), Quaternion.Euler(0f, 0f, 12f), new Vector3(0.22f, 0.55f, 0.25f), materials.BarrierSteel);
+
+        var serializedLauncher = new SerializedObject(launcher);
+        Transform pitchPivot = (Transform)serializedLauncher.FindProperty("pitchPivot").objectReferenceValue;
+        if (pitchPivot == null)
+        {
+            throw new UnityException("Launcher presentation requires the pitch pivot reference.");
+        }
+
+        Transform existingBarrel = pitchPivot.Find(BarrelPresentationName);
+        if (existingBarrel != null)
+        {
+            Object.DestroyImmediate(existingBarrel.gameObject);
+        }
+
+        Transform barrelRoot = new GameObject(BarrelPresentationName).transform;
+        barrelRoot.SetParent(pitchPivot, false);
+        AddLocalPrimitive(barrelRoot, PrimitiveType.Cylinder, "Breech Sleeve", new Vector3(0f, 0f, 0.42f), Quaternion.Euler(90f, 0f, 0f), new Vector3(0.46f, 0.42f, 0.46f), materials.LauncherMetal);
+        AddLocalPrimitive(barrelRoot, PrimitiveType.Cylinder, "Muzzle Collar", new Vector3(0f, 0f, 2.05f), Quaternion.Euler(90f, 0f, 0f), new Vector3(0.4f, 0.18f, 0.4f), materials.LauncherAccent);
+        AddLocalPrimitive(barrelRoot, PrimitiveType.Cube, "Pivot Bracket Left", new Vector3(-0.48f, -0.08f, 0.15f), Quaternion.identity, new Vector3(0.18f, 0.72f, 0.75f), materials.BarrierSteel);
+        AddLocalPrimitive(barrelRoot, PrimitiveType.Cube, "Pivot Bracket Right", new Vector3(0.48f, -0.08f, 0.15f), Quaternion.identity, new Vector3(0.18f, 0.72f, 0.75f), materials.BarrierSteel);
+    }
+
+    private static void ConfigureHudPresentation()
+    {
+        VerticalSliceStageController controller = Object.FindAnyObjectByType<VerticalSliceStageController>();
+        if (controller == null)
+        {
+            throw new UnityException("Vertical-slice scene is missing its stage controller.");
+        }
+
+        var serializedController = new SerializedObject(controller);
+        Text stage = (Text)serializedController.FindProperty("stageLabelText").objectReferenceValue;
+        Text shots = (Text)serializedController.FindProperty("shotsText").objectReferenceValue;
+        Text destruction = (Text)serializedController.FindProperty("destructionText").objectReferenceValue;
+        GameObject endPanel = (GameObject)serializedController.FindProperty("endPanel").objectReferenceValue;
+        Button next = (Button)serializedController.FindProperty("nextButton").objectReferenceValue;
+
+        ConfigureHudText(stage, 32, new Vector2(32f, -28f), new Vector2(320f, 54f), new Vector2(0f, 1f));
+        ConfigureHudText(shots, 32, new Vector2(-32f, -28f), new Vector2(320f, 54f), new Vector2(1f, 1f));
+        ConfigureHudText(destruction, 30, new Vector2(0f, 30f), new Vector2(460f, 54f), new Vector2(0.5f, 0f));
+
+        Image panelImage = endPanel != null ? endPanel.GetComponent<Image>() : null;
+        if (panelImage != null)
+        {
+            panelImage.color = new Color(0.035f, 0.05f, 0.06f, 0.96f);
+        }
+
+        ConfigureButton(next);
+        Button retry = endPanel != null ? endPanel.transform.Find("Retry Button")?.GetComponent<Button>() : null;
+        ConfigureButton(retry);
+    }
+
+    private static void ConfigureHudText(
+        Text text,
+        int fontSize,
+        Vector2 position,
+        Vector2 size,
+        Vector2 anchor)
+    {
+        if (text == null)
+        {
+            throw new UnityException("Vertical-slice HUD has a missing Text reference.");
+        }
+
+        text.fontSize = fontSize;
+        text.color = new Color(0.94f, 0.95f, 0.92f);
+        RectTransform rect = text.rectTransform;
+        rect.anchorMin = anchor;
+        rect.anchorMax = anchor;
+        rect.pivot = anchor;
+        rect.anchoredPosition = position;
+        rect.sizeDelta = size;
+
+        Outline outline = text.GetComponent<Outline>();
+        if (outline == null)
+        {
+            outline = text.gameObject.AddComponent<Outline>();
+        }
+
+        outline.effectColor = new Color(0.02f, 0.03f, 0.035f, 0.9f);
+        outline.effectDistance = new Vector2(1.5f, -1.5f);
+    }
+
+    private static void ConfigureButton(Button button)
+    {
+        if (button == null)
+        {
+            return;
+        }
+
+        Image image = button.GetComponent<Image>();
+        if (image != null)
+        {
+            image.color = new Color(0.11f, 0.2f, 0.24f, 1f);
+        }
+
+        ColorBlock colors = button.colors;
+        colors.normalColor = new Color(0.11f, 0.2f, 0.24f, 1f);
+        colors.highlightedColor = new Color(0.18f, 0.35f, 0.4f, 1f);
+        colors.pressedColor = new Color(0.9f, 0.52f, 0.08f, 1f);
+        colors.selectedColor = colors.highlightedColor;
+        button.colors = colors;
+    }
+
+    private static GameObject AddLocalPrimitive(
+        Transform parent,
+        PrimitiveType primitiveType,
+        string name,
+        Vector3 localPosition,
+        Quaternion localRotation,
+        Vector3 localScale,
+        Material material)
+    {
+        GameObject visual = GameObject.CreatePrimitive(primitiveType);
+        visual.name = name;
+        visual.transform.SetParent(parent, false);
+        visual.transform.localPosition = localPosition;
+        visual.transform.localRotation = localRotation;
+        visual.transform.localScale = localScale;
+        visual.GetComponent<Renderer>().sharedMaterial = material;
+        Object.DestroyImmediate(visual.GetComponent<Collider>());
+        return visual;
     }
 
     private static void AddEnvironmentGeometry(
@@ -218,6 +466,22 @@ public static class VerticalSlicePresentationBuilder
         return material;
     }
 
+    private static StructuralPresentationMaterials CreateStructuralMaterials()
+    {
+        EnsureMaterialFolder();
+        PresentationMaterials environment = CreateEnvironmentMaterials();
+        return new StructuralPresentationMaterials(
+            CreateLitMaterial("StructuralConcrete", new Color(0.46f, 0.49f, 0.5f), 0f, 0.16f),
+            CreateLitMaterial("WeakSteel", new Color(0.86f, 0.34f, 0.045f), 0.46f, 0.25f),
+            CreateLitMaterial("ReinforcedSteel", new Color(0.075f, 0.22f, 0.31f), 0.72f, 0.32f),
+            CreateLitMaterial("UtilitySteel", new Color(0.32f, 0.24f, 0.15f), 0.38f, 0.22f),
+            CreateLitMaterial("BrokenSteel", new Color(0.19f, 0.065f, 0.04f), 0.32f, 0.16f),
+            CreateLitMaterial("LauncherMetal", new Color(0.075f, 0.095f, 0.105f), 0.82f, 0.38f),
+            CreateLitMaterial("LauncherAccent", new Color(0.82f, 0.38f, 0.045f), 0.58f, 0.3f),
+            environment.BarrierSteel,
+            environment.SafetyYellow);
+    }
+
     private static void EnsureMaterialFolder()
     {
         if (!AssetDatabase.IsValidFolder(MaterialFolder))
@@ -260,6 +524,73 @@ public static class VerticalSlicePresentationBuilder
         }
     }
 
+    private static void ValidateStructuralPresentationInOpenScene(string scenePath)
+    {
+        CriticalSupportJoint[] joints = Object.FindObjectsByType<CriticalSupportJoint>();
+        if (joints.Length == 0)
+        {
+            throw new UnityException($"{scenePath} has no critical support joints to present.");
+        }
+
+        foreach (CriticalSupportJoint joint in joints)
+        {
+            Transform detail = joint.transform.Find(ConnectionDetailName);
+            int expectedRenderers = joint.IsWeak ? 5 : 4;
+            if (detail == null
+                || detail.GetComponentsInChildren<Renderer>().Length != expectedRenderers
+                || detail.GetComponentInChildren<Collider>() != null
+                || detail.GetComponentInChildren<Rigidbody>() != null)
+            {
+                throw new UnityException($"{scenePath} joint '{joint.name}' has invalid visual detailing.");
+            }
+
+            foreach (Renderer renderer in detail.GetComponentsInChildren<Renderer>())
+            {
+                if (renderer.sharedMaterial == null)
+                {
+                    throw new UnityException($"{scenePath} joint '{joint.name}' has a missing visual material.");
+                }
+            }
+        }
+
+        LauncherController launcher = Object.FindAnyObjectByType<LauncherController>();
+        Transform launcherPresentation = launcher != null
+            ? launcher.transform.Find(LauncherPresentationName)
+            : null;
+        Transform pitchPivot = launcher != null
+            ? (Transform)new SerializedObject(launcher).FindProperty("pitchPivot").objectReferenceValue
+            : null;
+        Transform barrelPresentation = pitchPivot != null
+            ? pitchPivot.Find(BarrelPresentationName)
+            : null;
+        if (launcherPresentation == null
+            || launcherPresentation.GetComponentsInChildren<Renderer>().Length < 7
+            || launcherPresentation.GetComponentInChildren<Collider>() != null
+            || launcherPresentation.GetComponentInChildren<Rigidbody>() != null)
+        {
+            throw new UnityException($"{scenePath} launcher presentation is incomplete or colliding.");
+        }
+
+        if (barrelPresentation == null
+            || barrelPresentation.GetComponentsInChildren<Renderer>().Length != 4
+            || barrelPresentation.GetComponentInChildren<Collider>() != null)
+        {
+            throw new UnityException($"{scenePath} barrel presentation is incomplete or colliding.");
+        }
+
+        VerticalSliceStageController controller = Object.FindAnyObjectByType<VerticalSliceStageController>();
+        var serializedController = new SerializedObject(controller);
+        string[] hudProperties = { "stageLabelText", "shotsText", "destructionText" };
+        foreach (string propertyName in hudProperties)
+        {
+            Text text = (Text)serializedController.FindProperty(propertyName).objectReferenceValue;
+            if (text == null || text.GetComponent<Outline>() == null)
+            {
+                throw new UnityException($"{scenePath} HUD presentation is incomplete.");
+            }
+        }
+    }
+
     private static void RemoveExistingRoot(string rootName)
     {
         GameObject existing = GameObject.Find(rootName);
@@ -299,5 +630,40 @@ public static class VerticalSlicePresentationBuilder
         public Material SafetyYellow { get; }
         public Material LinePaint { get; }
         public Material Skybox { get; }
+    }
+
+    private readonly struct StructuralPresentationMaterials
+    {
+        public StructuralPresentationMaterials(
+            Material concrete,
+            Material weakSteel,
+            Material reinforcedSteel,
+            Material utilitySteel,
+            Material brokenSteel,
+            Material launcherMetal,
+            Material launcherAccent,
+            Material barrierSteel,
+            Material safetyYellow)
+        {
+            Concrete = concrete;
+            WeakSteel = weakSteel;
+            ReinforcedSteel = reinforcedSteel;
+            UtilitySteel = utilitySteel;
+            BrokenSteel = brokenSteel;
+            LauncherMetal = launcherMetal;
+            LauncherAccent = launcherAccent;
+            BarrierSteel = barrierSteel;
+            SafetyYellow = safetyYellow;
+        }
+
+        public Material Concrete { get; }
+        public Material WeakSteel { get; }
+        public Material ReinforcedSteel { get; }
+        public Material UtilitySteel { get; }
+        public Material BrokenSteel { get; }
+        public Material LauncherMetal { get; }
+        public Material LauncherAccent { get; }
+        public Material BarrierSteel { get; }
+        public Material SafetyYellow { get; }
     }
 }

@@ -58,6 +58,7 @@ public static class VerticalSliceStage05Builder
         AddJoints(structure, controller, materials.Broken);
         ConfigureCamera();
         VerticalSlicePresentationBuilder.ApplyEnvironmentToOpenScene();
+        VerticalSlicePresentationBuilder.ApplyStructuralPresentationToOpenScene();
         EditorSceneManager.SaveScene(scene);
         AddSceneToBuildSettings();
         AssetDatabase.SaveAssets();
