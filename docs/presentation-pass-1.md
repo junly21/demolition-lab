@@ -54,6 +54,12 @@ Every Stage01–05 object tagged `Destructible` keeps its Transform, Rigidbody, 
 
 Imported structural art must be placed below `VisualRoot` without Rigidbody, Collider, Joint, or gameplay components. Mesh offsets and scale corrections belong on an additional child, never on the physical root or `VisualRoot`. Use `DemolitionLab/Presentation/Validate Physics And Visuals` after replacing any geometry.
 
+## Integrated Industrial Assets
+
+Kenney City Kit and Factory Kit models are wrapped in project-owned visual-only prefabs for distant buildings, chimneys, tanks, crates, machinery, pipes, a yard crane, and launcher housing detail. Poly Haven asphalt and concrete textures use URP Lit materials with 2048 import limits, OpenGL normal maps, and generated smoothness masks. Structural collision silhouettes remain the existing primitive roots; imported structural models are deliberately not forced onto them.
+
+Weak roots use restrained dark brown steel with orange/yellow limited to exposed connector plates and warning straps. Reinforced roots use darker blue steel with collars and crossed braces. Stage-specific background layouts vary prop placement while preserving the shared demolition-yard direction.
+
 ## Gameplay Lock
 
 Presentation Pass 1 does not change projectile settings, Rigidbody values, colliders, joint thresholds, target rules, ammunition, success thresholds, settle timing, or stage progression. Manual Play Mode remains required to judge final screenshot composition and collapse framing.

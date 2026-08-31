@@ -109,6 +109,7 @@ public static class VerticalSlicePresentationBuilder
         AddEnvironmentGeometry(root.transform, materials);
         ConfigureGround(materials.YardConcrete);
         ConfigureLighting(materials.Skybox);
+        ThirdPartyPresentationBuilder.ApplyEnvironmentToOpenScene();
         EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
     }
 
@@ -120,6 +121,7 @@ public static class VerticalSlicePresentationBuilder
         AddLauncherPresentation(materials);
         ConfigureHudPresentation();
         PhysicsPresentationSeparationBuilder.ApplyToOpenScene();
+        ThirdPartyPresentationBuilder.ApplyStructuralVisualsToOpenScene();
         EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
     }
 
@@ -565,6 +567,8 @@ public static class VerticalSlicePresentationBuilder
         {
             throw new UnityException($"{scenePath} environment lighting or ground setup is incomplete.");
         }
+
+        ThirdPartyPresentationBuilder.ValidateOpenScene(scenePath);
     }
 
     private static void ValidateStructuralPresentationInOpenScene(string scenePath)
@@ -636,6 +640,7 @@ public static class VerticalSlicePresentationBuilder
         }
 
         PhysicsPresentationSeparationBuilder.ValidateOpenScene(scenePath);
+        ThirdPartyPresentationBuilder.ValidateOpenScene(scenePath);
     }
 
     private static void ValidateCameraFramingInOpenScene(string scenePath)

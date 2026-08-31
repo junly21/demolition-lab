@@ -1,6 +1,42 @@
 # Third-Party Assets
 
-No third-party assets have been imported yet.
+## Assets In Use
+
+### Kenney City Kit (Industrial)
+
+- Asset name: City Kit (Industrial) 1.0
+- Author / publisher: Kenney
+- Source: https://kenney.nl/assets/city-kit-industrial
+- License: Creative Commons Zero (CC0 1.0)
+- What it is used for: Distant industrial warehouses, plant silhouettes, cooling chimneys, and storage tanks
+- Whether modified: Wrapped in project-owned, visual-only prefabs; URP material override and scene scale/placement applied
+
+### Kenney Factory Kit
+
+- Asset name: Factory Kit 3.0
+- Author / publisher: Kenney
+- Source: https://kenney.nl/assets/factory-kit
+- License: Creative Commons Zero (CC0 1.0)
+- What it is used for: Cargo crates, factory machinery, pipe runs, yard crane, and launcher housing detail
+- Whether modified: Wrapped in project-owned, visual-only prefabs; all non-render components stripped and URP material override applied
+
+### Poly Haven Asphalt 01
+
+- Asset name: Asphalt 01
+- Author / publisher: Poly Haven
+- Source: https://polyhaven.com/a/asphalt_01
+- License: Creative Commons Zero (CC0)
+- What it is used for: Demolition-yard ground material
+- Whether modified: Imported at a 2048 maximum runtime size; roughness converted to a URP metallic/smoothness mask
+
+### Poly Haven Concrete
+
+- Asset name: Concrete
+- Author / publisher: Poly Haven
+- Source: https://polyhaven.com/a/concrete
+- License: Creative Commons Zero (CC0)
+- What it is used for: Structural concrete and foundation materials
+- Whether modified: Imported at a 2048 maximum runtime size; roughness converted to a URP metallic/smoothness mask
 
 ## Asset Record Template
 
