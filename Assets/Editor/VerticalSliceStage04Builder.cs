@@ -84,6 +84,7 @@ public static class VerticalSliceStage04Builder
         }
 
         ValidateController(controllers[0]);
+        VerticalSliceSceneBuilder.ValidateLegacyHudDisabled();
         ValidateJoints(joints);
         ValidateNoInitialPenetration(pieces);
         ValidateNoResearchSystems();

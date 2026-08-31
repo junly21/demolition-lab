@@ -41,6 +41,8 @@ public static class VerticalSliceSceneBuilder
             throw new UnityException("Vertical-slice source scene is missing launcher or Main Camera.");
         }
 
+        ConfigureLegacyHud();
+
         var pieces = new List<GameObject>();
         var targets = new List<StageTargetPiece>();
         GameObject root = new("Stage 01 Structure");
@@ -107,6 +109,7 @@ public static class VerticalSliceSceneBuilder
         }
 
         ValidateRequiredReferences(controller, launcher);
+        ValidateLegacyHudDisabled();
         ValidateStageFlowRules(controller);
         ValidateDefaultTrajectory(launcher);
 
@@ -565,6 +568,29 @@ public static class VerticalSliceSceneBuilder
             {
                 throw new UnityException($"Stage launcher is missing '{propertyName}'.");
             }
+        }
+    }
+
+    private static void ConfigureLegacyHud()
+    {
+        ResetController resetController = Object.FindAnyObjectByType<ResetController>();
+        if (resetController == null)
+        {
+            throw new UnityException("Vertical-slice source scene is missing the reset controller.");
+        }
+
+        var serializedReset = new SerializedObject(resetController);
+        serializedReset.FindProperty("showControls").boolValue = false;
+        serializedReset.ApplyModifiedPropertiesWithoutUndo();
+    }
+
+    internal static void ValidateLegacyHudDisabled()
+    {
+        ResetController resetController = Object.FindAnyObjectByType<ResetController>();
+        if (resetController == null
+            || new SerializedObject(resetController).FindProperty("showControls").boolValue)
+        {
+            throw new UnityException("Vertical-slice legacy M0 HUD must be disabled.");
         }
     }
 

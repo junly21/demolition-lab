@@ -7265,7 +7265,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c4184114d873401c919f2e39a6a520b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DemolitionLab.ResetController
-  showControls: 1
+  showControls: 0
 --- !u!4 &747545145
 Transform:
   m_ObjectHideFlags: 0
