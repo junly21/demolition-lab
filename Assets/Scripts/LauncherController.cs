@@ -30,6 +30,8 @@ namespace DemolitionLab
         private Quaternion initialPitchRotation;
         private float yawAngle;
         private float pitchAngle;
+        private float projectileSpeedMultiplier = 1f;
+        private float projectileMassMultiplier = 1f;
         private bool hasValidReferences;
         private bool gameplayEnabled = true;
 
@@ -37,6 +39,8 @@ namespace DemolitionLab
 
         public float ProjectileSpeed => projectileSpeed;
         public float ProjectileMass => projectileMass;
+        public float EffectiveProjectileSpeed => projectileSpeed * projectileSpeedMultiplier;
+        public float EffectiveProjectileMass => projectileMass * projectileMassMultiplier;
         public bool GameplayEnabled => gameplayEnabled;
 
         private void Awake()
@@ -116,6 +120,12 @@ namespace DemolitionLab
             gameplayEnabled = isEnabled;
         }
 
+        public void ConfigureProjectileMultipliers(float speedMultiplier, float massMultiplier)
+        {
+            projectileSpeedMultiplier = Mathf.Max(0.1f, speedMultiplier);
+            projectileMassMultiplier = Mathf.Max(0.1f, massMultiplier);
+        }
+
         public bool TryFire()
         {
             if (!hasValidReferences || !gameplayEnabled)
@@ -125,12 +135,15 @@ namespace DemolitionLab
 
             Projectile projectile = Instantiate(projectilePrefab, muzzle.position, muzzle.rotation);
             projectile.Launch(
-                muzzle.forward * projectileSpeed,
-                projectileMass,
+                muzzle.forward * EffectiveProjectileSpeed,
+                EffectiveProjectileMass,
                 projectileLifetime,
                 true);
             ProjectileFired?.Invoke();
-            Debug.Log($"Projectile fired at {projectileSpeed:0.0} m/s.", this);
+            Debug.Log(
+                $"Projectile fired at {EffectiveProjectileSpeed:0.0} m/s "
+                + $"with {EffectiveProjectileMass:0.00} kg mass.",
+                this);
             return true;
         }
 
@@ -143,7 +156,7 @@ namespace DemolitionLab
 
             aimLine.positionCount = trajectoryPoints;
             Vector3 startPosition = muzzle.position;
-            Vector3 startVelocity = muzzle.forward * projectileSpeed;
+            Vector3 startVelocity = muzzle.forward * EffectiveProjectileSpeed;
 
             for (int index = 0; index < trajectoryPoints; index++)
             {

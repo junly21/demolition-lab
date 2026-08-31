@@ -14,14 +14,16 @@ public static class VerticalSliceStage04Builder
     private const int ExpectedPieceCount = 36;
     private const int ExpectedTargetCount = 21;
     private const int ExpectedJointCount = 6;
-    private const float WeakLowerForce = 240f;
-    private const float WeakLowerTorque = 95f;
-    private const float WeakUpperForce = 300f;
-    private const float WeakUpperTorque = 120f;
+    private const float WeakLowerForce = 200f;
+    private const float WeakLowerTorque = 75f;
+    private const float WeakUpperForce = 250f;
+    private const float WeakUpperTorque = 95f;
     private const float CenterLowerForce = 700f;
     private const float CenterLowerTorque = 280f;
     private const float CenterUpperForce = 850f;
     private const float CenterUpperTorque = 340f;
+    private const float ProjectileSpeedMultiplier = 1.1f;
+    private const float ProjectileMassMultiplier = 1.15f;
 
     [MenuItem("DemolitionLab/Build Vertical Slice Stage 04")]
     public static void BuildScene()
@@ -343,6 +345,8 @@ public static class VerticalSliceStage04Builder
         serializedController.FindProperty("clearThreshold").floatValue = 0.7f;
         serializedController.FindProperty("collapseSettleDelay").floatValue = 3.25f;
         serializedController.FindProperty("nextSceneName").stringValue = string.Empty;
+        serializedController.FindProperty("projectileSpeedMultiplier").floatValue = ProjectileSpeedMultiplier;
+        serializedController.FindProperty("projectileMassMultiplier").floatValue = ProjectileMassMultiplier;
         AssignObjectList(serializedController.FindProperty("targetPieces"), targets);
         Text label = (Text)serializedController.FindProperty("stageLabelText").objectReferenceValue;
         label.text = "STAGE 04";
@@ -369,10 +373,31 @@ public static class VerticalSliceStage04Builder
             || serializedController.FindProperty("startingShots").intValue != 4
             || !Mathf.Approximately(serializedController.FindProperty("clearThreshold").floatValue, 0.7f)
             || !string.IsNullOrEmpty(serializedController.FindProperty("nextSceneName").stringValue)
+            || !Mathf.Approximately(
+                serializedController.FindProperty("projectileSpeedMultiplier").floatValue,
+                ProjectileSpeedMultiplier)
+            || !Mathf.Approximately(
+                serializedController.FindProperty("projectileMassMultiplier").floatValue,
+                ProjectileMassMultiplier)
             || serializedController.FindProperty("targetPieces").arraySize != ExpectedTargetCount
             || controller.HasNextScene)
         {
             throw new UnityException("Stage04 controller configuration is invalid.");
+        }
+
+        LauncherController launcher = (LauncherController)serializedController
+            .FindProperty("launcher").objectReferenceValue;
+        if (launcher == null)
+        {
+            throw new UnityException("Stage04 controller is missing 'launcher'.");
+        }
+
+        float configuredSpeed = launcher.ProjectileSpeed * ProjectileSpeedMultiplier;
+        float configuredMass = launcher.ProjectileMass * ProjectileMassMultiplier;
+        if (!Mathf.Approximately(configuredSpeed, 19.8f)
+            || !Mathf.Approximately(configuredMass, 2.3f))
+        {
+            throw new UnityException("Stage04 projectile multiplier configuration is invalid.");
         }
 
         string[] references =

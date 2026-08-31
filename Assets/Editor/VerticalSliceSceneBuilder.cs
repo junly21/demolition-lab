@@ -269,6 +269,8 @@ public static class VerticalSliceSceneBuilder
         serializedController.FindProperty("clearThreshold").floatValue = 0.7f;
         serializedController.FindProperty("collapseSettleDelay").floatValue = 2.75f;
         serializedController.FindProperty("nextSceneName").stringValue = "VerticalSlice_Stage02";
+        serializedController.FindProperty("projectileSpeedMultiplier").floatValue = 1f;
+        serializedController.FindProperty("projectileMassMultiplier").floatValue = 1f;
         serializedController.FindProperty("launcher").objectReferenceValue = launcher;
         AssignObjectList(serializedController.FindProperty("targetPieces"), targets);
         serializedController.FindProperty("stageLabelText").objectReferenceValue = ui.StageLabel;
@@ -546,6 +548,8 @@ public static class VerticalSliceSceneBuilder
         if (serializedController.FindProperty("stageLabel").stringValue != "STAGE 01"
             || serializedController.FindProperty("startingShots").intValue != 3
             || !Mathf.Approximately(serializedController.FindProperty("clearThreshold").floatValue, 0.7f)
+            || !Mathf.Approximately(serializedController.FindProperty("projectileSpeedMultiplier").floatValue, 1f)
+            || !Mathf.Approximately(serializedController.FindProperty("projectileMassMultiplier").floatValue, 1f)
             || serializedController.FindProperty("nextSceneName").stringValue != "VerticalSlice_Stage02")
         {
             throw new UnityException("Stage 01 reusable configuration is incorrect.");

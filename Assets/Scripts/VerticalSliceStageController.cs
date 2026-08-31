@@ -15,6 +15,8 @@ namespace DemolitionLab
         [SerializeField, Range(0.1f, 1f)] private float clearThreshold = 0.7f;
         [SerializeField, Min(0f)] private float collapseSettleDelay = 2.75f;
         [SerializeField] private string nextSceneName;
+        [SerializeField, Min(0.1f)] private float projectileSpeedMultiplier = 1f;
+        [SerializeField, Min(0.1f)] private float projectileMassMultiplier = 1f;
         [SerializeField] private LauncherController launcher;
         [SerializeField] private List<StageTargetPiece> targetPieces = new();
 
@@ -53,6 +55,9 @@ namespace DemolitionLab
                 return;
             }
 
+            launcher.ConfigureProjectileMultipliers(
+                projectileSpeedMultiplier,
+                projectileMassMultiplier);
             launcher.SetGameplayEnabled(false);
             ParticleSystem.MainModule dustMain = impactDust.main;
             dustMain.simulationSpace = ParticleSystemSimulationSpace.World;

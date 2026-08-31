@@ -9,16 +9,17 @@ Stage04 is the vertical tower finale. Three lower support paths create an attack
 - Physical pieces: 36
 - Objective targets: 21
 - Critical joints: 4 Weak outer joints and 2 reinforced center joints
-- Outer lower joints: 240 N break force, 95 N·m break torque
-- Outer upper joints: 300 N break force, 120 N·m break torque
+- Outer lower joints: 200 N break force, 75 N·m break torque
+- Outer upper joints: 250 N break force, 95 N·m break torque
 - Center lower joint: 700 N break force, 280 N·m break torque
 - Center upper joint: 850 N break force, 340 N·m break torque
 - Ammunition: 4 shots
+- Projectile: 19.8 m/s, 2.3 kg through stage multipliers of 1.10× speed and 1.15× mass
 - Clear threshold: 70%
 - Settle duration: 3.25 seconds
 - Next scene: none
 
-The tower uses three visibly distinct lower load paths, five horizontal floor/roof targets, sixteen wall targets, and four non-target roof pieces. Only the six gameplay-critical support connections use joints; the stacked upper structure remains ordinary Rigidbody geometry. Thin outer supports and exposed plates identify vulnerable paths, while the thicker center support, band, and braces communicate resistance through shape.
+The tower uses three visibly distinct lower load paths, five horizontal floor/roof targets, sixteen wall targets, and four non-target roof pieces. Only the six gameplay-critical support connections use joints; the stacked upper structure remains ordinary Rigidbody geometry. Thin outer supports and exposed plates identify vulnerable paths, while the thicker center support, band, and braces communicate resistance through shape. A baseline breakable lower-support probe measured about 25.20 N·s at 18.02 m/s. The tuned launch raises momentum from 36.00 to 45.54 N·s and kinetic energy from 324 to about 451 J. The final breakable probe reported 19.60 N·s at 19.82 m/s because the weaker joint released during contact, shortening the collision transfer instead of resisting the projectile as a rigid constraint.
 
 ## Intended Play
 
