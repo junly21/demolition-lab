@@ -57,6 +57,7 @@ public static class VerticalSliceStage03Builder
         ConfigureCamera();
         VerticalSlicePresentationBuilder.ApplyEnvironmentToOpenScene();
         VerticalSlicePresentationBuilder.ApplyStructuralPresentationToOpenScene();
+        VerticalSlicePresentationBuilder.ApplyCameraFramingToOpenScene();
         EditorSceneManager.SaveScene(scene);
         AddSceneToBuildSettings();
         AssetDatabase.SaveAssets();

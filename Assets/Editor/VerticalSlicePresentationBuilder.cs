@@ -75,6 +75,31 @@ public static class VerticalSlicePresentationBuilder
         Debug.Log("Structural presentation validation passed for Stage01-05.");
     }
 
+    [MenuItem("DemolitionLab/Presentation/Apply Camera Framing")]
+    public static void ApplyCameraFraming()
+    {
+        foreach (string scenePath in StageScenePaths)
+        {
+            EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
+            ApplyCameraFramingToOpenScene();
+            EditorSceneManager.SaveOpenScenes();
+        }
+
+        Debug.Log("Applied presentation camera framing to Stage01-05.");
+    }
+
+    [MenuItem("DemolitionLab/Presentation/Validate Camera Framing")]
+    public static void ValidateCameraFraming()
+    {
+        foreach (string scenePath in StageScenePaths)
+        {
+            EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
+            ValidateCameraFramingInOpenScene(scenePath);
+        }
+
+        Debug.Log("Presentation camera framing validation passed for Stage01-05.");
+    }
+
     internal static void ApplyEnvironmentToOpenScene()
     {
         PresentationMaterials materials = CreateEnvironmentMaterials();
@@ -94,6 +119,21 @@ public static class VerticalSlicePresentationBuilder
         AddConnectionDetails(materials);
         AddLauncherPresentation(materials);
         ConfigureHudPresentation();
+        EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+    }
+
+    internal static void ApplyCameraFramingToOpenScene()
+    {
+        Camera camera = Camera.main;
+        if (camera == null)
+        {
+            throw new UnityException("Vertical-slice scene is missing its Main Camera.");
+        }
+
+        CameraFraming framing = GetCameraFraming(SceneManager.GetActiveScene().name);
+        camera.transform.position = framing.Position;
+        camera.transform.LookAt(framing.LookAt);
+        camera.fieldOfView = framing.FieldOfView;
         EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
     }
 
@@ -591,6 +631,33 @@ public static class VerticalSlicePresentationBuilder
         }
     }
 
+    private static void ValidateCameraFramingInOpenScene(string scenePath)
+    {
+        Camera camera = Camera.main;
+        CameraFraming framing = GetCameraFraming(SceneManager.GetActiveScene().name);
+        Vector3 expectedDirection = (framing.LookAt - framing.Position).normalized;
+        if (camera == null
+            || Vector3.Distance(camera.transform.position, framing.Position) > 0.001f
+            || Vector3.Angle(camera.transform.forward, expectedDirection) > 0.05f
+            || !Mathf.Approximately(camera.fieldOfView, framing.FieldOfView))
+        {
+            throw new UnityException($"{scenePath} presentation camera framing is incorrect.");
+        }
+    }
+
+    private static CameraFraming GetCameraFraming(string sceneName)
+    {
+        return sceneName switch
+        {
+            "VerticalSlice_Stage01" => new CameraFraming(new Vector3(8.2f, 5.6f, -12.8f), new Vector3(0f, 2.1f, 4f), 49f),
+            "VerticalSlice_Stage02" => new CameraFraming(new Vector3(9.2f, 5f, -13.8f), new Vector3(0f, 2.05f, 4f), 50f),
+            "VerticalSlice_Stage03" => new CameraFraming(new Vector3(9.2f, 5.3f, -14f), new Vector3(0f, 2.55f, 4f), 49f),
+            "VerticalSlice_Stage04" => new CameraFraming(new Vector3(10.8f, 7.2f, -17.2f), new Vector3(0f, 3.9f, 4f), 49f),
+            "VerticalSlice_Stage05" => new CameraFraming(new Vector3(12f, 7f, -18.5f), new Vector3(1f, 3.65f, 4f), 51f),
+            _ => throw new UnityException($"No presentation camera framing is configured for '{sceneName}'.")
+        };
+    }
+
     private static void RemoveExistingRoot(string rootName)
     {
         GameObject existing = GameObject.Find(rootName);
@@ -665,5 +732,19 @@ public static class VerticalSlicePresentationBuilder
         public Material LauncherAccent { get; }
         public Material BarrierSteel { get; }
         public Material SafetyYellow { get; }
+    }
+
+    private readonly struct CameraFraming
+    {
+        public CameraFraming(Vector3 position, Vector3 lookAt, float fieldOfView)
+        {
+            Position = position;
+            LookAt = lookAt;
+            FieldOfView = fieldOfView;
+        }
+
+        public Vector3 Position { get; }
+        public Vector3 LookAt { get; }
+        public float FieldOfView { get; }
     }
 }
