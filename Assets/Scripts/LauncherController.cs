@@ -42,6 +42,8 @@ namespace DemolitionLab
         public float EffectiveProjectileSpeed => projectileSpeed * projectileSpeedMultiplier;
         public float EffectiveProjectileMass => projectileMass * projectileMassMultiplier;
         public bool GameplayEnabled => gameplayEnabled;
+        public Vector3 MuzzlePosition => muzzle.position;
+        public Quaternion MuzzleRotation => muzzle.rotation;
 
         private void Awake()
         {

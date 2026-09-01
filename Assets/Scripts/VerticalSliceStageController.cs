@@ -33,8 +33,12 @@ namespace DemolitionLab
 
         [Header("Feedback")]
         [SerializeField] private SimpleCameraShake cameraShake;
+        [SerializeField] private ParticleSystem muzzleFlash;
+        [SerializeField] private ParticleSystem muzzleSmoke;
         [SerializeField] private ParticleSystem impactDust;
         [SerializeField] private ParticleSystem impactSparks;
+        [SerializeField] private ParticleSystem impactDebris;
+        [SerializeField] private ParticleSystem structuralImpactDust;
         [SerializeField] private ParticleSystem collapseDust;
         [SerializeField] private PresentationAudioHooks audioHooks;
         [SerializeField] private bool logImpactDiagnostics = true;
@@ -42,8 +46,13 @@ namespace DemolitionLab
         private readonly StageFlowStateMachine flow = new();
         private bool hasValidReferences;
         private bool clearLockedIn;
-        private int destroyedAtLastCollapseFeedback;
         private float lastCollapseFeedbackTime = -10f;
+        private int lastObservedDestroyedTargets;
+        private int destroyedInCollapseWindow;
+        private float collapseWindowStartTime = -10f;
+        private Vector3 lastImpactPosition;
+        private float lastImpactFeedbackTime = -10f;
+        private float lastGroundImpactFeedbackTime = -10f;
 
         public StageState CurrentState => flow.State;
         public int ShotsRemaining => flow.AmmoRemaining;
@@ -67,8 +76,12 @@ namespace DemolitionLab
                 projectileSpeedMultiplier,
                 projectileMassMultiplier);
             launcher.SetGameplayEnabled(false);
+            PrepareParticleSystem(muzzleFlash);
+            PrepareParticleSystem(muzzleSmoke);
             PrepareParticleSystem(impactDust);
             PrepareParticleSystem(impactSparks);
+            PrepareParticleSystem(impactDebris);
+            PrepareParticleSystem(structuralImpactDust);
             PrepareParticleSystem(collapseDust);
             endPanel.SetActive(false);
             nextButton.gameObject.SetActive(false);
@@ -85,8 +98,10 @@ namespace DemolitionLab
 
             launcher.ProjectileFired -= HandleProjectileFired;
             Projectile.MeaningfulImpact -= HandleImpact;
+            StructuralGroundImpactFeedback.MeaningfulGroundImpact -= HandleGroundImpact;
             launcher.ProjectileFired += HandleProjectileFired;
             Projectile.MeaningfulImpact += HandleImpact;
+            StructuralGroundImpactFeedback.MeaningfulGroundImpact += HandleGroundImpact;
         }
 
         private void Start()
@@ -112,6 +127,7 @@ namespace DemolitionLab
 
             launcher.ProjectileFired -= HandleProjectileFired;
             Projectile.MeaningfulImpact -= HandleImpact;
+            StructuralGroundImpactFeedback.MeaningfulGroundImpact -= HandleGroundImpact;
         }
 
         private void Update()
@@ -138,14 +154,14 @@ namespace DemolitionLab
 
         public void NotifyCriticalSupportBroken(Vector3 position, bool weakConnection)
         {
-            PlayParticle(impactSparks, position);
-            if (weakConnection)
-            {
-                PlayParticle(impactDust, position);
-            }
+            bool overlapsImpact = Time.time - lastImpactFeedbackTime < 0.18f
+                && Vector3.Distance(position, lastImpactPosition) < 0.8f;
+            EmitParticle(impactSparks, position, overlapsImpact ? 6 : 18);
+            EmitParticle(impactDust, position, overlapsImpact ? 8 : 12);
+            EmitParticle(impactDebris, position, weakConnection ? 6 : 4);
 
-            cameraShake?.Shake(weakConnection ? 0.085f : 0.11f, 0.2f);
-            audioHooks?.PlayCriticalBreak();
+            cameraShake?.Shake(weakConnection ? 0.085f : 0.1f, 0.18f);
+            audioHooks?.PlayCriticalBreak(position);
             Debug.Log(
                 $"{stageLabel} {(weakConnection ? "Weak" : "Reinforced")} critical joint broke; "
                 + $"shot={flow.ShotsUsed}, remainingAmmo={flow.AmmoRemaining}, "
@@ -202,7 +218,10 @@ namespace DemolitionLab
             }
 
             Debug.Log($"{stageLabel} shot {flow.ShotsUsed}/{flow.StartingAmmo} fired.", this);
-            audioHooks?.PlayFire();
+            EmitParticle(muzzleFlash, launcher.MuzzlePosition, launcher.MuzzleRotation, 1);
+            EmitParticle(muzzleSmoke, launcher.MuzzlePosition, launcher.MuzzleRotation, 10);
+            cameraShake?.Shake(0.022f, 0.08f);
+            audioHooks?.PlayFire(launcher.MuzzlePosition);
             RefreshHud();
             if (flow.AmmoRemaining == 0)
             {
@@ -248,17 +267,54 @@ namespace DemolitionLab
             cameraShake?.Shake(shakeIntensity, 0.12f);
 
             PresentationVisual visual = impact.ImpactedObject.GetComponentInChildren<PresentationVisual>();
-            bool concreteImpact = visual == null
-                || visual.Category is PresentationCategory.Concrete or PresentationCategory.Foundation;
-            if (concreteImpact)
+            PresentationCategory category = visual != null
+                ? visual.Category
+                : PresentationCategory.Concrete;
+            float audioSeverity = Mathf.Lerp(
+                0.72f,
+                1f,
+                Mathf.InverseLerp(4f, 24f, impact.ImpulseMagnitude));
+            if (category is PresentationCategory.Concrete or PresentationCategory.Foundation)
             {
-                PlayParticle(impactDust, impact.ContactPosition);
-                audioHooks?.PlayConcreteImpact();
+                EmitParticle(impactDust, impact.ContactPosition, 18);
+                EmitParticle(impactDebris, impact.ContactPosition, 6);
+                audioHooks?.PlayConcreteImpact(impact.ContactPosition, audioSeverity);
+            }
+            else if (category == PresentationCategory.Weak)
+            {
+                EmitParticle(impactSparks, impact.ContactPosition, 18);
+                EmitParticle(impactDust, impact.ContactPosition, 5);
+                EmitParticle(impactDebris, impact.ContactPosition, 4);
+                audioHooks?.PlaySteelImpact(impact.ContactPosition, audioSeverity * 1.08f);
             }
             else
             {
-                PlayParticle(impactSparks, impact.ContactPosition);
-                audioHooks?.PlaySteelImpact();
+                EmitParticle(impactSparks, impact.ContactPosition, 14);
+                EmitParticle(impactDebris, impact.ContactPosition, 3);
+                audioHooks?.PlaySteelImpact(impact.ContactPosition, audioSeverity);
+            }
+
+            lastImpactPosition = impact.ContactPosition;
+            lastImpactFeedbackTime = Time.time;
+        }
+
+        private void HandleGroundImpact(StructuralGroundImpact impact)
+        {
+            bool validState = flow.State == StageState.Active || flow.State == StageState.Settling;
+            if (!validState
+                || flow.ShotsUsed == 0
+                || Time.time - lastGroundImpactFeedbackTime < 0.18f)
+            {
+                return;
+            }
+
+            lastGroundImpactFeedbackTime = Time.time;
+            bool largeImpact = impact.ImpulseMagnitude >= 14f;
+            EmitParticle(structuralImpactDust, impact.Position, largeImpact ? 22 : 12);
+            audioHooks?.PlayConcreteImpact(impact.Position, largeImpact ? 1f : 0.65f);
+            if (largeImpact)
+            {
+                cameraShake?.Shake(0.045f, 0.12f);
             }
         }
 
@@ -368,13 +424,27 @@ namespace DemolitionLab
 
         private void TryPlayCollapseFeedback()
         {
-            if (flow.ShotsUsed == 0 || Time.time - lastCollapseFeedbackTime < 0.8f)
+            if (flow.ShotsUsed == 0)
             {
                 return;
             }
 
             int destroyed = CountDestroyedTargets();
-            if (destroyed - destroyedAtLastCollapseFeedback < 3)
+            int newlyDestroyed = Mathf.Max(0, destroyed - lastObservedDestroyedTargets);
+            lastObservedDestroyedTargets = destroyed;
+            if (newlyDestroyed == 0)
+            {
+                return;
+            }
+
+            if (Time.time - collapseWindowStartTime > 1.35f)
+            {
+                collapseWindowStartTime = Time.time;
+                destroyedInCollapseWindow = 0;
+            }
+
+            destroyedInCollapseWindow += newlyDestroyed;
+            if (destroyedInCollapseWindow < 3 || Time.time - lastCollapseFeedbackTime < 1.2f)
             {
                 return;
             }
@@ -397,11 +467,11 @@ namespace DemolitionLab
 
             center /= count;
             center.y = 0.18f;
-            destroyedAtLastCollapseFeedback = destroyed;
+            destroyedInCollapseWindow = 0;
             lastCollapseFeedbackTime = Time.time;
-            PlayParticle(collapseDust, center);
-            cameraShake?.Shake(0.13f, 0.24f);
-            audioHooks?.PlayLargeCollapse();
+            EmitParticle(collapseDust, center, 38);
+            cameraShake?.Shake(0.12f, 0.22f);
+            audioHooks?.PlayLargeCollapse(center);
         }
 
         private static void PrepareParticleSystem(ParticleSystem particles)
@@ -411,11 +481,20 @@ namespace DemolitionLab
             particles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         }
 
-        private static void PlayParticle(ParticleSystem particles, Vector3 position)
+        private static void EmitParticle(ParticleSystem particles, Vector3 position, int count)
         {
-            particles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             particles.transform.position = position;
-            particles.Play(true);
+            particles.Emit(count);
+        }
+
+        private static void EmitParticle(
+            ParticleSystem particles,
+            Vector3 position,
+            Quaternion rotation,
+            int count)
+        {
+            particles.transform.SetPositionAndRotation(position, rotation);
+            particles.Emit(count);
         }
 
         [ContextMenu("Validate Required References")]
@@ -437,8 +516,12 @@ namespace DemolitionLab
             isValid &= ValidateReference(resultDetailsText, nameof(resultDetailsText));
             isValid &= ValidateReference(nextButton, nameof(nextButton));
             isValid &= ValidateReference(cameraShake, nameof(cameraShake));
+            isValid &= ValidateReference(muzzleFlash, nameof(muzzleFlash));
+            isValid &= ValidateReference(muzzleSmoke, nameof(muzzleSmoke));
             isValid &= ValidateReference(impactDust, nameof(impactDust));
             isValid &= ValidateReference(impactSparks, nameof(impactSparks));
+            isValid &= ValidateReference(impactDebris, nameof(impactDebris));
+            isValid &= ValidateReference(structuralImpactDust, nameof(structuralImpactDust));
             isValid &= ValidateReference(collapseDust, nameof(collapseDust));
             isValid &= ValidateReference(audioHooks, nameof(audioHooks));
 

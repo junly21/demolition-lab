@@ -16,8 +16,13 @@ public static class FinalVisualPolishBuilder
     private const string ProfilePath = "Assets/Art/Materials/DemolitionLab_PostProcess.asset";
     private const string VolumeName = "Presentation Post Processing";
     private const string FillLightName = "Presentation Fill Light";
+    private const string MuzzleFlashName = "Muzzle Flash";
+    private const string MuzzleSmokeName = "Muzzle Smoke";
     private const string SparkName = "Impact Sparks";
+    private const string DebrisName = "Impact Debris";
+    private const string StructuralDustName = "Structural Impact Dust";
     private const string CollapseDustName = "Collapse Dust";
+    private const string WorldAudioName = "World Feedback Audio";
     private const string HudPresentationName = "Final HUD Presentation";
     private const string TitleScenePath = "Assets/Scenes/VerticalSlice_Title.unity";
     private const string StageOneSceneName = "VerticalSlice_Stage01";
@@ -188,9 +193,17 @@ public static class FinalVisualPolishBuilder
             new Color(1f, 0.55f, 0.08f, 0.95f));
         ConfigureImpactDust(dust, dustMaterial);
 
+        RemoveRootObject(MuzzleFlashName);
+        RemoveRootObject(MuzzleSmokeName);
         RemoveRootObject(SparkName);
+        RemoveRootObject(DebrisName);
+        RemoveRootObject(StructuralDustName);
         RemoveRootObject(CollapseDustName);
+        ParticleSystem muzzleFlash = CreateMuzzleFlash(sparkMaterial);
+        ParticleSystem muzzleSmoke = CreateMuzzleSmoke(dustMaterial);
         ParticleSystem sparks = CreateSparks(sparkMaterial);
+        ParticleSystem debris = CreateImpactDebris(dustMaterial);
+        ParticleSystem structuralDust = CreateStructuralImpactDust(dustMaterial);
         ParticleSystem collapse = CreateCollapseDust(dustMaterial);
 
         PresentationAudioHooks audioHooks = controller.GetComponent<PresentationAudioHooks>();
@@ -204,7 +217,41 @@ public static class FinalVisualPolishBuilder
         audioSource.loop = false;
         audioSource.spatialBlend = 0f;
 
+        Transform existingWorldAudio = controller.transform.Find(WorldAudioName);
+        if (existingWorldAudio != null)
+        {
+            Object.DestroyImmediate(existingWorldAudio.gameObject);
+        }
+
+        GameObject worldAudioObject = new(WorldAudioName);
+        worldAudioObject.transform.SetParent(controller.transform, false);
+        AudioSource worldAudio = worldAudioObject.AddComponent<AudioSource>();
+        worldAudio.playOnAwake = false;
+        worldAudio.loop = false;
+        worldAudio.spatialBlend = 1f;
+        worldAudio.dopplerLevel = 0f;
+        worldAudio.rolloffMode = AudioRolloffMode.Linear;
+        worldAudio.minDistance = 3f;
+        worldAudio.maxDistance = 28f;
+        worldAudio.volume = 1f;
+
+        var serializedAudio = new SerializedObject(audioHooks);
+        serializedAudio.FindProperty("worldSource").objectReferenceValue = worldAudio;
+        serializedAudio.ApplyModifiedPropertiesWithoutUndo();
+
+        foreach (StageTargetPiece target in Object.FindObjectsByType<StageTargetPiece>())
+        {
+            if (target.GetComponent<StructuralGroundImpactFeedback>() == null)
+            {
+                target.gameObject.AddComponent<StructuralGroundImpactFeedback>();
+            }
+        }
+
+        serializedController.FindProperty("muzzleFlash").objectReferenceValue = muzzleFlash;
+        serializedController.FindProperty("muzzleSmoke").objectReferenceValue = muzzleSmoke;
         serializedController.FindProperty("impactSparks").objectReferenceValue = sparks;
+        serializedController.FindProperty("impactDebris").objectReferenceValue = debris;
+        serializedController.FindProperty("structuralImpactDust").objectReferenceValue = structuralDust;
         serializedController.FindProperty("collapseDust").objectReferenceValue = collapse;
         serializedController.FindProperty("audioHooks").objectReferenceValue = audioHooks;
         serializedController.ApplyModifiedPropertiesWithoutUndo();
@@ -335,16 +382,30 @@ public static class FinalVisualPolishBuilder
         VerticalSliceStageController controller = Object.FindAnyObjectByType<VerticalSliceStageController>();
         var serializedController = new SerializedObject(controller);
         ParticleSystem dust = (ParticleSystem)serializedController.FindProperty("impactDust").objectReferenceValue;
+        ParticleSystem muzzleFlash = (ParticleSystem)serializedController.FindProperty("muzzleFlash").objectReferenceValue;
+        ParticleSystem muzzleSmoke = (ParticleSystem)serializedController.FindProperty("muzzleSmoke").objectReferenceValue;
         ParticleSystem sparks = (ParticleSystem)serializedController.FindProperty("impactSparks").objectReferenceValue;
+        ParticleSystem debris = (ParticleSystem)serializedController.FindProperty("impactDebris").objectReferenceValue;
+        ParticleSystem structuralDust = (ParticleSystem)serializedController.FindProperty("structuralImpactDust").objectReferenceValue;
         ParticleSystem collapse = (ParticleSystem)serializedController.FindProperty("collapseDust").objectReferenceValue;
         PresentationAudioHooks audio = (PresentationAudioHooks)serializedController
             .FindProperty("audioHooks").objectReferenceValue;
-        if (dust == null || sparks == null || collapse == null || audio == null)
+        if (dust == null
+            || muzzleFlash == null
+            || muzzleSmoke == null
+            || sparks == null
+            || debris == null
+            || structuralDust == null
+            || collapse == null
+            || audio == null)
         {
             throw new UnityException($"{scenePath} impact feedback references are incomplete.");
         }
 
-        foreach (ParticleSystem particles in new[] { dust, sparks, collapse })
+        foreach (ParticleSystem particles in new[]
+                 {
+                     dust, muzzleFlash, muzzleSmoke, sparks, debris, structuralDust, collapse
+                 })
         {
             if (particles.main.simulationSpace != ParticleSystemSimulationSpace.World
                 || particles.main.playOnAwake
@@ -354,6 +415,18 @@ public static class FinalVisualPolishBuilder
             {
                 throw new UnityException($"{scenePath} has unsafe or excessive impact particles.");
             }
+        }
+
+        var serializedAudio = new SerializedObject(audio);
+        AudioSource worldSource = (AudioSource)serializedAudio.FindProperty("worldSource").objectReferenceValue;
+        int targetCount = Object.FindObjectsByType<StageTargetPiece>().Length;
+        int groundFeedbackCount = Object.FindObjectsByType<StructuralGroundImpactFeedback>().Length;
+        if (worldSource == null
+            || !Mathf.Approximately(worldSource.spatialBlend, 1f)
+            || worldSource.playOnAwake
+            || targetCount != groundFeedbackCount)
+        {
+            throw new UnityException($"{scenePath} world audio or structural impact feedback is incomplete.");
         }
     }
 
@@ -806,6 +879,47 @@ public static class FinalVisualPolishBuilder
         particles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
     }
 
+    private static ParticleSystem CreateMuzzleFlash(Material material)
+    {
+        ParticleSystem particles = CreateParticleRoot(MuzzleFlashName);
+        ParticleSystem.MainModule main = particles.main;
+        main.duration = 0.08f;
+        main.startLifetime = new ParticleSystem.MinMaxCurve(0.035f, 0.065f);
+        main.startSpeed = new ParticleSystem.MinMaxCurve(0.2f, 0.5f);
+        main.startSize = new ParticleSystem.MinMaxCurve(0.22f, 0.36f);
+        main.startColor = new ParticleSystem.MinMaxGradient(
+            new Color(1f, 0.48f, 0.08f, 0.95f),
+            new Color(1f, 0.88f, 0.42f, 0.95f));
+        main.maxParticles = 4;
+        ParticleSystem.ShapeModule shape = particles.shape;
+        shape.shapeType = ParticleSystemShapeType.Cone;
+        shape.angle = 8f;
+        shape.radius = 0.04f;
+        particles.GetComponent<ParticleSystemRenderer>().sharedMaterial = material;
+        particles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        return particles;
+    }
+
+    private static ParticleSystem CreateMuzzleSmoke(Material material)
+    {
+        ParticleSystem particles = CreateParticleRoot(MuzzleSmokeName);
+        ParticleSystem.MainModule main = particles.main;
+        main.duration = 0.5f;
+        main.startLifetime = new ParticleSystem.MinMaxCurve(0.35f, 0.7f);
+        main.startSpeed = new ParticleSystem.MinMaxCurve(0.65f, 1.35f);
+        main.startSize = new ParticleSystem.MinMaxCurve(0.13f, 0.3f);
+        main.startColor = new Color(0.48f, 0.5f, 0.5f, 0.42f);
+        main.gravityModifier = -0.05f;
+        main.maxParticles = 24;
+        ParticleSystem.ShapeModule shape = particles.shape;
+        shape.shapeType = ParticleSystemShapeType.Cone;
+        shape.angle = 12f;
+        shape.radius = 0.08f;
+        particles.GetComponent<ParticleSystemRenderer>().sharedMaterial = material;
+        particles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        return particles;
+    }
+
     private static ParticleSystem CreateSparks(Material material)
     {
         ParticleSystem particles = CreateParticleRoot(SparkName);
@@ -828,6 +942,46 @@ public static class FinalVisualPolishBuilder
         renderer.lengthScale = 3.5f;
         renderer.velocityScale = 0.08f;
         renderer.sharedMaterial = material;
+        particles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        return particles;
+    }
+
+    private static ParticleSystem CreateImpactDebris(Material material)
+    {
+        ParticleSystem particles = CreateParticleRoot(DebrisName);
+        ParticleSystem.MainModule main = particles.main;
+        main.duration = 0.45f;
+        main.startLifetime = new ParticleSystem.MinMaxCurve(0.3f, 0.65f);
+        main.startSpeed = new ParticleSystem.MinMaxCurve(1.8f, 4.2f);
+        main.startSize = new ParticleSystem.MinMaxCurve(0.025f, 0.065f);
+        main.startColor = new ParticleSystem.MinMaxGradient(
+            new Color(0.34f, 0.36f, 0.36f, 0.9f),
+            new Color(0.62f, 0.6f, 0.55f, 0.9f));
+        main.gravityModifier = 1f;
+        main.maxParticles = 40;
+        ParticleSystem.ShapeModule shape = particles.shape;
+        shape.shapeType = ParticleSystemShapeType.Hemisphere;
+        shape.radius = 0.08f;
+        particles.GetComponent<ParticleSystemRenderer>().sharedMaterial = material;
+        particles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        return particles;
+    }
+
+    private static ParticleSystem CreateStructuralImpactDust(Material material)
+    {
+        ParticleSystem particles = CreateParticleRoot(StructuralDustName);
+        ParticleSystem.MainModule main = particles.main;
+        main.duration = 0.65f;
+        main.startLifetime = new ParticleSystem.MinMaxCurve(0.45f, 0.9f);
+        main.startSpeed = new ParticleSystem.MinMaxCurve(0.8f, 2.1f);
+        main.startSize = new ParticleSystem.MinMaxCurve(0.16f, 0.4f);
+        main.startColor = new Color(0.45f, 0.43f, 0.4f, 0.58f);
+        main.gravityModifier = 0.18f;
+        main.maxParticles = 48;
+        ParticleSystem.ShapeModule shape = particles.shape;
+        shape.shapeType = ParticleSystemShapeType.Hemisphere;
+        shape.radius = 0.22f;
+        particles.GetComponent<ParticleSystemRenderer>().sharedMaterial = material;
         particles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
         return particles;
     }
@@ -860,6 +1014,9 @@ public static class FinalVisualPolishBuilder
         main.loop = false;
         main.playOnAwake = false;
         main.simulationSpace = ParticleSystemSimulationSpace.World;
+        ParticleSystem.EmissionModule emission = particles.emission;
+        emission.rateOverTime = 0f;
+        emission.SetBursts(System.Array.Empty<ParticleSystem.Burst>());
         return particles;
     }
 
