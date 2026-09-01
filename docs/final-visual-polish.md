@@ -29,6 +29,20 @@ Concrete variants are selected deterministically from object names so stages rem
 
 The settings are deliberately restrained so the trajectory line and HUD remain crisp.
 
+## Impact And Collapse Feedback
+
+- Concrete/Foundation hit: 22-particle dust burst at the accepted `ProjectileImpact.ContactPosition`
+- Steel/Weak/Reinforced hit: 18 stretched sparks at the same accepted contact position
+- Critical joint break: medium camera shake and mixed spark/dust feedback for Weak connections
+- Major collapse: one 34-particle ground dust puff after three additional targets become destroyed, throttled to once per 0.8 seconds
+- Camera shake: normal hit `0.018–0.055` for `0.12 s`; critical break `0.085–0.11` for `0.20 s`; collapse `0.13` for `0.24 s`
+
+All particles use world simulation, contain no physics components, remain below 100 particles per system, and are cleared on scene initialization.
+
+## Audio Hooks
+
+`PresentationAudioHooks` exposes clips for fire, concrete impact, steel impact, critical break, large collapse, UI click, clear, and fail. No placeholder audio is synthesized; external SFX remain required.
+
 ## Gameplay Lock
 
 The visual polish does not change Rigidbody, Collider, FixedJoint, projectile, ammunition, target, success-threshold, balance, or progression settings.

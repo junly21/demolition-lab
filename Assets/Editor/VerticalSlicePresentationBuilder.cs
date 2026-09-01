@@ -123,6 +123,7 @@ public static class VerticalSlicePresentationBuilder
         ConfigureHudPresentation();
         PhysicsPresentationSeparationBuilder.ApplyToOpenScene();
         ThirdPartyPresentationBuilder.ApplyStructuralVisualsToOpenScene();
+        FinalVisualPolishBuilder.ApplyFeedbackToOpenScene();
         EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
     }
 
@@ -643,6 +644,7 @@ public static class VerticalSlicePresentationBuilder
         PhysicsPresentationSeparationBuilder.ValidateOpenScene(scenePath);
         ThirdPartyPresentationBuilder.ValidateOpenScene(scenePath);
         FinalVisualPolishBuilder.ValidateLightingAndPostInOpenScene(scenePath);
+        FinalVisualPolishBuilder.ValidateFeedbackInOpenScene(scenePath);
     }
 
     private static void ValidateCameraFramingInOpenScene(string scenePath)

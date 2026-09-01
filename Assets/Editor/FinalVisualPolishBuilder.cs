@@ -11,6 +11,8 @@ public static class FinalVisualPolishBuilder
     private const string ProfilePath = "Assets/Art/Materials/DemolitionLab_PostProcess.asset";
     private const string VolumeName = "Presentation Post Processing";
     private const string FillLightName = "Presentation Fill Light";
+    private const string SparkName = "Impact Sparks";
+    private const string CollapseDustName = "Collapse Dust";
 
     private static readonly string[] StageScenePaths =
     {
@@ -48,6 +50,32 @@ public static class FinalVisualPolishBuilder
         Debug.Log("Final materials and lighting validation passed for Stage01-05.");
     }
 
+    [MenuItem("DemolitionLab/Presentation/Apply Demolition Impact Feedback")]
+    public static void ApplyImpactFeedback()
+    {
+        foreach (string scenePath in StageScenePaths)
+        {
+            EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
+            ApplyFeedbackToOpenScene();
+            EditorSceneManager.SaveOpenScenes();
+        }
+
+        AssetDatabase.SaveAssets();
+        Debug.Log("Applied demolition impact feedback to Stage01-05.");
+    }
+
+    [MenuItem("DemolitionLab/Presentation/Validate Demolition Impact Feedback")]
+    public static void ValidateImpactFeedback()
+    {
+        foreach (string scenePath in StageScenePaths)
+        {
+            EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
+            ValidateFeedbackInOpenScene(scenePath);
+        }
+
+        Debug.Log("Demolition impact feedback validation passed for Stage01-05.");
+    }
+
     internal static void ApplyLightingAndPostToOpenScene()
     {
         VolumeProfile profile = CreatePostProcessProfile();
@@ -79,6 +107,52 @@ public static class FinalVisualPolishBuilder
         EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
     }
 
+    internal static void ApplyFeedbackToOpenScene()
+    {
+        VerticalSliceStageController controller = Object.FindAnyObjectByType<VerticalSliceStageController>();
+        if (controller == null)
+        {
+            throw new UnityException("Impact feedback requires the vertical-slice stage controller.");
+        }
+
+        var serializedController = new SerializedObject(controller);
+        ParticleSystem dust = (ParticleSystem)serializedController.FindProperty("impactDust").objectReferenceValue;
+        if (dust == null)
+        {
+            throw new UnityException("Impact feedback requires the existing impact dust system.");
+        }
+
+        Material dustMaterial = CreateParticleMaterial(
+            "DL_DustParticle",
+            new Color(0.48f, 0.45f, 0.4f, 0.72f));
+        Material sparkMaterial = CreateParticleMaterial(
+            "DL_SparkParticle",
+            new Color(1f, 0.55f, 0.08f, 0.95f));
+        ConfigureImpactDust(dust, dustMaterial);
+
+        RemoveRootObject(SparkName);
+        RemoveRootObject(CollapseDustName);
+        ParticleSystem sparks = CreateSparks(sparkMaterial);
+        ParticleSystem collapse = CreateCollapseDust(dustMaterial);
+
+        PresentationAudioHooks audioHooks = controller.GetComponent<PresentationAudioHooks>();
+        if (audioHooks == null)
+        {
+            audioHooks = controller.gameObject.AddComponent<PresentationAudioHooks>();
+        }
+
+        AudioSource audioSource = controller.GetComponent<AudioSource>();
+        audioSource.playOnAwake = false;
+        audioSource.loop = false;
+        audioSource.spatialBlend = 0f;
+
+        serializedController.FindProperty("impactSparks").objectReferenceValue = sparks;
+        serializedController.FindProperty("collapseDust").objectReferenceValue = collapse;
+        serializedController.FindProperty("audioHooks").objectReferenceValue = audioHooks;
+        serializedController.ApplyModifiedPropertiesWithoutUndo();
+        EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+    }
+
     internal static void ValidateLightingAndPostInOpenScene(string scenePath)
     {
         Volume volume = GameObject.Find(VolumeName)?.GetComponent<Volume>();
@@ -106,6 +180,32 @@ public static class FinalVisualPolishBuilder
             || !vignette.active)
         {
             throw new UnityException($"{scenePath} final post-processing profile is incomplete.");
+        }
+    }
+
+    internal static void ValidateFeedbackInOpenScene(string scenePath)
+    {
+        VerticalSliceStageController controller = Object.FindAnyObjectByType<VerticalSliceStageController>();
+        var serializedController = new SerializedObject(controller);
+        ParticleSystem dust = (ParticleSystem)serializedController.FindProperty("impactDust").objectReferenceValue;
+        ParticleSystem sparks = (ParticleSystem)serializedController.FindProperty("impactSparks").objectReferenceValue;
+        ParticleSystem collapse = (ParticleSystem)serializedController.FindProperty("collapseDust").objectReferenceValue;
+        PresentationAudioHooks audio = (PresentationAudioHooks)serializedController
+            .FindProperty("audioHooks").objectReferenceValue;
+        if (dust == null || sparks == null || collapse == null || audio == null)
+        {
+            throw new UnityException($"{scenePath} impact feedback references are incomplete.");
+        }
+
+        foreach (ParticleSystem particles in new[] { dust, sparks, collapse })
+        {
+            if (particles.main.simulationSpace != ParticleSystemSimulationSpace.World
+                || particles.main.maxParticles > 100
+                || particles.GetComponent<Collider>() != null
+                || particles.GetComponent<Rigidbody>() != null)
+            {
+                throw new UnityException($"{scenePath} has unsafe or excessive impact particles.");
+            }
         }
     }
 
@@ -150,6 +250,111 @@ public static class FinalVisualPolishBuilder
 
         EditorUtility.SetDirty(profile);
         return profile;
+    }
+
+    private static Material CreateParticleMaterial(string name, Color color)
+    {
+        string path = $"Assets/Art/Materials/{name}.mat";
+        Material material = AssetDatabase.LoadAssetAtPath<Material>(path);
+        if (material == null)
+        {
+            Shader shader = Shader.Find("Universal Render Pipeline/Particles/Unlit");
+            material = new Material(shader) { name = name };
+            AssetDatabase.CreateAsset(material, path);
+        }
+
+        material.SetColor("_BaseColor", color);
+        material.SetFloat("_Surface", 1f);
+        material.SetFloat("_Blend", 0f);
+        material.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+        material.renderQueue = 3000;
+        EditorUtility.SetDirty(material);
+        return material;
+    }
+
+    private static void ConfigureImpactDust(ParticleSystem particles, Material material)
+    {
+        ParticleSystem.MainModule main = particles.main;
+        main.duration = 0.6f;
+        main.loop = false;
+        main.startLifetime = new ParticleSystem.MinMaxCurve(0.45f, 0.85f);
+        main.startSpeed = new ParticleSystem.MinMaxCurve(1.4f, 3.2f);
+        main.startSize = new ParticleSystem.MinMaxCurve(0.14f, 0.34f);
+        main.startColor = new Color(0.48f, 0.45f, 0.4f, 0.72f);
+        main.gravityModifier = 0.45f;
+        main.simulationSpace = ParticleSystemSimulationSpace.World;
+        main.maxParticles = 64;
+        ConfigureBurst(particles, 22);
+        ParticleSystem.ShapeModule shape = particles.shape;
+        shape.shapeType = ParticleSystemShapeType.Hemisphere;
+        shape.radius = 0.14f;
+        particles.GetComponent<ParticleSystemRenderer>().sharedMaterial = material;
+        particles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+    }
+
+    private static ParticleSystem CreateSparks(Material material)
+    {
+        ParticleSystem particles = CreateParticleRoot(SparkName);
+        ParticleSystem.MainModule main = particles.main;
+        main.duration = 0.3f;
+        main.startLifetime = new ParticleSystem.MinMaxCurve(0.16f, 0.36f);
+        main.startSpeed = new ParticleSystem.MinMaxCurve(3.5f, 7f);
+        main.startSize = new ParticleSystem.MinMaxCurve(0.025f, 0.065f);
+        main.startColor = new ParticleSystem.MinMaxGradient(
+            new Color(1f, 0.38f, 0.04f),
+            new Color(1f, 0.82f, 0.28f));
+        main.gravityModifier = 0.8f;
+        main.maxParticles = 72;
+        ConfigureBurst(particles, 18);
+        ParticleSystem.ShapeModule shape = particles.shape;
+        shape.shapeType = ParticleSystemShapeType.Hemisphere;
+        shape.radius = 0.08f;
+        ParticleSystemRenderer renderer = particles.GetComponent<ParticleSystemRenderer>();
+        renderer.renderMode = ParticleSystemRenderMode.Stretch;
+        renderer.lengthScale = 3.5f;
+        renderer.velocityScale = 0.08f;
+        renderer.sharedMaterial = material;
+        particles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        return particles;
+    }
+
+    private static ParticleSystem CreateCollapseDust(Material material)
+    {
+        ParticleSystem particles = CreateParticleRoot(CollapseDustName);
+        ParticleSystem.MainModule main = particles.main;
+        main.duration = 1.1f;
+        main.startLifetime = new ParticleSystem.MinMaxCurve(0.9f, 1.6f);
+        main.startSpeed = new ParticleSystem.MinMaxCurve(0.7f, 2f);
+        main.startSize = new ParticleSystem.MinMaxCurve(0.38f, 0.82f);
+        main.startColor = new Color(0.42f, 0.4f, 0.37f, 0.55f);
+        main.gravityModifier = 0.08f;
+        main.maxParticles = 80;
+        ConfigureBurst(particles, 34);
+        ParticleSystem.ShapeModule shape = particles.shape;
+        shape.shapeType = ParticleSystemShapeType.Hemisphere;
+        shape.radius = 0.65f;
+        particles.GetComponent<ParticleSystemRenderer>().sharedMaterial = material;
+        particles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        return particles;
+    }
+
+    private static ParticleSystem CreateParticleRoot(string objectName)
+    {
+        GameObject particleObject = new(objectName);
+        ParticleSystem particles = particleObject.AddComponent<ParticleSystem>();
+        ParticleSystem.MainModule main = particles.main;
+        main.loop = false;
+        main.playOnAwake = false;
+        main.simulationSpace = ParticleSystemSimulationSpace.World;
+        return particles;
+    }
+
+    private static void ConfigureBurst(ParticleSystem particles, short count)
+    {
+        ParticleSystem.EmissionModule emission = particles.emission;
+        emission.enabled = true;
+        emission.rateOverTime = 0f;
+        emission.SetBursts(new[] { new ParticleSystem.Burst(0f, count) });
     }
 
     private static T GetOrAdd<T>(VolumeProfile profile) where T : VolumeComponent

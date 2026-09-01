@@ -33,11 +33,16 @@ namespace DemolitionLab
         [Header("Feedback")]
         [SerializeField] private SimpleCameraShake cameraShake;
         [SerializeField] private ParticleSystem impactDust;
+        [SerializeField] private ParticleSystem impactSparks;
+        [SerializeField] private ParticleSystem collapseDust;
+        [SerializeField] private PresentationAudioHooks audioHooks;
         [SerializeField] private bool logImpactDiagnostics = true;
 
         private readonly StageFlowStateMachine flow = new();
         private bool hasValidReferences;
         private bool clearLockedIn;
+        private int destroyedAtLastCollapseFeedback;
+        private float lastCollapseFeedbackTime = -10f;
 
         public StageState CurrentState => flow.State;
         public int ShotsRemaining => flow.AmmoRemaining;
@@ -61,9 +66,9 @@ namespace DemolitionLab
                 projectileSpeedMultiplier,
                 projectileMassMultiplier);
             launcher.SetGameplayEnabled(false);
-            ParticleSystem.MainModule dustMain = impactDust.main;
-            dustMain.simulationSpace = ParticleSystemSimulationSpace.World;
-            impactDust.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            PrepareParticleSystem(impactDust);
+            PrepareParticleSystem(impactSparks);
+            PrepareParticleSystem(collapseDust);
             endPanel.SetActive(false);
             nextButton.gameObject.SetActive(false);
             stageLabelText.text = stageLabel;
@@ -117,6 +122,7 @@ namespace DemolitionLab
             }
 
             RefreshHud();
+            TryPlayCollapseFeedback();
             if (!clearLockedIn
                 && flow.ShotsUsed > 0
                 && DestructionPercentage >= clearThreshold * 100f)
@@ -131,6 +137,14 @@ namespace DemolitionLab
 
         public void NotifyCriticalSupportBroken(Vector3 position, bool weakConnection)
         {
+            PlayParticle(impactSparks, position);
+            if (weakConnection)
+            {
+                PlayParticle(impactDust, position);
+            }
+
+            cameraShake?.Shake(weakConnection ? 0.085f : 0.11f, 0.2f);
+            audioHooks?.PlayCriticalBreak();
             Debug.Log(
                 $"{stageLabel} {(weakConnection ? "Weak" : "Reinforced")} critical joint broke; "
                 + $"shot={flow.ShotsUsed}, remainingAmmo={flow.AmmoRemaining}, "
@@ -187,6 +201,7 @@ namespace DemolitionLab
             }
 
             Debug.Log($"{stageLabel} shot {flow.ShotsUsed}/{flow.StartingAmmo} fired.", this);
+            audioHooks?.PlayFire();
             RefreshHud();
             if (flow.AmmoRemaining == 0)
             {
@@ -226,11 +241,24 @@ namespace DemolitionLab
             }
 
             float shakeIntensity = Mathf.Lerp(
-                0.025f,
-                0.12f,
+                0.018f,
+                0.055f,
                 Mathf.InverseLerp(2f, 18f, impact.ImpulseMagnitude));
-            cameraShake?.Shake(shakeIntensity, 0.16f);
-            PlayDust(impact.ContactPosition);
+            cameraShake?.Shake(shakeIntensity, 0.12f);
+
+            PresentationVisual visual = impact.ImpactedObject.GetComponentInChildren<PresentationVisual>();
+            bool concreteImpact = visual == null
+                || visual.Category is PresentationCategory.Concrete or PresentationCategory.Foundation;
+            if (concreteImpact)
+            {
+                PlayParticle(impactDust, impact.ContactPosition);
+                audioHooks?.PlayConcreteImpact();
+            }
+            else
+            {
+                PlayParticle(impactSparks, impact.ContactPosition);
+                audioHooks?.PlaySteelImpact();
+            }
         }
 
         private void BeginSettling()
@@ -265,6 +293,14 @@ namespace DemolitionLab
             resultDetailsText.text = $"Shots Used: {flow.ShotsUsed}\nDestruction: {destruction:0}%";
             nextButton.gameObject.SetActive(cleared && HasNextScene);
             endPanel.SetActive(true);
+            if (cleared)
+            {
+                audioHooks?.PlayClear();
+            }
+            else
+            {
+                audioHooks?.PlayFail();
+            }
             Debug.Log(
                 $"{stageLabel} {(cleared ? "CLEAR" : "FAILED")}: "
                 + $"destruction {DestroyedTargetCount}/{targetPieces.Count} ({destruction:0}%), "
@@ -326,16 +362,56 @@ namespace DemolitionLab
             Debug.Log(message.ToString(), this);
         }
 
-        private void PlayDust(Vector3 position)
+        private void TryPlayCollapseFeedback()
         {
-            if (impactDust == null)
+            if (flow.ShotsUsed == 0 || Time.time - lastCollapseFeedbackTime < 0.8f)
             {
                 return;
             }
 
-            impactDust.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-            impactDust.transform.position = position;
-            impactDust.Play(true);
+            int destroyed = CountDestroyedTargets();
+            if (destroyed - destroyedAtLastCollapseFeedback < 3)
+            {
+                return;
+            }
+
+            Vector3 center = Vector3.zero;
+            int count = 0;
+            foreach (StageTargetPiece target in targetPieces)
+            {
+                if (target != null && target.IsDestroyed)
+                {
+                    center += target.CurrentPosition;
+                    count++;
+                }
+            }
+
+            if (count == 0)
+            {
+                return;
+            }
+
+            center /= count;
+            center.y = 0.18f;
+            destroyedAtLastCollapseFeedback = destroyed;
+            lastCollapseFeedbackTime = Time.time;
+            PlayParticle(collapseDust, center);
+            cameraShake?.Shake(0.13f, 0.24f);
+            audioHooks?.PlayLargeCollapse();
+        }
+
+        private static void PrepareParticleSystem(ParticleSystem particles)
+        {
+            ParticleSystem.MainModule main = particles.main;
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+            particles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+        }
+
+        private static void PlayParticle(ParticleSystem particles, Vector3 position)
+        {
+            particles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            particles.transform.position = position;
+            particles.Play(true);
         }
 
         [ContextMenu("Validate Required References")]
@@ -355,6 +431,11 @@ namespace DemolitionLab
             isValid &= ValidateReference(resultTitleText, nameof(resultTitleText));
             isValid &= ValidateReference(resultDetailsText, nameof(resultDetailsText));
             isValid &= ValidateReference(nextButton, nameof(nextButton));
+            isValid &= ValidateReference(cameraShake, nameof(cameraShake));
+            isValid &= ValidateReference(impactDust, nameof(impactDust));
+            isValid &= ValidateReference(impactSparks, nameof(impactSparks));
+            isValid &= ValidateReference(collapseDust, nameof(collapseDust));
+            isValid &= ValidateReference(audioHooks, nameof(audioHooks));
 
             if (targetPieces.Count == 0 || targetPieces.Exists(target => target == null))
             {
