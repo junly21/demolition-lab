@@ -124,6 +124,7 @@ public static class VerticalSlicePresentationBuilder
         PhysicsPresentationSeparationBuilder.ApplyToOpenScene();
         ThirdPartyPresentationBuilder.ApplyStructuralVisualsToOpenScene();
         FinalVisualPolishBuilder.ApplyFeedbackToOpenScene();
+        FinalVisualPolishBuilder.ApplyHudToOpenScene();
         EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
     }
 
@@ -559,11 +560,19 @@ public static class VerticalSlicePresentationBuilder
         }
 
         Renderer ground = GameObject.Find("Ground")?.GetComponent<Renderer>();
-        Light keyLight = Object.FindAnyObjectByType<Light>();
+        bool hasSoftKeyLight = false;
+        foreach (Light light in Object.FindObjectsByType<Light>())
+        {
+            if (light.shadows == LightShadows.Soft)
+            {
+                hasSoftKeyLight = true;
+                break;
+            }
+        }
+
         if (ground == null
             || ground.sharedMaterial == null
-            || keyLight == null
-            || keyLight.shadows != LightShadows.Soft
+            || !hasSoftKeyLight
             || !RenderSettings.fog
             || RenderSettings.skybox == null)
         {
@@ -645,6 +654,7 @@ public static class VerticalSlicePresentationBuilder
         ThirdPartyPresentationBuilder.ValidateOpenScene(scenePath);
         FinalVisualPolishBuilder.ValidateLightingAndPostInOpenScene(scenePath);
         FinalVisualPolishBuilder.ValidateFeedbackInOpenScene(scenePath);
+        FinalVisualPolishBuilder.ValidateHudInOpenScene(scenePath);
     }
 
     private static void ValidateCameraFramingInOpenScene(string scenePath)

@@ -1,10 +1,15 @@
 using DemolitionLab;
+using System.Collections.Generic;
 using UnityEditor;
+using UnityEditor.Events;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem.UI;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public static class FinalVisualPolishBuilder
 {
@@ -13,6 +18,9 @@ public static class FinalVisualPolishBuilder
     private const string FillLightName = "Presentation Fill Light";
     private const string SparkName = "Impact Sparks";
     private const string CollapseDustName = "Collapse Dust";
+    private const string HudPresentationName = "Final HUD Presentation";
+    private const string TitleScenePath = "Assets/Scenes/VerticalSlice_Title.unity";
+    private const string StageOneSceneName = "VerticalSlice_Stage01";
 
     private static readonly string[] StageScenePaths =
     {
@@ -74,6 +82,55 @@ public static class FinalVisualPolishBuilder
         }
 
         Debug.Log("Demolition impact feedback validation passed for Stage01-05.");
+    }
+
+    [MenuItem("DemolitionLab/Presentation/Apply Final HUD And Flow")]
+    public static void ApplyHudAndFlow()
+    {
+        foreach (string scenePath in StageScenePaths)
+        {
+            EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
+            ApplyHudToOpenScene();
+            EditorSceneManager.SaveOpenScenes();
+        }
+
+        CreateTitleScene();
+        ConfigureBuildSettings();
+        AssetDatabase.SaveAssets();
+        Debug.Log("Applied final HUD, title, result, and screenshot presentation flow.");
+    }
+
+    [MenuItem("DemolitionLab/Presentation/Validate Final HUD And Flow")]
+    public static void ValidateHudAndFlow()
+    {
+        foreach (string scenePath in StageScenePaths)
+        {
+            EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
+            ValidateHudInOpenScene(scenePath);
+        }
+
+        ValidateTitleScene();
+        Debug.Log("Final HUD and presentation flow validation passed.");
+    }
+
+    [MenuItem("DemolitionLab/Presentation/Validate Final Portfolio Build")]
+    public static void ValidateFinalPortfolioBuild()
+    {
+        M1SceneBuilder.ValidateScene();
+        M2SceneBuilder.ValidateScene();
+        M3SceneBuilder.ValidateScene();
+        M4SceneBuilder.ValidateScene();
+        M5SceneBuilder.ValidateScene();
+        VerticalSliceStage05Builder.ValidateAllStages();
+        PhysicsPresentationSeparationBuilder.ValidateAllStages();
+        ThirdPartyPresentationBuilder.ValidateAllStages();
+        VerticalSlicePresentationBuilder.ValidateIndustrialEnvironment();
+        VerticalSlicePresentationBuilder.ValidateStructuralPresentation();
+        VerticalSlicePresentationBuilder.ValidateCameraFraming();
+        ValidateMaterialsAndLighting();
+        ValidateImpactFeedback();
+        ValidateHudAndFlow();
+        Debug.Log("Final portfolio build validation passed.");
     }
 
     internal static void ApplyLightingAndPostToOpenScene()
@@ -153,6 +210,93 @@ public static class FinalVisualPolishBuilder
         EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
     }
 
+    internal static void ApplyHudToOpenScene()
+    {
+        VerticalSliceStageController controller = Object.FindAnyObjectByType<VerticalSliceStageController>();
+        LauncherController launcher = Object.FindAnyObjectByType<LauncherController>();
+        Camera camera = Camera.main;
+        if (controller == null || launcher == null || camera == null)
+        {
+            throw new UnityException("Final HUD requires the stage controller, launcher, and Main Camera.");
+        }
+
+        var serializedController = new SerializedObject(controller);
+        Text stage = (Text)serializedController.FindProperty("stageLabelText").objectReferenceValue;
+        Text shots = (Text)serializedController.FindProperty("shotsText").objectReferenceValue;
+        Text destruction = (Text)serializedController.FindProperty("destructionText").objectReferenceValue;
+        GameObject endPanel = (GameObject)serializedController.FindProperty("endPanel").objectReferenceValue;
+        Text resultTitle = (Text)serializedController.FindProperty("resultTitleText").objectReferenceValue;
+        Text resultDetails = (Text)serializedController.FindProperty("resultDetailsText").objectReferenceValue;
+        Button next = (Button)serializedController.FindProperty("nextButton").objectReferenceValue;
+        PresentationAudioHooks audio = (PresentationAudioHooks)serializedController.FindProperty("audioHooks").objectReferenceValue;
+        Canvas canvas = stage != null ? stage.GetComponentInParent<Canvas>() : null;
+        if (stage == null || shots == null || destruction == null || endPanel == null
+            || resultTitle == null || resultDetails == null || next == null || audio == null || canvas == null)
+        {
+            throw new UnityException("Final HUD requires all existing HUD and audio references.");
+        }
+
+        Transform existing = canvas.transform.Find(HudPresentationName);
+        if (existing != null)
+        {
+            Object.DestroyImmediate(existing.gameObject);
+        }
+
+        GameObject root = new(HudPresentationName, typeof(RectTransform));
+        root.transform.SetParent(canvas.transform, false);
+        RectTransform rootRect = root.GetComponent<RectTransform>();
+        rootRect.anchorMin = Vector2.zero;
+        rootRect.anchorMax = Vector2.one;
+        rootRect.offsetMin = Vector2.zero;
+        rootRect.offsetMax = Vector2.zero;
+        root.transform.SetAsFirstSibling();
+
+        CreateHudPanel(root.transform, "Stage Panel", new Vector2(24f, -20f), new Vector2(350f, 66f), new Vector2(0f, 1f));
+        CreateHudPanel(root.transform, "Shots Panel", new Vector2(-24f, -20f), new Vector2(350f, 66f), new Vector2(1f, 1f));
+        CreateHudPanel(root.transform, "Destruction Panel", new Vector2(0f, 20f), new Vector2(520f, 86f), new Vector2(0.5f, 0f));
+        Image destructionFill = CreateProgressBar(root.transform);
+        destruction.rectTransform.anchoredPosition = new Vector2(0f, 52f);
+
+        Image endPanelImage = endPanel.GetComponent<Image>();
+        endPanelImage.color = new Color(0.025f, 0.04f, 0.05f, 0.975f);
+        Outline panelOutline = endPanel.GetComponent<Outline>() ?? endPanel.AddComponent<Outline>();
+        panelOutline.effectColor = new Color(0.95f, 0.5f, 0.08f, 0.8f);
+        panelOutline.effectDistance = new Vector2(3f, -3f);
+        resultTitle.color = new Color(1f, 0.66f, 0.18f);
+        resultTitle.fontSize = 40;
+        resultDetails.color = new Color(0.82f, 0.88f, 0.9f);
+
+        Button retry = endPanel.transform.Find("Retry Button")?.GetComponent<Button>();
+        StyleResultButton(retry);
+        StyleResultButton(next);
+        AddPersistentClick(retry, audio, audio.PlayUiClick);
+        AddPersistentClick(next, audio, audio.PlayUiClick);
+        if (SceneManager.GetActiveScene().name == "VerticalSlice_Stage05")
+        {
+            Text retryLabel = retry != null ? retry.GetComponentInChildren<Text>() : null;
+            if (retryLabel != null)
+            {
+                retryLabel.text = "RESTART TEST";
+            }
+        }
+
+        serializedController.FindProperty("destructionFill").objectReferenceValue = destructionFill;
+        serializedController.ApplyModifiedPropertiesWithoutUndo();
+
+        var serializedLauncher = new SerializedObject(launcher);
+        LineRenderer trajectory = (LineRenderer)serializedLauncher.FindProperty("aimLine").objectReferenceValue;
+        PresentationCaptureMode captureMode = camera.GetComponent<PresentationCaptureMode>();
+        if (captureMode == null)
+        {
+            captureMode = camera.gameObject.AddComponent<PresentationCaptureMode>();
+        }
+
+        var serializedCapture = new SerializedObject(captureMode);
+        serializedCapture.FindProperty("trajectory").objectReferenceValue = trajectory;
+        serializedCapture.ApplyModifiedPropertiesWithoutUndo();
+        EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+    }
+
     internal static void ValidateLightingAndPostInOpenScene(string scenePath)
     {
         Volume volume = GameObject.Find(VolumeName)?.GetComponent<Volume>();
@@ -200,6 +344,7 @@ public static class FinalVisualPolishBuilder
         foreach (ParticleSystem particles in new[] { dust, sparks, collapse })
         {
             if (particles.main.simulationSpace != ParticleSystemSimulationSpace.World
+                || particles.main.playOnAwake
                 || particles.main.maxParticles > 100
                 || particles.GetComponent<Collider>() != null
                 || particles.GetComponent<Rigidbody>() != null)
@@ -207,6 +352,321 @@ public static class FinalVisualPolishBuilder
                 throw new UnityException($"{scenePath} has unsafe or excessive impact particles.");
             }
         }
+    }
+
+    internal static void ValidateHudInOpenScene(string scenePath)
+    {
+        VerticalSliceStageController controller = Object.FindAnyObjectByType<VerticalSliceStageController>();
+        PresentationCaptureMode capture = Camera.main != null
+            ? Camera.main.GetComponent<PresentationCaptureMode>()
+            : null;
+        if (controller == null || capture == null)
+        {
+            throw new UnityException($"{scenePath} final HUD or screenshot mode is missing.");
+        }
+
+        var serializedController = new SerializedObject(controller);
+        Image fill = (Image)serializedController.FindProperty("destructionFill").objectReferenceValue;
+        GameObject panel = (GameObject)serializedController.FindProperty("endPanel").objectReferenceValue;
+        Text stage = (Text)serializedController.FindProperty("stageLabelText").objectReferenceValue;
+        Canvas canvas = stage != null ? stage.GetComponentInParent<Canvas>() : null;
+        if (fill == null
+            || fill.type != Image.Type.Filled
+            || fill.fillMethod != Image.FillMethod.Horizontal
+            || panel == null
+            || panel.GetComponent<Outline>() == null
+            || canvas == null
+            || canvas.transform.Find(HudPresentationName) == null)
+        {
+            throw new UnityException($"{scenePath} final HUD presentation is incomplete.");
+        }
+
+        var serializedCapture = new SerializedObject(capture);
+        if (serializedCapture.FindProperty("trajectory").objectReferenceValue == null)
+        {
+            throw new UnityException($"{scenePath} screenshot mode is missing its trajectory reference.");
+        }
+    }
+
+    private static Image CreateHudPanel(
+        Transform parent,
+        string name,
+        Vector2 position,
+        Vector2 size,
+        Vector2 anchor)
+    {
+        GameObject panel = new(name, typeof(RectTransform), typeof(Image));
+        panel.transform.SetParent(parent, false);
+        SetRect(panel.GetComponent<RectTransform>(), position, size, anchor);
+        Image image = panel.GetComponent<Image>();
+        image.color = new Color(0.025f, 0.045f, 0.055f, 0.78f);
+        image.raycastTarget = false;
+        Outline outline = panel.AddComponent<Outline>();
+        outline.effectColor = new Color(0.24f, 0.34f, 0.38f, 0.75f);
+        outline.effectDistance = new Vector2(2f, -2f);
+        return image;
+    }
+
+    private static Image CreateProgressBar(Transform parent)
+    {
+        GameObject background = new("Destruction Progress", typeof(RectTransform), typeof(Image));
+        background.transform.SetParent(parent, false);
+        SetRect(background.GetComponent<RectTransform>(), new Vector2(0f, 34f), new Vector2(456f, 9f), new Vector2(0.5f, 0f));
+        Image backgroundImage = background.GetComponent<Image>();
+        backgroundImage.color = new Color(0.08f, 0.12f, 0.14f, 0.95f);
+        backgroundImage.raycastTarget = false;
+
+        GameObject fillObject = new("Fill", typeof(RectTransform), typeof(Image));
+        fillObject.transform.SetParent(background.transform, false);
+        RectTransform fillRect = fillObject.GetComponent<RectTransform>();
+        fillRect.anchorMin = Vector2.zero;
+        fillRect.anchorMax = Vector2.one;
+        fillRect.offsetMin = new Vector2(2f, 2f);
+        fillRect.offsetMax = new Vector2(-2f, -2f);
+        Image fill = fillObject.GetComponent<Image>();
+        fill.color = new Color(0.95f, 0.49f, 0.08f, 1f);
+        fill.type = Image.Type.Filled;
+        fill.fillMethod = Image.FillMethod.Horizontal;
+        fill.fillOrigin = (int)Image.OriginHorizontal.Left;
+        fill.fillAmount = 0f;
+        fill.raycastTarget = false;
+        return fill;
+    }
+
+    private static void StyleResultButton(Button button)
+    {
+        if (button == null)
+        {
+            return;
+        }
+
+        Image image = button.GetComponent<Image>();
+        image.color = new Color(0.1f, 0.19f, 0.22f, 1f);
+        ColorBlock colors = button.colors;
+        colors.normalColor = image.color;
+        colors.highlightedColor = new Color(0.16f, 0.32f, 0.36f, 1f);
+        colors.pressedColor = new Color(0.95f, 0.49f, 0.08f, 1f);
+        colors.selectedColor = colors.highlightedColor;
+        button.colors = colors;
+        Text label = button.GetComponentInChildren<Text>();
+        if (label != null)
+        {
+            label.color = new Color(0.94f, 0.96f, 0.94f);
+            label.fontStyle = FontStyle.Bold;
+        }
+    }
+
+    private static void AddPersistentClick(Button button, Object target, UnityEngine.Events.UnityAction action)
+    {
+        if (button == null || target == null)
+        {
+            return;
+        }
+
+        for (int index = 0; index < button.onClick.GetPersistentEventCount(); index++)
+        {
+            if (button.onClick.GetPersistentTarget(index) == target
+                && button.onClick.GetPersistentMethodName(index) == action.Method.Name)
+            {
+                return;
+            }
+        }
+
+        UnityEventTools.AddPersistentListener(button.onClick, action);
+    }
+
+    private static void CreateTitleScene()
+    {
+        Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+        scene.name = "VerticalSlice_Title";
+
+        GameObject cameraObject = new("Main Camera");
+        cameraObject.tag = "MainCamera";
+        Camera camera = cameraObject.AddComponent<Camera>();
+        camera.clearFlags = CameraClearFlags.Skybox;
+        camera.fieldOfView = 48f;
+        camera.transform.position = new Vector3(0f, 4.2f, -12f);
+        camera.transform.LookAt(new Vector3(0f, 2.2f, 4f));
+        cameraObject.AddComponent<AudioListener>();
+
+        GameObject keyObject = new("Directional Light");
+        Light key = keyObject.AddComponent<Light>();
+        key.type = LightType.Directional;
+        key.color = new Color(1f, 0.91f, 0.78f);
+        key.intensity = 1.55f;
+        key.shadows = LightShadows.Soft;
+        key.transform.rotation = Quaternion.Euler(52f, -38f, 0f);
+
+        RenderSettings.fog = true;
+        RenderSettings.fogMode = FogMode.Linear;
+        RenderSettings.fogColor = new Color(0.45f, 0.5f, 0.53f);
+        RenderSettings.fogStartDistance = 22f;
+        RenderSettings.fogEndDistance = 55f;
+        RenderSettings.ambientMode = AmbientMode.Trilight;
+        RenderSettings.ambientIntensity = 0.82f;
+        RenderSettings.skybox = AssetDatabase.LoadAssetAtPath<Material>("Assets/Materials/Presentation/IndustrialSky.mat");
+        ApplyLightingAndPostToOpenScene();
+
+        Material concrete = AssetDatabase.LoadAssetAtPath<Material>("Assets/Materials/Presentation/YardConcrete.mat");
+        Material steel = AssetDatabase.LoadAssetAtPath<Material>("Assets/Materials/Presentation/LauncherMetal.mat");
+        Material accent = AssetDatabase.LoadAssetAtPath<Material>("Assets/Materials/Presentation/SafetyYellow.mat");
+        CreateTitlePrimitive(PrimitiveType.Cube, "Test Yard", new Vector3(0f, -0.35f, 5f), new Vector3(28f, 0.5f, 30f), concrete);
+        CreateTitlePrimitive(PrimitiveType.Cube, "Left Gantry", new Vector3(-7.5f, 3f, 8f), new Vector3(2.8f, 6f, 5f), steel);
+        CreateTitlePrimitive(PrimitiveType.Cube, "Right Gantry", new Vector3(7.5f, 2.4f, 9f), new Vector3(3.4f, 4.8f, 5f), steel);
+        CreateTitlePrimitive(PrimitiveType.Cube, "Hazard Beam", new Vector3(0f, 0.2f, 8f), new Vector3(9f, 0.22f, 0.35f), accent);
+
+        Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        GameObject canvasObject = new("Title Screen", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+        Canvas canvas = canvasObject.GetComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        CanvasScaler scaler = canvasObject.GetComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1920f, 1080f);
+
+        Image backing = CreateTitleImage(canvas.transform, "Title Backing", new Vector2(0f, 40f), new Vector2(860f, 500f));
+        backing.color = new Color(0.02f, 0.035f, 0.045f, 0.9f);
+        Text title = CreateTitleText(canvas.transform, font, "DEMOLITION LAB", 72, new Vector2(0f, 180f), new Vector2(900f, 100f));
+        title.color = new Color(0.96f, 0.62f, 0.13f);
+        title.fontStyle = FontStyle.Bold;
+        Text subtitle = CreateTitleText(canvas.transform, font, "STRUCTURAL DEMOLITION TEST", 28, new Vector2(0f, 112f), new Vector2(700f, 55f));
+        subtitle.color = new Color(0.78f, 0.85f, 0.87f);
+        Button start = CreateTitleButton(canvas.transform, font);
+        CreateTitleText(canvas.transform, font, "WASD / ARROW KEYS  —  AIM     SPACE  —  FIRE     F10  —  HIDE TRAJECTORY", 21, new Vector2(0f, -130f), new Vector2(900f, 45f));
+
+        GameObject menuObject = new("Presentation Menu Controller");
+        PresentationMenuController menu = menuObject.AddComponent<PresentationMenuController>();
+        PresentationAudioHooks audio = menuObject.AddComponent<PresentationAudioHooks>();
+        AudioSource source = menuObject.GetComponent<AudioSource>();
+        source.playOnAwake = false;
+        AddPersistentClick(start, menu, menu.StartTest);
+        AddPersistentClick(start, audio, audio.PlayUiClick);
+
+        GameObject eventSystem = new("EventSystem");
+        eventSystem.AddComponent<EventSystem>();
+        eventSystem.AddComponent<InputSystemUIInputModule>();
+        EditorSceneManager.SaveScene(scene, TitleScenePath);
+    }
+
+    private static void ValidateTitleScene()
+    {
+        EditorSceneManager.OpenScene(TitleScenePath, OpenSceneMode.Single);
+        PresentationMenuController menu = Object.FindAnyObjectByType<PresentationMenuController>();
+        Button start = GameObject.Find("Start Button")?.GetComponent<Button>();
+        if (menu == null
+            || menu.StartSceneName != StageOneSceneName
+            || start == null
+            || start.onClick.GetPersistentEventCount() < 1
+            || Camera.main == null
+            || Object.FindAnyObjectByType<Rigidbody>() != null
+            || Object.FindAnyObjectByType<Collider>() != null)
+        {
+            throw new UnityException("Title scene presentation or START flow is incomplete.");
+        }
+
+        bool titleBeforeStageOne = false;
+        EditorBuildSettingsScene[] scenes = EditorBuildSettings.scenes;
+        for (int index = 0; index < scenes.Length - 1; index++)
+        {
+            if (scenes[index].path == TitleScenePath
+                && scenes[index + 1].path == StageScenePaths[0]
+                && scenes[index].enabled)
+            {
+                titleBeforeStageOne = true;
+                break;
+            }
+        }
+
+        if (!titleBeforeStageOne)
+        {
+            throw new UnityException("Title scene is not enabled immediately before Stage01 in build settings.");
+        }
+    }
+
+    private static void ConfigureBuildSettings()
+    {
+        var scenes = new List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
+        scenes.RemoveAll(scene => scene.path == TitleScenePath);
+        int stageOneIndex = scenes.FindIndex(scene => scene.path == StageScenePaths[0]);
+        if (stageOneIndex < 0)
+        {
+            throw new UnityException("Stage01 must exist in build settings before adding the title scene.");
+        }
+
+        scenes.Insert(stageOneIndex, new EditorBuildSettingsScene(TitleScenePath, true));
+        EditorBuildSettings.scenes = scenes.ToArray();
+    }
+
+    private static void CreateTitlePrimitive(
+        PrimitiveType type,
+        string name,
+        Vector3 position,
+        Vector3 scale,
+        Material material)
+    {
+        GameObject visual = GameObject.CreatePrimitive(type);
+        visual.name = name;
+        visual.transform.position = position;
+        visual.transform.localScale = scale;
+        Object.DestroyImmediate(visual.GetComponent<Collider>());
+        visual.GetComponent<Renderer>().sharedMaterial = material;
+    }
+
+    private static Image CreateTitleImage(Transform parent, string name, Vector2 position, Vector2 size)
+    {
+        GameObject imageObject = new(name, typeof(RectTransform), typeof(Image));
+        imageObject.transform.SetParent(parent, false);
+        SetRect(imageObject.GetComponent<RectTransform>(), position, size, new Vector2(0.5f, 0.5f));
+        return imageObject.GetComponent<Image>();
+    }
+
+    private static Text CreateTitleText(
+        Transform parent,
+        Font font,
+        string content,
+        int fontSize,
+        Vector2 position,
+        Vector2 size)
+    {
+        GameObject textObject = new(content, typeof(RectTransform), typeof(Text));
+        textObject.transform.SetParent(parent, false);
+        SetRect(textObject.GetComponent<RectTransform>(), position, size, new Vector2(0.5f, 0.5f));
+        Text text = textObject.GetComponent<Text>();
+        text.font = font;
+        text.text = content;
+        text.fontSize = fontSize;
+        text.alignment = TextAnchor.MiddleCenter;
+        text.color = new Color(0.9f, 0.93f, 0.92f);
+        text.raycastTarget = false;
+        return text;
+    }
+
+    private static Button CreateTitleButton(Transform parent, Font font)
+    {
+        GameObject buttonObject = new("Start Button", typeof(RectTransform), typeof(Image), typeof(Button));
+        buttonObject.transform.SetParent(parent, false);
+        SetRect(buttonObject.GetComponent<RectTransform>(), new Vector2(0f, -15f), new Vector2(280f, 68f), new Vector2(0.5f, 0.5f));
+        Button button = buttonObject.GetComponent<Button>();
+        StyleResultButton(button);
+        Text label = CreateTitleText(buttonObject.transform, font, "START", 30, Vector2.zero, new Vector2(280f, 68f));
+        RectTransform labelRect = label.rectTransform;
+        labelRect.anchorMin = Vector2.zero;
+        labelRect.anchorMax = Vector2.one;
+        labelRect.offsetMin = Vector2.zero;
+        labelRect.offsetMax = Vector2.zero;
+        return button;
+    }
+
+    private static void SetRect(
+        RectTransform rect,
+        Vector2 position,
+        Vector2 size,
+        Vector2 anchor)
+    {
+        rect.anchorMin = anchor;
+        rect.anchorMax = anchor;
+        rect.pivot = anchor;
+        rect.anchoredPosition = position;
+        rect.sizeDelta = size;
     }
 
     private static VolumeProfile CreatePostProcessProfile()
@@ -277,6 +737,7 @@ public static class FinalVisualPolishBuilder
         ParticleSystem.MainModule main = particles.main;
         main.duration = 0.6f;
         main.loop = false;
+        main.playOnAwake = false;
         main.startLifetime = new ParticleSystem.MinMaxCurve(0.45f, 0.85f);
         main.startSpeed = new ParticleSystem.MinMaxCurve(1.4f, 3.2f);
         main.startSize = new ParticleSystem.MinMaxCurve(0.14f, 0.34f);

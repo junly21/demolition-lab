@@ -29,6 +29,12 @@ Concrete variants are selected deterministically from object names so stages rem
 
 The settings are deliberately restrained so the trajectory line and HUD remain crisp.
 
+## Environment And Launcher
+
+- Existing warehouse, container, barrier, pipe, and industrial silhouettes frame the firing lane without entering it.
+- Stage04 and Stage05 use larger and more distant backdrop masses to support their scale while keeping the target structure highest contrast.
+- The launcher keeps its exact transform and muzzle but uses a charcoal metal housing, orange turntable/muzzle accents, a clearer yaw ring, support legs, breech sleeve, and pivot brackets under presentation-only roots.
+
 ## Impact And Collapse Feedback
 
 - Concrete/Foundation hit: 22-particle dust burst at the accepted `ProjectileImpact.ContactPosition`
@@ -42,6 +48,20 @@ All particles use world simulation, contain no physics components, remain below 
 ## Audio Hooks
 
 `PresentationAudioHooks` exposes clips for fire, concrete impact, steel impact, critical break, large collapse, UI click, clear, and fail. No placeholder audio is synthesized; external SFX remain required.
+
+## HUD And Presentation Flow
+
+- The existing Stage, Shots, and Destruction information remains unchanged.
+- Stage and ammo use compact translucent industrial panels; destruction adds a thin orange progress bar.
+- Result panels use a dark test-report treatment with orange status emphasis and non-default button states.
+- Stage05 clear reads `TEST PROGRAM COMPLETE`; its Retry action is presented as `RESTART TEST`.
+- `VerticalSlice_Title` provides `DEMOLITION LAB`, `STRUCTURAL DEMOLITION TEST`, controls, and a single `START` action into Stage01.
+- The title is inserted directly before Stage01 in build settings without changing Stage01–05 Next-scene progression.
+
+## Screenshot Mode
+
+- Press `F10` during a stage to toggle only the trajectory line.
+- Gameplay HUD, physics, input, and stage state remain active and unchanged.
 
 ## Gameplay Lock
 

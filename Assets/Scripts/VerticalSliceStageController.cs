@@ -25,6 +25,7 @@ namespace DemolitionLab
         [SerializeField] private Text stageLabelText;
         [SerializeField] private Text shotsText;
         [SerializeField] private Text destructionText;
+        [SerializeField] private Image destructionFill;
         [SerializeField] private GameObject endPanel;
         [SerializeField] private Text resultTitleText;
         [SerializeField] private Text resultDetailsText;
@@ -289,7 +290,9 @@ namespace DemolitionLab
             }
 
             flow.Complete(cleared);
-            resultTitleText.text = cleared ? "STAGE CLEAR" : "STAGE FAILED";
+            resultTitleText.text = cleared
+                ? HasNextScene ? "STAGE CLEAR" : "TEST PROGRAM COMPLETE"
+                : "STAGE FAILED";
             resultDetailsText.text = $"Shots Used: {flow.ShotsUsed}\nDestruction: {destruction:0}%";
             nextButton.gameObject.SetActive(cleared && HasNextScene);
             endPanel.SetActive(true);
@@ -342,6 +345,7 @@ namespace DemolitionLab
         {
             shotsText.text = $"Shots: {flow.AmmoRemaining}";
             destructionText.text = $"Destruction: {DestructionPercentage:0}%";
+            destructionFill.fillAmount = DestructionPercentage / 100f;
         }
 
         private void LogInitialTargetState()
@@ -427,6 +431,7 @@ namespace DemolitionLab
             isValid &= ValidateReference(stageLabelText, nameof(stageLabelText));
             isValid &= ValidateReference(shotsText, nameof(shotsText));
             isValid &= ValidateReference(destructionText, nameof(destructionText));
+            isValid &= ValidateReference(destructionFill, nameof(destructionFill));
             isValid &= ValidateReference(endPanel, nameof(endPanel));
             isValid &= ValidateReference(resultTitleText, nameof(resultTitleText));
             isValid &= ValidateReference(resultDetailsText, nameof(resultDetailsText));

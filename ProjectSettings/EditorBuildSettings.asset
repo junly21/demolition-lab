@@ -24,6 +24,9 @@ EditorBuildSettings:
     path: Assets/Scenes/M5_PhysicalConnections.unity
     guid: f3a404e9fb7a9470f9c6e197a96063c3
   - enabled: 1
+    path: Assets/Scenes/VerticalSlice_Title.unity
+    guid: 2ee66590d468042329ebef30549e9307
+  - enabled: 1
     path: Assets/Scenes/VerticalSlice_Stage01.unity
     guid: af090e29048fc40cdb245731e326d02c
   - enabled: 1
