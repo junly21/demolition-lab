@@ -29,14 +29,16 @@
 - What it is used for: Demolition-yard ground material
 - Whether modified: Imported at a 2048 maximum runtime size; roughness converted to a URP metallic/smoothness mask
 
+## Imported But Not Currently Used
+
 ### Poly Haven Concrete
 
 - Asset name: Concrete
 - Author / publisher: Poly Haven
 - Source: https://polyhaven.com/a/concrete
 - License: Creative Commons Zero (CC0)
-- What it is used for: Structural concrete and foundation materials
-- Whether modified: Imported at a 2048 maximum runtime size; roughness converted to a URP metallic/smoothness mask
+- What it is used for: Retained as an imported source asset, but no longer assigned to structural pieces because its directional surface read as wood-like at gameplay scale
+- Whether modified: Imported source remains unchanged; structural concrete now uses a project-owned procedural mottle texture
 
 ## Asset Record Template
 

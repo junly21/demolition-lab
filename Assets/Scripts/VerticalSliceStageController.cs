@@ -343,8 +343,8 @@ namespace DemolitionLab
 
         private void RefreshHud()
         {
-            shotsText.text = $"Shots: {flow.AmmoRemaining}";
-            destructionText.text = $"Destruction: {DestructionPercentage:0}%";
+            shotsText.text = $"SHOTS  {flow.AmmoRemaining}";
+            destructionText.text = $"DESTRUCTION  {DestructionPercentage:0}%";
             destructionFill.fillAmount = DestructionPercentage / 100f;
         }
 

@@ -2,30 +2,28 @@
 
 ## Material Palette
 
-- Clean concrete: cool light gray, low metallic, 0.32 normal strength
-- Dark concrete: medium cool gray, 0.28 normal strength
-- Worn concrete: slightly warm gray, 0.38 normal strength
-- Foundation concrete: darker neutral gray, 0.36 normal strength
-- Steel: dark blue-charcoal, 0.82 metallic, 0.32 smoothness
-- Weak steel: dark worn steel, 0.72 metallic, 0.24 smoothness; orange/yellow is limited to connector accents
-- Reinforced steel: deep blue steel, 0.90 metallic, 0.38 smoothness
+- Concrete: project-owned low-contrast, non-directional mottle texture; metallic `0`, smoothness `0.12–0.16`, no directional normal map
+- Concrete variants: cool light gray, medium cool gray, restrained worn gray, and darker foundation gray
+- Steel: lifted charcoal blue-gray, metallic `0.78`, smoothness `0.30`
+- Weak steel: neutral worn steel, metallic `0.70`, smoothness `0.23`; orange/yellow remains limited to connector accents
+- Reinforced steel: readable dark blue-gray, metallic `0.86`, smoothness `0.34`
 
 Concrete variants are selected deterministically from object names so stages remain reproducible and visually coherent.
 
 ## Lighting And Depth
 
-- Key light: warm directional, intensity 1.55, rotation `(52, -38, 0)`, soft shadows at 0.88 strength
-- Fill light: cool directional, intensity 0.26, rotation `(28, 142, 0)`, no shadows
+- Key light: warm directional, intensity `1.50`, rotation `(52, -38, 0)`, soft shadows at `0.88` strength
+- Fill light: cool directional, intensity `0.48`, rotation `(28, 142, 0)`, no shadows
 - SSAO: intensity 0.55, radius 0.35, direct-light contribution 0.20
 - Linear fog: start 22 m, end 55 m, desaturated blue-gray
-- Ambient light: cool trilight with 0.82 intensity
+- Ambient light: lifted cool trilight with `1.02` intensity
 
 ## Post Processing
 
-- Color Adjustments: exposure `+0.08`, contrast `+12`, saturation `-8`, subtle cool filter
+- Color Adjustments: exposure `+0.20`, contrast `+4`, saturation `-8`, subtle cool filter
 - Tonemapping: ACES
 - Bloom: threshold `1.15`, intensity `0.12`, scatter `0.45`, clamp `4`
-- Vignette: intensity `0.11`, smoothness `0.38`
+- Vignette: intensity `0.055`, smoothness `0.32`
 
 The settings are deliberately restrained so the trajectory line and HUD remain crisp.
 
@@ -52,10 +50,11 @@ All particles use world simulation, contain no physics components, remain below 
 ## HUD And Presentation Flow
 
 - The existing Stage, Shots, and Destruction information remains unchanged.
-- Stage and ammo use compact translucent industrial panels; destruction adds a thin orange progress bar.
-- Result panels use a dark test-report treatment with orange status emphasis and non-default button states.
+- Stage and ammo use compact typography with short orange baseline accents and no card panels.
+- Destruction uses a compact label and a `380 × 6` thin progress line without a backing card.
+- Result panels use one restrained translucent test-report surface, a thin orange edge, and lighter outlined buttons.
 - Stage05 clear reads `TEST PROGRAM COMPLETE`; its Retry action is presented as `RESTART TEST`.
-- `VerticalSlice_Title` provides `DEMOLITION LAB`, `STRUCTURAL DEMOLITION TEST`, controls, and a single `START` action into Stage01.
+- `VerticalSlice_Title` uses a dedicated camera, right-side braced industrial frame silhouette, one full-screen translucent overlay, split `DEMOLITION / LAB` typography, and a single `START TEST` action into Stage01.
 - The title is inserted directly before Stage01 in build settings without changing Stage01–05 Next-scene progression.
 
 ## Screenshot Mode

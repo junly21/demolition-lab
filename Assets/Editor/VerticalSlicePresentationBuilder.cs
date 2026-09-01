@@ -143,6 +143,13 @@ public static class VerticalSlicePresentationBuilder
         EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
     }
 
+    internal static void ApplyLightingToOpenScene()
+    {
+        PresentationMaterials materials = CreateEnvironmentMaterials();
+        ConfigureLighting(materials.Skybox);
+        EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+    }
+
     private static void RemapStructuralMaterials(StructuralPresentationMaterials materials)
     {
         foreach (GameObject piece in GameObject.FindGameObjectsWithTag("Destructible"))
@@ -428,7 +435,7 @@ public static class VerticalSlicePresentationBuilder
 
         keyLight.transform.rotation = Quaternion.Euler(52f, -38f, 0f);
         keyLight.color = new Color(1f, 0.9f, 0.76f);
-        keyLight.intensity = 1.55f;
+        keyLight.intensity = 1.5f;
         keyLight.shadows = LightShadows.Soft;
         keyLight.shadowStrength = 0.88f;
         keyLight.shadowBias = 0.035f;
@@ -437,10 +444,10 @@ public static class VerticalSlicePresentationBuilder
         RenderSettings.sun = keyLight;
         RenderSettings.skybox = skybox;
         RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
-        RenderSettings.ambientSkyColor = new Color(0.38f, 0.47f, 0.57f);
-        RenderSettings.ambientEquatorColor = new Color(0.24f, 0.29f, 0.34f);
-        RenderSettings.ambientGroundColor = new Color(0.14f, 0.16f, 0.18f);
-        RenderSettings.ambientIntensity = 0.82f;
+        RenderSettings.ambientSkyColor = new Color(0.47f, 0.56f, 0.65f);
+        RenderSettings.ambientEquatorColor = new Color(0.34f, 0.4f, 0.45f);
+        RenderSettings.ambientGroundColor = new Color(0.22f, 0.25f, 0.28f);
+        RenderSettings.ambientIntensity = 1.02f;
         RenderSettings.fog = true;
         RenderSettings.fogMode = FogMode.Linear;
         RenderSettings.fogColor = new Color(0.42f, 0.49f, 0.55f);
@@ -509,7 +516,7 @@ public static class VerticalSlicePresentationBuilder
         material.SetColor("_GroundColor", new Color(0.16f, 0.19f, 0.22f));
         material.SetFloat("_AtmosphereThickness", 0.64f);
         material.SetFloat("_SunSize", 0.03f);
-        material.SetFloat("_Exposure", 0.92f);
+        material.SetFloat("_Exposure", 1.04f);
         EditorUtility.SetDirty(material);
         return material;
     }

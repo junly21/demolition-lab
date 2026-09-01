@@ -38,6 +38,7 @@ public static class FinalVisualPolishBuilder
         foreach (string scenePath in StageScenePaths)
         {
             EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
+            VerticalSlicePresentationBuilder.ApplyLightingToOpenScene();
             ApplyLightingAndPostToOpenScene();
             EditorSceneManager.SaveOpenScenes();
         }
@@ -149,7 +150,7 @@ public static class FinalVisualPolishBuilder
         Light fill = fillObject.AddComponent<Light>();
         fill.type = LightType.Directional;
         fill.color = new Color(0.64f, 0.76f, 0.92f);
-        fill.intensity = 0.26f;
+        fill.intensity = 0.48f;
         fill.shadows = LightShadows.None;
         fill.transform.rotation = Quaternion.Euler(28f, 142f, 0f);
 
@@ -251,17 +252,19 @@ public static class FinalVisualPolishBuilder
         rootRect.offsetMax = Vector2.zero;
         root.transform.SetAsFirstSibling();
 
-        CreateHudPanel(root.transform, "Stage Panel", new Vector2(24f, -20f), new Vector2(350f, 66f), new Vector2(0f, 1f));
-        CreateHudPanel(root.transform, "Shots Panel", new Vector2(-24f, -20f), new Vector2(350f, 66f), new Vector2(1f, 1f));
-        CreateHudPanel(root.transform, "Destruction Panel", new Vector2(0f, 20f), new Vector2(520f, 86f), new Vector2(0.5f, 0f));
+        ConfigureCompactHudText(stage, 30, new Vector2(30f, -22f), new Vector2(300f, 44f), new Vector2(0f, 1f), TextAnchor.UpperLeft);
+        ConfigureCompactHudText(shots, 28, new Vector2(-30f, -22f), new Vector2(300f, 44f), new Vector2(1f, 1f), TextAnchor.UpperRight);
+        ConfigureCompactHudText(destruction, 24, new Vector2(0f, 43f), new Vector2(380f, 36f), new Vector2(0.5f, 0f), TextAnchor.LowerCenter);
+        CreateHudAccentLine(root.transform, "Stage Accent", new Vector2(30f, -72f), new Vector2(118f, 3f), new Vector2(0f, 1f));
+        CreateHudAccentLine(root.transform, "Shots Accent", new Vector2(-30f, -72f), new Vector2(118f, 3f), new Vector2(1f, 1f));
         Image destructionFill = CreateProgressBar(root.transform);
-        destruction.rectTransform.anchoredPosition = new Vector2(0f, 52f);
 
         Image endPanelImage = endPanel.GetComponent<Image>();
-        endPanelImage.color = new Color(0.025f, 0.04f, 0.05f, 0.975f);
+        endPanelImage.color = new Color(0.025f, 0.04f, 0.05f, 0.9f);
+        endPanel.GetComponent<RectTransform>().sizeDelta = new Vector2(500f, 320f);
         Outline panelOutline = endPanel.GetComponent<Outline>() ?? endPanel.AddComponent<Outline>();
-        panelOutline.effectColor = new Color(0.95f, 0.5f, 0.08f, 0.8f);
-        panelOutline.effectDistance = new Vector2(3f, -3f);
+        panelOutline.effectColor = new Color(0.95f, 0.5f, 0.08f, 0.62f);
+        panelOutline.effectDistance = new Vector2(1.5f, -1.5f);
         resultTitle.color = new Color(1f, 0.66f, 0.18f);
         resultTitle.fontSize = 40;
         resultDetails.color = new Color(0.82f, 0.88f, 0.9f);
@@ -370,13 +373,18 @@ public static class FinalVisualPolishBuilder
         GameObject panel = (GameObject)serializedController.FindProperty("endPanel").objectReferenceValue;
         Text stage = (Text)serializedController.FindProperty("stageLabelText").objectReferenceValue;
         Canvas canvas = stage != null ? stage.GetComponentInParent<Canvas>() : null;
+        Transform hudRoot = canvas != null ? canvas.transform.Find(HudPresentationName) : null;
         if (fill == null
             || fill.type != Image.Type.Filled
             || fill.fillMethod != Image.FillMethod.Horizontal
             || panel == null
             || panel.GetComponent<Outline>() == null
-            || canvas == null
-            || canvas.transform.Find(HudPresentationName) == null)
+            || hudRoot == null
+            || hudRoot.Find("Stage Panel") != null
+            || hudRoot.Find("Shots Panel") != null
+            || hudRoot.Find("Destruction Panel") != null
+            || hudRoot.Find("Stage Accent") == null
+            || hudRoot.Find("Shots Accent") == null)
         {
             throw new UnityException($"{scenePath} final HUD presentation is incomplete.");
         }
@@ -388,22 +396,40 @@ public static class FinalVisualPolishBuilder
         }
     }
 
-    private static Image CreateHudPanel(
+    private static void ConfigureCompactHudText(
+        Text text,
+        int fontSize,
+        Vector2 position,
+        Vector2 size,
+        Vector2 anchor,
+        TextAnchor alignment)
+    {
+        text.fontSize = fontSize;
+        text.fontStyle = FontStyle.Bold;
+        text.alignment = alignment;
+        text.color = new Color(0.92f, 0.95f, 0.95f);
+        SetRect(text.rectTransform, position, size, anchor);
+        Outline outline = text.GetComponent<Outline>();
+        if (outline != null)
+        {
+            outline.effectColor = new Color(0.015f, 0.025f, 0.03f, 0.78f);
+            outline.effectDistance = new Vector2(1f, -1f);
+        }
+    }
+
+    private static Image CreateHudAccentLine(
         Transform parent,
         string name,
         Vector2 position,
         Vector2 size,
         Vector2 anchor)
     {
-        GameObject panel = new(name, typeof(RectTransform), typeof(Image));
-        panel.transform.SetParent(parent, false);
-        SetRect(panel.GetComponent<RectTransform>(), position, size, anchor);
-        Image image = panel.GetComponent<Image>();
-        image.color = new Color(0.025f, 0.045f, 0.055f, 0.78f);
+        GameObject lineObject = new(name, typeof(RectTransform), typeof(Image));
+        lineObject.transform.SetParent(parent, false);
+        SetRect(lineObject.GetComponent<RectTransform>(), position, size, anchor);
+        Image image = lineObject.GetComponent<Image>();
+        image.color = new Color(0.95f, 0.49f, 0.08f, 0.9f);
         image.raycastTarget = false;
-        Outline outline = panel.AddComponent<Outline>();
-        outline.effectColor = new Color(0.24f, 0.34f, 0.38f, 0.75f);
-        outline.effectDistance = new Vector2(2f, -2f);
         return image;
     }
 
@@ -411,9 +437,9 @@ public static class FinalVisualPolishBuilder
     {
         GameObject background = new("Destruction Progress", typeof(RectTransform), typeof(Image));
         background.transform.SetParent(parent, false);
-        SetRect(background.GetComponent<RectTransform>(), new Vector2(0f, 34f), new Vector2(456f, 9f), new Vector2(0.5f, 0f));
+        SetRect(background.GetComponent<RectTransform>(), new Vector2(0f, 28f), new Vector2(380f, 6f), new Vector2(0.5f, 0f));
         Image backgroundImage = background.GetComponent<Image>();
-        backgroundImage.color = new Color(0.08f, 0.12f, 0.14f, 0.95f);
+        backgroundImage.color = new Color(0.04f, 0.07f, 0.08f, 0.72f);
         backgroundImage.raycastTarget = false;
 
         GameObject fillObject = new("Fill", typeof(RectTransform), typeof(Image));
@@ -421,8 +447,8 @@ public static class FinalVisualPolishBuilder
         RectTransform fillRect = fillObject.GetComponent<RectTransform>();
         fillRect.anchorMin = Vector2.zero;
         fillRect.anchorMax = Vector2.one;
-        fillRect.offsetMin = new Vector2(2f, 2f);
-        fillRect.offsetMax = new Vector2(-2f, -2f);
+        fillRect.offsetMin = new Vector2(1f, 1f);
+        fillRect.offsetMax = new Vector2(-1f, -1f);
         Image fill = fillObject.GetComponent<Image>();
         fill.color = new Color(0.95f, 0.49f, 0.08f, 1f);
         fill.type = Image.Type.Filled;
@@ -441,13 +467,16 @@ public static class FinalVisualPolishBuilder
         }
 
         Image image = button.GetComponent<Image>();
-        image.color = new Color(0.1f, 0.19f, 0.22f, 1f);
+        image.color = new Color(0.08f, 0.15f, 0.17f, 0.88f);
         ColorBlock colors = button.colors;
         colors.normalColor = image.color;
         colors.highlightedColor = new Color(0.16f, 0.32f, 0.36f, 1f);
         colors.pressedColor = new Color(0.95f, 0.49f, 0.08f, 1f);
         colors.selectedColor = colors.highlightedColor;
         button.colors = colors;
+        Outline outline = button.GetComponent<Outline>() ?? button.gameObject.AddComponent<Outline>();
+        outline.effectColor = new Color(0.95f, 0.49f, 0.08f, 0.7f);
+        outline.effectDistance = new Vector2(1f, -1f);
         Text label = button.GetComponentInChildren<Text>();
         if (label != null)
         {
@@ -484,16 +513,16 @@ public static class FinalVisualPolishBuilder
         cameraObject.tag = "MainCamera";
         Camera camera = cameraObject.AddComponent<Camera>();
         camera.clearFlags = CameraClearFlags.Skybox;
-        camera.fieldOfView = 48f;
-        camera.transform.position = new Vector3(0f, 4.2f, -12f);
-        camera.transform.LookAt(new Vector3(0f, 2.2f, 4f));
+        camera.fieldOfView = 46f;
+        camera.transform.position = new Vector3(-1.5f, 4.4f, -13.5f);
+        camera.transform.LookAt(new Vector3(2.8f, 2.4f, 6.5f));
         cameraObject.AddComponent<AudioListener>();
 
         GameObject keyObject = new("Directional Light");
         Light key = keyObject.AddComponent<Light>();
         key.type = LightType.Directional;
         key.color = new Color(1f, 0.91f, 0.78f);
-        key.intensity = 1.55f;
+        key.intensity = 1.5f;
         key.shadows = LightShadows.Soft;
         key.transform.rotation = Quaternion.Euler(52f, -38f, 0f);
 
@@ -503,17 +532,25 @@ public static class FinalVisualPolishBuilder
         RenderSettings.fogStartDistance = 22f;
         RenderSettings.fogEndDistance = 55f;
         RenderSettings.ambientMode = AmbientMode.Trilight;
-        RenderSettings.ambientIntensity = 0.82f;
+        RenderSettings.ambientSkyColor = new Color(0.47f, 0.56f, 0.65f);
+        RenderSettings.ambientEquatorColor = new Color(0.34f, 0.4f, 0.45f);
+        RenderSettings.ambientGroundColor = new Color(0.22f, 0.25f, 0.28f);
+        RenderSettings.ambientIntensity = 1.02f;
         RenderSettings.skybox = AssetDatabase.LoadAssetAtPath<Material>("Assets/Materials/Presentation/IndustrialSky.mat");
         ApplyLightingAndPostToOpenScene();
 
         Material concrete = AssetDatabase.LoadAssetAtPath<Material>("Assets/Materials/Presentation/YardConcrete.mat");
         Material steel = AssetDatabase.LoadAssetAtPath<Material>("Assets/Materials/Presentation/LauncherMetal.mat");
         Material accent = AssetDatabase.LoadAssetAtPath<Material>("Assets/Materials/Presentation/SafetyYellow.mat");
-        CreateTitlePrimitive(PrimitiveType.Cube, "Test Yard", new Vector3(0f, -0.35f, 5f), new Vector3(28f, 0.5f, 30f), concrete);
-        CreateTitlePrimitive(PrimitiveType.Cube, "Left Gantry", new Vector3(-7.5f, 3f, 8f), new Vector3(2.8f, 6f, 5f), steel);
-        CreateTitlePrimitive(PrimitiveType.Cube, "Right Gantry", new Vector3(7.5f, 2.4f, 9f), new Vector3(3.4f, 4.8f, 5f), steel);
-        CreateTitlePrimitive(PrimitiveType.Cube, "Hazard Beam", new Vector3(0f, 0.2f, 8f), new Vector3(9f, 0.22f, 0.35f), accent);
+        CreateTitlePrimitive(PrimitiveType.Cube, "Test Yard", new Vector3(1f, -0.35f, 7f), Quaternion.identity, new Vector3(30f, 0.5f, 32f), concrete);
+        CreateTitlePrimitive(PrimitiveType.Cube, "Frame Foundation", new Vector3(5.5f, 0.15f, 7f), Quaternion.identity, new Vector3(8.5f, 0.3f, 3.6f), concrete);
+        CreateTitlePrimitive(PrimitiveType.Cube, "Frame Column Left", new Vector3(3.1f, 2.7f, 7f), Quaternion.identity, new Vector3(0.48f, 5.2f, 0.55f), steel);
+        CreateTitlePrimitive(PrimitiveType.Cube, "Frame Column Right", new Vector3(7.9f, 2.7f, 7f), Quaternion.identity, new Vector3(0.48f, 5.2f, 0.55f), steel);
+        CreateTitlePrimitive(PrimitiveType.Cube, "Frame Top Beam", new Vector3(5.5f, 5.15f, 7f), Quaternion.identity, new Vector3(5.4f, 0.5f, 0.62f), steel);
+        CreateTitlePrimitive(PrimitiveType.Cube, "Frame Mid Beam", new Vector3(5.5f, 2.65f, 7f), Quaternion.identity, new Vector3(5.1f, 0.34f, 0.5f), steel);
+        CreateTitlePrimitive(PrimitiveType.Cube, "Frame Brace A", new Vector3(4.25f, 2.65f, 6.65f), Quaternion.Euler(0f, 0f, 34f), new Vector3(0.24f, 4.4f, 0.28f), steel);
+        CreateTitlePrimitive(PrimitiveType.Cube, "Frame Brace B", new Vector3(6.75f, 2.65f, 6.65f), Quaternion.Euler(0f, 0f, -34f), new Vector3(0.24f, 4.4f, 0.28f), steel);
+        CreateTitlePrimitive(PrimitiveType.Cube, "Hazard Rail", new Vector3(5.5f, 0.48f, 5.2f), Quaternion.identity, new Vector3(7.2f, 0.16f, 0.18f), accent);
 
         Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         GameObject canvasObject = new("Title Screen", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
@@ -523,15 +560,24 @@ public static class FinalVisualPolishBuilder
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1920f, 1080f);
 
-        Image backing = CreateTitleImage(canvas.transform, "Title Backing", new Vector2(0f, 40f), new Vector2(860f, 500f));
-        backing.color = new Color(0.02f, 0.035f, 0.045f, 0.9f);
-        Text title = CreateTitleText(canvas.transform, font, "DEMOLITION LAB", 72, new Vector2(0f, 180f), new Vector2(900f, 100f));
-        title.color = new Color(0.96f, 0.62f, 0.13f);
-        title.fontStyle = FontStyle.Bold;
-        Text subtitle = CreateTitleText(canvas.transform, font, "STRUCTURAL DEMOLITION TEST", 28, new Vector2(0f, 112f), new Vector2(700f, 55f));
+        Image overlay = CreateTitleImage(canvas.transform, "Title Overlay", Vector2.zero, new Vector2(1920f, 1080f));
+        overlay.color = new Color(0.015f, 0.028f, 0.035f, 0.32f);
+        Text demolition = CreateTitleText(canvas.transform, font, "DEMOLITION", 70, new Vector2(-570f, 190f), new Vector2(700f, 90f));
+        demolition.alignment = TextAnchor.MiddleLeft;
+        demolition.fontStyle = FontStyle.Bold;
+        Text lab = CreateTitleText(canvas.transform, font, "LAB", 96, new Vector2(-570f, 105f), new Vector2(700f, 110f));
+        lab.alignment = TextAnchor.MiddleLeft;
+        lab.color = new Color(0.96f, 0.58f, 0.1f);
+        lab.fontStyle = FontStyle.Bold;
+        Image titleAccent = CreateTitleImage(canvas.transform, "Title Accent", new Vector2(-565f, 35f), new Vector2(190f, 4f));
+        titleAccent.color = new Color(0.96f, 0.49f, 0.08f, 0.95f);
+        Text subtitle = CreateTitleText(canvas.transform, font, "STRUCTURAL DEMOLITION TEST", 25, new Vector2(-570f, -12f), new Vector2(700f, 50f));
+        subtitle.alignment = TextAnchor.MiddleLeft;
         subtitle.color = new Color(0.78f, 0.85f, 0.87f);
-        Button start = CreateTitleButton(canvas.transform, font);
-        CreateTitleText(canvas.transform, font, "WASD / ARROW KEYS  —  AIM     SPACE  —  FIRE     F10  —  HIDE TRAJECTORY", 21, new Vector2(0f, -130f), new Vector2(900f, 45f));
+        Button start = CreateTitleButton(canvas.transform, font, new Vector2(-570f, -115f));
+        Text controls = CreateTitleText(canvas.transform, font, "WASD / ARROWS  —  AIM     SPACE  —  FIRE", 19, new Vector2(-570f, -205f), new Vector2(700f, 42f));
+        controls.alignment = TextAnchor.MiddleLeft;
+        controls.color = new Color(0.66f, 0.73f, 0.75f);
 
         GameObject menuObject = new("Presentation Menu Controller");
         PresentationMenuController menu = menuObject.AddComponent<PresentationMenuController>();
@@ -557,6 +603,9 @@ public static class FinalVisualPolishBuilder
             || start == null
             || start.onClick.GetPersistentEventCount() < 1
             || Camera.main == null
+            || GameObject.Find("Title Backing") != null
+            || GameObject.Find("Title Overlay") == null
+            || GameObject.Find("Frame Brace A") == null
             || Object.FindAnyObjectByType<Rigidbody>() != null
             || Object.FindAnyObjectByType<Collider>() != null)
         {
@@ -600,12 +649,14 @@ public static class FinalVisualPolishBuilder
         PrimitiveType type,
         string name,
         Vector3 position,
+        Quaternion rotation,
         Vector3 scale,
         Material material)
     {
         GameObject visual = GameObject.CreatePrimitive(type);
         visual.name = name;
         visual.transform.position = position;
+        visual.transform.rotation = rotation;
         visual.transform.localScale = scale;
         Object.DestroyImmediate(visual.GetComponent<Collider>());
         visual.GetComponent<Renderer>().sharedMaterial = material;
@@ -616,7 +667,9 @@ public static class FinalVisualPolishBuilder
         GameObject imageObject = new(name, typeof(RectTransform), typeof(Image));
         imageObject.transform.SetParent(parent, false);
         SetRect(imageObject.GetComponent<RectTransform>(), position, size, new Vector2(0.5f, 0.5f));
-        return imageObject.GetComponent<Image>();
+        Image image = imageObject.GetComponent<Image>();
+        image.raycastTarget = false;
+        return image;
     }
 
     private static Text CreateTitleText(
@@ -640,14 +693,14 @@ public static class FinalVisualPolishBuilder
         return text;
     }
 
-    private static Button CreateTitleButton(Transform parent, Font font)
+    private static Button CreateTitleButton(Transform parent, Font font, Vector2 position)
     {
         GameObject buttonObject = new("Start Button", typeof(RectTransform), typeof(Image), typeof(Button));
         buttonObject.transform.SetParent(parent, false);
-        SetRect(buttonObject.GetComponent<RectTransform>(), new Vector2(0f, -15f), new Vector2(280f, 68f), new Vector2(0.5f, 0.5f));
+        SetRect(buttonObject.GetComponent<RectTransform>(), position, new Vector2(250f, 62f), new Vector2(0.5f, 0.5f));
         Button button = buttonObject.GetComponent<Button>();
         StyleResultButton(button);
-        Text label = CreateTitleText(buttonObject.transform, font, "START", 30, Vector2.zero, new Vector2(280f, 68f));
+        Text label = CreateTitleText(buttonObject.transform, font, "START TEST", 26, Vector2.zero, new Vector2(250f, 62f));
         RectTransform labelRect = label.rectTransform;
         labelRect.anchorMin = Vector2.zero;
         labelRect.anchorMax = Vector2.one;
@@ -683,8 +736,8 @@ public static class FinalVisualPolishBuilder
 
         ColorAdjustments color = GetOrAdd<ColorAdjustments>(profile);
         color.active = true;
-        color.postExposure.Override(0.08f);
-        color.contrast.Override(12f);
+        color.postExposure.Override(0.2f);
+        color.contrast.Override(4f);
         color.colorFilter.Override(new Color(0.96f, 0.985f, 1f));
         color.hueShift.Override(0f);
         color.saturation.Override(-8f);
@@ -704,8 +757,8 @@ public static class FinalVisualPolishBuilder
         vignette.active = true;
         vignette.color.Override(new Color(0.025f, 0.035f, 0.045f));
         vignette.center.Override(new Vector2(0.5f, 0.5f));
-        vignette.intensity.Override(0.11f);
-        vignette.smoothness.Override(0.38f);
+        vignette.intensity.Override(0.055f);
+        vignette.smoothness.Override(0.32f);
         vignette.rounded.Override(false);
 
         EditorUtility.SetDirty(profile);

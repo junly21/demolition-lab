@@ -19,7 +19,7 @@ public static class ThirdPartyPresentationBuilder
     private const string CityRoot = "Assets/Art/ThirdParty/kenney_city-kit-industrial_1.0";
     private const string FactoryRoot = "Assets/Art/ThirdParty/kenney_factory-kit_3.0";
     private const string AsphaltRoot = "Assets/Art/ThirdParty/asphalt_01_4k.blend/textures";
-    private const string ConcreteRoot = "Assets/Art/ThirdParty/concrete_4k.blend/textures";
+    private const string ConcreteMottlePath = "Assets/Art/Materials/DL_ConcreteMottle.png";
 
     private static readonly string[] StageScenePaths =
     {
@@ -63,6 +63,7 @@ public static class ThirdPartyPresentationBuilder
     {
         EnsurePresentationAssets();
         ValidateProjectPrefabs();
+        ValidateStructuralMaterials();
         foreach (string scenePath in StageScenePaths)
         {
             EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
@@ -70,6 +71,34 @@ public static class ThirdPartyPresentationBuilder
         }
 
         Debug.Log("Imported industrial asset validation passed for Stage01-05.");
+    }
+
+    private static void ValidateStructuralMaterials()
+    {
+        Texture2D mottle = AssetDatabase.LoadAssetAtPath<Texture2D>(ConcreteMottlePath);
+        string[] concreteMaterials =
+        {
+            "DL_Concrete",
+            "DL_ConcreteDark",
+            "DL_ConcreteWorn",
+            "DL_FoundationConcrete"
+        };
+
+        if (mottle == null)
+        {
+            throw new UnityException("Project-owned concrete mottle texture is missing.");
+        }
+
+        foreach (string materialName in concreteMaterials)
+        {
+            Material material = LoadMaterial(materialName);
+            if (material.GetTexture("_BaseMap") != mottle
+                || material.GetTexture("_BumpMap") != null
+                || material.GetFloat("_Metallic") > 0.01f)
+            {
+                throw new UnityException($"{materialName} is not using the non-directional concrete treatment.");
+            }
+        }
     }
 
     internal static void ApplyEnvironmentToOpenScene()
@@ -209,14 +238,10 @@ public static class ThirdPartyPresentationBuilder
         ConfigureTexture($"{AsphaltRoot}/asphalt_01_diff_4k.jpg", false, true);
         ConfigureTexture($"{AsphaltRoot}/asphalt_01_nor_gl_4k.exr", true, false);
         ConfigureTexture($"{AsphaltRoot}/asphalt_01_rough_4k.exr", false, false);
-        ConfigureTexture($"{ConcreteRoot}/concrete_diff_4k.jpg", false, true);
-        ConfigureTexture($"{ConcreteRoot}/concrete_nor_gl_4k.exr", true, false);
-        ConfigureTexture($"{ConcreteRoot}/concrete_rough_4k.jpg", false, false);
+        CreateConcreteMottleTexture();
 
         string asphaltMask = $"{MaterialFolder}/Asphalt_MetallicSmoothness.png";
-        string concreteMask = $"{MaterialFolder}/Concrete_MetallicSmoothness.png";
         CreateSmoothnessMask($"{AsphaltRoot}/asphalt_01_rough_4k.exr", asphaltMask);
-        CreateSmoothnessMask($"{ConcreteRoot}/concrete_rough_4k.jpg", concreteMask);
 
         CreateSurfaceMaterial(
             "DL_Asphalt",
@@ -226,43 +251,31 @@ public static class ThirdPartyPresentationBuilder
             new Color(0.48f, 0.5f, 0.5f),
             new Vector2(4f, 4f),
             0.42f);
-        CreateSurfaceMaterial(
+        CreateProceduralConcreteMaterial(
             "DL_Concrete",
-            $"{ConcreteRoot}/concrete_diff_4k.jpg",
-            $"{ConcreteRoot}/concrete_nor_gl_4k.exr",
-            concreteMask,
-            new Color(0.82f, 0.85f, 0.87f),
-            new Vector2(1.7f, 1.7f),
-            0.32f);
-        CreateSurfaceMaterial(
+            new Color(0.76f, 0.8f, 0.82f),
+            new Vector2(1.45f, 1.45f),
+            0.16f);
+        CreateProceduralConcreteMaterial(
             "DL_ConcreteDark",
-            $"{ConcreteRoot}/concrete_diff_4k.jpg",
-            $"{ConcreteRoot}/concrete_nor_gl_4k.exr",
-            concreteMask,
-            new Color(0.68f, 0.71f, 0.73f),
-            new Vector2(1.55f, 1.55f),
-            0.28f);
-        CreateSurfaceMaterial(
+            new Color(0.62f, 0.67f, 0.7f),
+            new Vector2(1.7f, 1.7f),
+            0.14f);
+        CreateProceduralConcreteMaterial(
             "DL_ConcreteWorn",
-            $"{ConcreteRoot}/concrete_diff_4k.jpg",
-            $"{ConcreteRoot}/concrete_nor_gl_4k.exr",
-            concreteMask,
-            new Color(0.72f, 0.72f, 0.69f),
+            new Color(0.68f, 0.7f, 0.69f),
             new Vector2(1.9f, 1.9f),
-            0.38f);
-        CreateSurfaceMaterial(
+            0.12f);
+        CreateProceduralConcreteMaterial(
             "DL_FoundationConcrete",
-            $"{ConcreteRoot}/concrete_diff_4k.jpg",
-            $"{ConcreteRoot}/concrete_nor_gl_4k.exr",
-            concreteMask,
-            new Color(0.56f, 0.58f, 0.59f),
-            new Vector2(1.25f, 1.25f),
-            0.36f);
+            new Color(0.49f, 0.53f, 0.55f),
+            new Vector2(1.3f, 1.3f),
+            0.11f);
 
-        CreateSimpleMaterial("DL_Steel", new Color(0.11f, 0.15f, 0.18f), 0.82f, 0.32f);
-        CreateSimpleMaterial("DL_WeakSteel", new Color(0.17f, 0.13f, 0.105f), 0.72f, 0.24f);
-        CreateSimpleMaterial("DL_ReinforcedSteel", new Color(0.04f, 0.105f, 0.15f), 0.9f, 0.38f);
-        CreateSimpleMaterial("DL_LauncherMetal", new Color(0.055f, 0.07f, 0.075f), 0.9f, 0.42f);
+        CreateSimpleMaterial("DL_Steel", new Color(0.2f, 0.25f, 0.29f), 0.78f, 0.3f);
+        CreateSimpleMaterial("DL_WeakSteel", new Color(0.24f, 0.25f, 0.24f), 0.7f, 0.23f);
+        CreateSimpleMaterial("DL_ReinforcedSteel", new Color(0.13f, 0.21f, 0.27f), 0.86f, 0.34f);
+        CreateSimpleMaterial("DL_LauncherMetal", new Color(0.14f, 0.17f, 0.19f), 0.84f, 0.36f);
         CreateColorMapMaterial(
             "DL_KenneyCity",
             $"{CityRoot}/Models/FBX format/Textures/colormap.png",
@@ -524,6 +537,57 @@ public static class ThirdPartyPresentationBuilder
         material.SetFloat("_BumpScale", bumpScale);
         material.EnableKeyword("_NORMALMAP");
         material.EnableKeyword("_METALLICSPECGLOSSMAP");
+        EditorUtility.SetDirty(material);
+    }
+
+    private static void CreateConcreteMottleTexture()
+    {
+        const int size = 256;
+        var texture = new Texture2D(size, size, TextureFormat.RGB24, false, false);
+        var pixels = new Color[size * size];
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                float broad = Mathf.PerlinNoise(x / 47f + 3.1f, y / 47f + 8.7f);
+                float fine = Mathf.PerlinNoise(x / 13f + 17.4f, y / 13f + 2.6f);
+                float value = Mathf.Lerp(0.78f, 0.98f, broad * 0.72f + fine * 0.28f);
+                pixels[y * size + x] = new Color(value, value, value);
+            }
+        }
+
+        texture.SetPixels(pixels);
+        texture.Apply();
+        File.WriteAllBytes(ConcreteMottlePath, texture.EncodeToPNG());
+        UnityEngine.Object.DestroyImmediate(texture);
+        AssetDatabase.ImportAsset(ConcreteMottlePath, ImportAssetOptions.ForceUpdate);
+
+        TextureImporter importer = AssetImporter.GetAtPath(ConcreteMottlePath) as TextureImporter;
+        importer.sRGBTexture = true;
+        importer.wrapMode = TextureWrapMode.Repeat;
+        importer.maxTextureSize = size;
+        importer.textureCompression = TextureImporterCompression.CompressedHQ;
+        importer.SaveAndReimport();
+    }
+
+    private static void CreateProceduralConcreteMaterial(
+        string name,
+        Color tint,
+        Vector2 tiling,
+        float smoothness)
+    {
+        Material material = GetOrCreateMaterial(name);
+        Texture2D mottle = AssetDatabase.LoadAssetAtPath<Texture2D>(ConcreteMottlePath);
+        material.SetTexture("_BaseMap", mottle);
+        material.SetTextureScale("_BaseMap", tiling);
+        material.SetTexture("_BumpMap", null);
+        material.SetTexture("_MetallicGlossMap", null);
+        material.SetColor("_BaseColor", tint);
+        material.SetFloat("_Metallic", 0f);
+        material.SetFloat("_Smoothness", smoothness);
+        material.SetFloat("_BumpScale", 0f);
+        material.DisableKeyword("_NORMALMAP");
+        material.DisableKeyword("_METALLICSPECGLOSSMAP");
         EditorUtility.SetDirty(material);
     }
 
