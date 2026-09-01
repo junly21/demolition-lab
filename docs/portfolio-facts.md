@@ -65,6 +65,6 @@ restart action.
 ## Evidence Locations
 
 - Stage documentation: `docs/vertical-slice-stage01.md` through `docs/vertical-slice-stage05.md`.
-- Structural research documentation: `docs/m1-structural-graph.md` through `docs/m5-physical-connections.md` where present.
+- Structural research documentation: `docs/m1-structural-support.md`, `docs/m2-structural-stability.md`, `docs/m3-local-support.md`, `docs/m4-breakable-connections.md`, and `docs/m5-physical-connections.md`.
 - Presentation asset attribution: `docs/third-party-assets.md`.
 - Release QA checklist: `docs/release-qa.md`.

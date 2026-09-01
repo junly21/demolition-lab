@@ -26,6 +26,10 @@
 # Recordings can get excessive in size
 /[Rr]ecordings/
 
+# Local portfolio capture sources (optimized copies live in docs/media)
+/stage*.mov
+/title.png
+
 # Uncomment this line if you wish to ignore the asset store tools plugin
 # /[Aa]ssets/AssetStoreTools*
 
