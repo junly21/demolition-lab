@@ -16,6 +16,7 @@ namespace DemolitionLab
         [SerializeField, Min(0f)] private float collapseSettleDelay = 2.75f;
         [SerializeField, Min(0f)] private float postClearPresentationDelay;
         [SerializeField] private string nextSceneName;
+        [SerializeField] private string completionSceneName;
         [SerializeField, Min(0.1f)] private float projectileSpeedMultiplier = 1f;
         [SerializeField, Min(0.1f)] private float projectileMassMultiplier = 1f;
         [SerializeField] private LauncherController launcher;
@@ -61,6 +62,8 @@ namespace DemolitionLab
         public float DestructionPercentage => CalculateDestructionPercentage();
         public bool HasNextScene => !string.IsNullOrWhiteSpace(nextSceneName)
             && Application.CanStreamedLevelBeLoaded(nextSceneName);
+        public bool HasCompletionScene => !string.IsNullOrWhiteSpace(completionSceneName)
+            && Application.CanStreamedLevelBeLoaded(completionSceneName);
 
         private void Awake()
         {
@@ -113,7 +116,10 @@ namespace DemolitionLab
 
             InitializeTargets();
             flow.MarkReady();
-            LogInitialTargetState();
+            if (logImpactDiagnostics)
+            {
+                LogInitialTargetState();
+            }
             RefreshHud();
             StartCoroutine(ActivateGameplayNextFrame());
         }
@@ -171,6 +177,12 @@ namespace DemolitionLab
 
         public void RetryStage()
         {
+            if (flow.State == StageState.Clear && !HasNextScene && HasCompletionScene)
+            {
+                SceneManager.LoadScene(completionSceneName);
+                return;
+            }
+
             Scene activeScene = SceneManager.GetActiveScene();
             SceneManager.LoadScene(activeScene.name);
         }

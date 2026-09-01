@@ -4379,7 +4379,7 @@ ParticleSystem:
           m_PostInfinity: 2
           m_RotationOrder: 4
       cycleCount: 1
-      repeatInterval: 0.0001
+      repeatInterval: 0.01
       probability: 1
   SizeModule:
     enabled: 0
@@ -10715,7 +10715,7 @@ ParticleSystem:
           m_PostInfinity: 2
           m_RotationOrder: 4
       cycleCount: 1
-      repeatInterval: 0.0001
+      repeatInterval: 0.01
       probability: 1
   SizeModule:
     enabled: 0
@@ -23792,6 +23792,7 @@ MonoBehaviour:
   collapseSettleDelay: 2.75
   postClearPresentationDelay: 0
   nextSceneName: VerticalSlice_Stage03
+  completionSceneName: 
   projectileSpeedMultiplier: 1
   projectileMassMultiplier: 1
   launcher: {fileID: 1689179600}
@@ -23825,7 +23826,7 @@ MonoBehaviour:
   structuralImpactDust: {fileID: 1412335590}
   collapseDust: {fileID: 515191434}
   audioHooks: {fileID: 1378943812}
-  logImpactDiagnostics: 1
+  logImpactDiagnostics: 0
 --- !u!4 &1378943811
 Transform:
   m_ObjectHideFlags: 0
@@ -37269,7 +37270,7 @@ ParticleSystem:
           m_PostInfinity: 2
           m_RotationOrder: 4
       cycleCount: 1
-      repeatInterval: 0.0001
+      repeatInterval: 0.01
       probability: 1
   SizeModule:
     enabled: 0
