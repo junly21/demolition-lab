@@ -11,16 +11,21 @@ using UnityEngine.UI;
 
 public static class VerticalSliceSceneBuilder
 {
-    private const string SourceScenePath = "Assets/Scenes/M0_DemolitionLab.unity";
-    private const string ScenePath = "Assets/Scenes/VerticalSlice_Stage01.unity";
-    private const string MaterialFolder = "Assets/Materials/VerticalSlice";
-    private const int ExpectedPieceCount = 20;
-    private const int ExpectedTargetCount = 8;
-    private const int ExpectedJointCount = 4;
-    private const float WeakBreakForce = 220f;
-    private const float WeakBreakTorque = 90f;
-    private const float ReinforcedBreakForce = 900f;
-    private const float ReinforcedBreakTorque = 400f;
+    internal const string SourceScenePath = "Assets/Scenes/M0_DemolitionLab.unity";
+    internal const string ScenePath = "Assets/Scenes/VerticalSlice_Stage01.unity";
+    internal const string MaterialFolder = "Assets/Materials/VerticalSlice";
+    internal const int ExpectedPieceCount = 20;
+    internal const int ExpectedTargetCount = 8;
+    internal const int ExpectedJointCount = 4;
+    internal const float WeakBreakForce = 220f;
+    internal const float WeakBreakTorque = 90f;
+    internal const float ReinforcedBreakForce = 900f;
+    internal const float ReinforcedBreakTorque = 400f;
+
+    internal static void ValidateLegacyHudDisabled()
+    {
+        Stage01Validation.ValidateLegacyHudDisabled();
+    }
 
     [MenuItem("DemolitionLab/Build Vertical Slice Stage 01")]
     public static void BuildScene()
@@ -111,10 +116,10 @@ public static class VerticalSliceSceneBuilder
             throw new UnityException("Stage 01 must not reuse the M1-M5 structural simulation stack.");
         }
 
-        ValidateRequiredReferences(controller, launcher);
-        ValidateLegacyHudDisabled();
-        ValidateStageFlowRules(controller);
-        ValidateDefaultTrajectory(launcher);
+        Stage01Validation.ValidateRequiredReferences(controller, launcher);
+        Stage01Validation.ValidateLegacyHudDisabled();
+        Stage01Validation.ValidateStageFlowRules(controller);
+        Stage01Validation.ValidateDefaultTrajectory(launcher);
 
         int weakJoints = 0;
         int reinforcedJoints = 0;
@@ -123,12 +128,12 @@ public static class VerticalSliceSceneBuilder
             if (joint.IsWeak)
             {
                 weakJoints++;
-                AssertJointThreshold(joint, WeakBreakForce, WeakBreakTorque);
+                Stage01Validation.AssertJointThreshold(joint, WeakBreakForce, WeakBreakTorque);
             }
             else
             {
                 reinforcedJoints++;
-                AssertJointThreshold(joint, ReinforcedBreakForce, ReinforcedBreakTorque);
+                Stage01Validation.AssertJointThreshold(joint, ReinforcedBreakForce, ReinforcedBreakTorque);
             }
         }
 
@@ -138,7 +143,7 @@ public static class VerticalSliceSceneBuilder
                 $"Stage 01 expected 2 Weak and 2 Reinforced joints, found {weakJoints}/{reinforcedJoints}.");
         }
 
-        ValidateNoInitialPenetration(destructiblePieces);
+        Stage01Validation.ValidateNoInitialPenetration(destructiblePieces);
         if (!Mathf.Approximately(launcher.ProjectileMass, 2f)
             || !Mathf.Approximately(launcher.ProjectileSpeed, 18f))
         {
@@ -267,9 +272,15 @@ public static class VerticalSliceSceneBuilder
     {
         GameObject controllerObject = new("Vertical Slice Stage Controller");
         VerticalSliceStageController controller = controllerObject.AddComponent<VerticalSliceStageController>();
-        UiReferences ui = CreateUi(controller);
+        StageHudView hud = controller.GetComponent<StageHudView>();
+        StageFeedbackController feedback = controller.GetComponent<StageFeedbackController>();
+        StageHudFactory.UiReferences ui = StageHudFactory.CreateUi(controller);
 
         var serializedController = new SerializedObject(controller);
+        var serializedHud = new SerializedObject(controller.GetComponent<StageHudView>());
+        var serializedFeedback = new SerializedObject(controller.GetComponent<StageFeedbackController>());
+        serializedController.FindProperty("hud").objectReferenceValue = hud;
+        serializedController.FindProperty("feedback").objectReferenceValue = feedback;
         serializedController.FindProperty("stageLabel").stringValue = "STAGE 01";
         serializedController.FindProperty("startingShots").intValue = 3;
         serializedController.FindProperty("clearThreshold").floatValue = 0.7f;
@@ -280,117 +291,22 @@ public static class VerticalSliceSceneBuilder
         serializedController.FindProperty("projectileMassMultiplier").floatValue = 1f;
         serializedController.FindProperty("launcher").objectReferenceValue = launcher;
         AssignObjectList(serializedController.FindProperty("targetPieces"), targets);
-        serializedController.FindProperty("stageLabelText").objectReferenceValue = ui.StageLabel;
-        serializedController.FindProperty("shotsText").objectReferenceValue = ui.Shots;
-        serializedController.FindProperty("destructionText").objectReferenceValue = ui.Destruction;
-        serializedController.FindProperty("endPanel").objectReferenceValue = ui.EndPanel;
-        serializedController.FindProperty("resultTitleText").objectReferenceValue = ui.ResultTitle;
-        serializedController.FindProperty("resultDetailsText").objectReferenceValue = ui.ResultDetails;
-        serializedController.FindProperty("nextButton").objectReferenceValue = ui.NextButton;
-        serializedController.FindProperty("cameraShake").objectReferenceValue = cameraShake;
-        serializedController.FindProperty("impactDust").objectReferenceValue = dust;
+        serializedHud.FindProperty("stageLabelText").objectReferenceValue = ui.StageLabel;
+        serializedHud.FindProperty("shotsText").objectReferenceValue = ui.Shots;
+        serializedHud.FindProperty("destructionText").objectReferenceValue = ui.Destruction;
+        serializedHud.FindProperty("endPanel").objectReferenceValue = ui.EndPanel;
+        serializedHud.FindProperty("resultTitleText").objectReferenceValue = ui.ResultTitle;
+        serializedHud.FindProperty("resultDetailsText").objectReferenceValue = ui.ResultDetails;
+        serializedHud.FindProperty("nextButton").objectReferenceValue = ui.NextButton;
+        serializedFeedback.FindProperty("cameraShake").objectReferenceValue = cameraShake;
+        serializedFeedback.FindProperty("impactDust").objectReferenceValue = dust;
         serializedController.ApplyModifiedPropertiesWithoutUndo();
+        serializedHud.ApplyModifiedPropertiesWithoutUndo();
+        serializedFeedback.ApplyModifiedPropertiesWithoutUndo();
 
         UnityEventTools.AddPersistentListener(ui.RetryButton.onClick, controller.RetryStage);
         UnityEventTools.AddPersistentListener(ui.NextButton.onClick, controller.LoadNextStage);
         return controller;
-    }
-
-    private static UiReferences CreateUi(VerticalSliceStageController controller)
-    {
-        Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        GameObject canvasObject = new("Vertical Slice HUD");
-        Canvas canvas = canvasObject.AddComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        CanvasScaler scaler = canvasObject.AddComponent<CanvasScaler>();
-        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920f, 1080f);
-        canvasObject.AddComponent<GraphicRaycaster>();
-
-        Text stage = CreateText(canvas.transform, "Stage Label", font, "STAGE 01", 30, TextAnchor.UpperLeft);
-        SetRect(stage.rectTransform, new Vector2(24f, -24f), new Vector2(260f, 50f), new Vector2(0f, 1f));
-        Text shots = CreateText(canvas.transform, "Shots Label", font, "Shots: 3", 30, TextAnchor.UpperRight);
-        SetRect(shots.rectTransform, new Vector2(-24f, -24f), new Vector2(260f, 50f), new Vector2(1f, 1f));
-        Text destruction = CreateText(canvas.transform, "Destruction Label", font, "Destruction: 0%", 28, TextAnchor.LowerCenter);
-        SetRect(destruction.rectTransform, new Vector2(0f, 28f), new Vector2(420f, 50f), new Vector2(0.5f, 0f));
-
-        GameObject panel = new("End State Panel");
-        panel.transform.SetParent(canvas.transform, false);
-        Image panelImage = panel.AddComponent<Image>();
-        panelImage.color = new Color(0.04f, 0.05f, 0.07f, 0.94f);
-        RectTransform panelRect = panel.GetComponent<RectTransform>();
-        SetRect(panelRect, Vector2.zero, new Vector2(520f, 340f), new Vector2(0.5f, 0.5f));
-
-        Text resultTitle = CreateText(panel.transform, "Result Title", font, "STAGE CLEAR", 42, TextAnchor.MiddleCenter);
-        SetRect(resultTitle.rectTransform, new Vector2(0f, 105f), new Vector2(460f, 70f), new Vector2(0.5f, 0.5f));
-        Text resultDetails = CreateText(panel.transform, "Result Details", font, "Shots Used: 0\nDestruction: 0%", 28, TextAnchor.MiddleCenter);
-        SetRect(resultDetails.rectTransform, new Vector2(0f, 25f), new Vector2(460f, 100f), new Vector2(0.5f, 0.5f));
-        Button retry = CreateButton(panel.transform, "Retry Button", font, "RETRY", new Vector2(-110f, -100f));
-        Button next = CreateButton(panel.transform, "Next Button", font, "NEXT", new Vector2(110f, -100f));
-
-        if (Object.FindAnyObjectByType<EventSystem>() == null)
-        {
-            GameObject eventSystemObject = new("EventSystem");
-            eventSystemObject.AddComponent<EventSystem>();
-            eventSystemObject.AddComponent<InputSystemUIInputModule>();
-        }
-
-        return new UiReferences(stage, shots, destruction, panel, resultTitle, resultDetails, retry, next);
-    }
-
-    private static Text CreateText(
-        Transform parent,
-        string name,
-        Font font,
-        string content,
-        int fontSize,
-        TextAnchor alignment)
-    {
-        GameObject textObject = new(name);
-        textObject.transform.SetParent(parent, false);
-        Text text = textObject.AddComponent<Text>();
-        text.font = font;
-        text.text = content;
-        text.fontSize = fontSize;
-        text.alignment = alignment;
-        text.color = Color.white;
-        text.raycastTarget = false;
-        return text;
-    }
-
-    private static Button CreateButton(
-        Transform parent,
-        string name,
-        Font font,
-        string label,
-        Vector2 position)
-    {
-        GameObject buttonObject = new(name);
-        buttonObject.transform.SetParent(parent, false);
-        Image image = buttonObject.AddComponent<Image>();
-        image.color = new Color(0.18f, 0.48f, 0.78f, 1f);
-        Button button = buttonObject.AddComponent<Button>();
-        SetRect(buttonObject.GetComponent<RectTransform>(), position, new Vector2(180f, 58f), new Vector2(0.5f, 0.5f));
-        Text text = CreateText(buttonObject.transform, "Label", font, label, 24, TextAnchor.MiddleCenter);
-        RectTransform textRect = text.rectTransform;
-        textRect.anchorMin = Vector2.zero;
-        textRect.anchorMax = Vector2.one;
-        textRect.offsetMin = Vector2.zero;
-        textRect.offsetMax = Vector2.zero;
-        return button;
-    }
-
-    private static void SetRect(
-        RectTransform rect,
-        Vector2 anchoredPosition,
-        Vector2 size,
-        Vector2 anchor)
-    {
-        rect.anchorMin = anchor;
-        rect.anchorMax = anchor;
-        rect.pivot = anchor;
-        rect.anchoredPosition = anchoredPosition;
-        rect.sizeDelta = size;
     }
 
     private static ParticleSystem CreateImpactDust(Material material)
@@ -480,100 +396,6 @@ public static class VerticalSliceSceneBuilder
         }
     }
 
-    private static void ValidateNoInitialPenetration(IReadOnlyList<GameObject> pieces)
-    {
-        Physics.SyncTransforms();
-        for (int firstIndex = 0; firstIndex < pieces.Count; firstIndex++)
-        {
-            Collider first = pieces[firstIndex].GetComponent<Collider>();
-            for (int secondIndex = firstIndex + 1; secondIndex < pieces.Count; secondIndex++)
-            {
-                Collider second = pieces[secondIndex].GetComponent<Collider>();
-                if (Physics.ComputePenetration(
-                        first,
-                        first.transform.position,
-                        first.transform.rotation,
-                        second,
-                        second.transform.position,
-                        second.transform.rotation,
-                        out _,
-                        out float distance)
-                    && distance > 0.0001f)
-                {
-                    throw new UnityException(
-                        $"Stage 01 pieces '{pieces[firstIndex].name}' and "
-                        + $"'{pieces[secondIndex].name}' overlap by {distance:0.0000} m.");
-                }
-            }
-        }
-    }
-
-    private static void AssertJointThreshold(
-        CriticalSupportJoint joint,
-        float expectedForce,
-        float expectedTorque)
-    {
-        if (!Mathf.Approximately(joint.BreakForce, expectedForce)
-            || !Mathf.Approximately(joint.BreakTorque, expectedTorque))
-        {
-            throw new UnityException("Stage 01 critical joint threshold mismatch.");
-        }
-    }
-
-    private static void ValidateRequiredReferences(
-        VerticalSliceStageController controller,
-        LauncherController launcher)
-    {
-        var serializedController = new SerializedObject(controller);
-        string[] controllerReferences =
-        {
-            "launcher",
-            "stageLabelText",
-            "shotsText",
-            "destructionText",
-            "endPanel",
-            "resultTitleText",
-            "resultDetailsText",
-            "nextButton",
-            "cameraShake",
-            "impactDust"
-        };
-
-        foreach (string propertyName in controllerReferences)
-        {
-            if (serializedController.FindProperty(propertyName).objectReferenceValue == null)
-            {
-                throw new UnityException($"Stage controller is missing '{propertyName}'.");
-            }
-        }
-
-        if (serializedController.FindProperty("targetPieces").arraySize != ExpectedTargetCount)
-        {
-            throw new UnityException("Stage controller target-piece wiring is incomplete.");
-        }
-
-        if (serializedController.FindProperty("stageLabel").stringValue != "STAGE 01"
-            || serializedController.FindProperty("startingShots").intValue != 3
-            || !Mathf.Approximately(serializedController.FindProperty("clearThreshold").floatValue, 0.7f)
-            || !Mathf.Approximately(serializedController.FindProperty("postClearPresentationDelay").floatValue, 0f)
-            || !Mathf.Approximately(serializedController.FindProperty("projectileSpeedMultiplier").floatValue, 1f)
-            || !Mathf.Approximately(serializedController.FindProperty("projectileMassMultiplier").floatValue, 1f)
-            || serializedController.FindProperty("nextSceneName").stringValue != "VerticalSlice_Stage02")
-        {
-            throw new UnityException("Stage 01 reusable configuration is incorrect.");
-        }
-
-        var serializedLauncher = new SerializedObject(launcher);
-        string[] launcherReferences = { "yawPivot", "pitchPivot", "muzzle", "projectilePrefab", "aimLine" };
-        foreach (string propertyName in launcherReferences)
-        {
-            if (serializedLauncher.FindProperty(propertyName).objectReferenceValue == null)
-            {
-                throw new UnityException($"Stage launcher is missing '{propertyName}'.");
-            }
-        }
-    }
-
     private static void ConfigureLegacyHud()
     {
         ResetController resetController = Object.FindAnyObjectByType<ResetController>();
@@ -585,139 +407,6 @@ public static class VerticalSliceSceneBuilder
         var serializedReset = new SerializedObject(resetController);
         serializedReset.FindProperty("showControls").boolValue = false;
         serializedReset.ApplyModifiedPropertiesWithoutUndo();
-    }
-
-    internal static void ValidateLegacyHudDisabled()
-    {
-        ResetController resetController = Object.FindAnyObjectByType<ResetController>();
-        if (resetController == null
-            || new SerializedObject(resetController).FindProperty("showControls").boolValue)
-        {
-            throw new UnityException("Vertical-slice legacy M0 HUD must be disabled.");
-        }
-    }
-
-    private static void ValidateStageFlowRules(VerticalSliceStageController controller)
-    {
-        var flow = new StageFlowStateMachine();
-        flow.Initialize(3);
-        if (flow.State != StageState.Initializing || flow.AmmoRemaining != 3)
-        {
-            throw new UnityException("Stage flow must start Initializing with full ammo.");
-        }
-
-        if (!flow.MarkReady() || !flow.Activate() || flow.State != StageState.Active)
-        {
-            throw new UnityException("Stage flow failed Initializing -> Ready -> Active.");
-        }
-
-        if (!flow.RegisterShot() || flow.AmmoRemaining != 2 || flow.ShotsUsed != 1)
-        {
-            throw new UnityException("One accepted shot must decrement ammo exactly once.");
-        }
-
-        if (!flow.BeginSettling() || !flow.Complete(true) || flow.State != StageState.Clear)
-        {
-            throw new UnityException("Stage flow failed the legitimate clear transition.");
-        }
-
-        flow.Initialize(3);
-        flow.MarkReady();
-        flow.Activate();
-        flow.RegisterShot();
-        flow.RegisterShot();
-        flow.RegisterShot();
-        if (flow.AmmoRemaining != 0
-            || !flow.BeginSettling()
-            || !flow.Complete(false)
-            || flow.State != StageState.Failed)
-        {
-            throw new UnityException("Stage flow failed the exhausted-ammo failure transition.");
-        }
-
-        GameObject targetObject = new("Stage Flow Validation Target");
-        targetObject.transform.position = new Vector3(0f, 4f, 0f);
-        targetObject.AddComponent<Rigidbody>().isKinematic = true;
-        StageTargetPiece target = targetObject.AddComponent<StageTargetPiece>();
-        target.InitializeReferenceState();
-        if (target.EvaluateDestroyed())
-        {
-            Object.DestroyImmediate(targetObject);
-            throw new UnityException("A target must not count during initialization.");
-        }
-
-        target.BeginEvaluation();
-        if (target.EvaluateDestroyed())
-        {
-            Object.DestroyImmediate(targetObject);
-            throw new UnityException("An unchanged active target must start at 0% destruction.");
-        }
-
-        targetObject.transform.position += Vector3.down * 2f;
-        if (!target.EvaluateDestroyed())
-        {
-            Object.DestroyImmediate(targetObject);
-            throw new UnityException("A fallen target must count toward destruction.");
-        }
-
-        Object.DestroyImmediate(targetObject);
-
-        int requiredTargets = Mathf.CeilToInt(ExpectedTargetCount * 0.7f);
-        if (requiredTargets != 6
-            || !new List<EditorBuildSettingsScene>(EditorBuildSettings.scenes).Exists(
-                scene => scene.enabled && scene.path == "Assets/Scenes/VerticalSlice_Stage02.unity"))
-        {
-            throw new UnityException("Stage threshold or Stage02 progression behavior is incorrect.");
-        }
-
-        if (!new List<EditorBuildSettingsScene>(EditorBuildSettings.scenes).Exists(
-                scene => scene.enabled && scene.path == ScenePath))
-        {
-            throw new UnityException("Stage 01 must be enabled in build settings for Retry.");
-        }
-    }
-
-    private static void ValidateDefaultTrajectory(LauncherController launcher)
-    {
-        var serializedLauncher = new SerializedObject(launcher);
-        Transform pitchPivot = (Transform)serializedLauncher.FindProperty("pitchPivot").objectReferenceValue;
-        Transform muzzle = (Transform)serializedLauncher.FindProperty("muzzle").objectReferenceValue;
-        float speed = serializedLauncher.FindProperty("projectileSpeed").floatValue;
-        int pointCount = serializedLauncher.FindProperty("trajectoryPoints").intValue;
-        float timeStep = serializedLauncher.FindProperty("trajectoryTimeStep").floatValue;
-
-        float initialPitchAngle = serializedLauncher.FindProperty("initialPitchAngle").floatValue;
-        Quaternion runtimePitchRotation = pitchPivot.rotation * Quaternion.Euler(-initialPitchAngle, 0f, 0f);
-        Vector3 startPosition = pitchPivot.position + runtimePitchRotation * muzzle.localPosition;
-        Vector3 startVelocity = runtimePitchRotation * muzzle.localRotation * Vector3.forward * speed;
-        Vector3 previousPoint = startPosition;
-        Physics.SyncTransforms();
-        Debug.Log(
-            $"Stage 01 default trajectory starts at {startPosition} with velocity {startVelocity}.");
-
-        for (int index = 1; index < pointCount; index++)
-        {
-            float time = index * timeStep;
-            Vector3 nextPoint = startPosition
-                + startVelocity * time
-                + 0.5f * Physics.gravity * time * time;
-
-            if (Physics.Linecast(previousPoint, nextPoint, out RaycastHit hit, ~0, QueryTriggerInteraction.Ignore))
-            {
-                if (!hit.collider.CompareTag("Destructible"))
-                {
-                    throw new UnityException(
-                        $"Stage 01 default trajectory is blocked by '{hit.collider.name}' before the structure.");
-                }
-
-                Debug.Log($"Stage 01 default trajectory intersects '{hit.collider.name}'.");
-                return;
-            }
-
-            previousPoint = nextPoint;
-        }
-
-        throw new UnityException("Stage 01 default trajectory never intersects the destructible structure.");
     }
 
     private static void AssignObjectList<T>(SerializedProperty property, IReadOnlyList<T> values)
@@ -762,37 +451,5 @@ public static class VerticalSliceSceneBuilder
         public Material Decor { get; }
         public Material Broken { get; }
         public Material Dust { get; }
-    }
-
-    private readonly struct UiReferences
-    {
-        public UiReferences(
-            Text stageLabel,
-            Text shots,
-            Text destruction,
-            GameObject endPanel,
-            Text resultTitle,
-            Text resultDetails,
-            Button retryButton,
-            Button nextButton)
-        {
-            StageLabel = stageLabel;
-            Shots = shots;
-            Destruction = destruction;
-            EndPanel = endPanel;
-            ResultTitle = resultTitle;
-            ResultDetails = resultDetails;
-            RetryButton = retryButton;
-            NextButton = nextButton;
-        }
-
-        public Text StageLabel { get; }
-        public Text Shots { get; }
-        public Text Destruction { get; }
-        public GameObject EndPanel { get; }
-        public Text ResultTitle { get; }
-        public Text ResultDetails { get; }
-        public Button RetryButton { get; }
-        public Button NextButton { get; }
     }
 }

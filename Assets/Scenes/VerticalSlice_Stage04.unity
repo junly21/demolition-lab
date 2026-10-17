@@ -30189,6 +30189,8 @@ GameObject:
   - component: {fileID: 1378943810}
   - component: {fileID: 1378943813}
   - component: {fileID: 1378943812}
+  - component: {fileID: 2100000040}
+  - component: {fileID: 2100000041}
   m_Layer: 0
   m_Name: Vertical Slice Stage Controller
   m_TagString: Untagged
@@ -30240,23 +30242,8 @@ MonoBehaviour:
   - {fileID: 166206721}
   - {fileID: 1857310737}
   - {fileID: 740774717}
-  stageLabelText: {fileID: 873384880}
-  shotsText: {fileID: 1530709485}
-  destructionText: {fileID: 1395394073}
-  destructionFill: {fileID: 894798297}
-  endPanel: {fileID: 1432868037}
-  resultTitleText: {fileID: 2125621128}
-  resultDetailsText: {fileID: 983214317}
-  nextButton: {fileID: 437403986}
-  cameraShake: {fileID: 1853796459}
-  muzzleFlash: {fileID: 164474900}
-  muzzleSmoke: {fileID: 91104700}
-  impactDust: {fileID: 679851491}
-  impactSparks: {fileID: 5626221}
-  impactDebris: {fileID: 1860533403}
-  structuralImpactDust: {fileID: 1580876481}
-  collapseDust: {fileID: 1970145819}
-  audioHooks: {fileID: 1378943812}
+  hud: {fileID: 2100000040}
+  feedback: {fileID: 2100000041}
   logImpactDiagnostics: 0
 --- !u!4 &1378943811
 Transform:
@@ -51784,6 +51771,47 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2133205364}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &2100000040
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1378943809}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b41ec0a006451fc9e2ff43312d39686, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::DemolitionLab.StageHudView
+  stageLabelText: {fileID: 873384880}
+  shotsText: {fileID: 1530709485}
+  destructionText: {fileID: 1395394073}
+  destructionFill: {fileID: 894798297}
+  endPanel: {fileID: 1432868037}
+  resultTitleText: {fileID: 2125621128}
+  resultDetailsText: {fileID: 983214317}
+  nextButton: {fileID: 437403986}
+--- !u!114 &2100000041
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1378943809}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: acdcae8bf5305f499d1a68a672d3baad, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::DemolitionLab.StageFeedbackController
+  cameraShake: {fileID: 1853796459}
+  muzzleFlash: {fileID: 164474900}
+  muzzleSmoke: {fileID: 91104700}
+  impactDust: {fileID: 679851491}
+  impactSparks: {fileID: 5626221}
+  impactDebris: {fileID: 1860533403}
+  structuralImpactDust: {fileID: 1580876481}
+  collapseDust: {fileID: 1970145819}
+  audioHooks: {fileID: 1378943812}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

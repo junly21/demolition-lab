@@ -195,29 +195,7 @@ namespace DemolitionLab
 
         private void LogEvaluationCounts(int connectionEvaluations)
         {
-            int activeBlocks = 0;
-            foreach (StructuralBlock block in blocks)
-            {
-                if (block != null && block.ParticipatesInStructure)
-                {
-                    activeBlocks++;
-                }
-            }
-
-            int activeConnections = 0;
-            foreach (StructuralConnection connection in connections)
-            {
-                if (connection != null && connection.IsValidForStaticGraph())
-                {
-                    activeConnections++;
-                }
-            }
-
-            Debug.Log(
-                $"Structural event metrics: activeBlocks={activeBlocks}, "
-                + $"activeConnections={activeConnections}, "
-                + $"connectionEvaluations={connectionEvaluations}.",
-                this);
+            StructuralDiagnostics.LogEvaluationCounts(blocks, connections, connectionEvaluations, this);
         }
 
         private void AddEdge(StructuralBlock from, StructuralBlock to)
@@ -243,7 +221,7 @@ namespace DemolitionLab
 
                 foreach (List<StructuralBlock> component in components)
                 {
-                    bool isConnected = HasGroundAnchor(component);
+                    bool isConnected = StructuralGraphTraversal.HasGroundAnchor(component);
                     bool isStable = isConnected;
                     StructuralStabilityResult stability = default;
 
@@ -279,7 +257,9 @@ namespace DemolitionLab
                                 StructuralBlockState.Unstable);
                             releasedCount += componentReleased;
                             repeatEvaluation |= componentReleased > 0;
-                            LogLocalSupportResult(component, localSupport, componentReleased);
+                            StructuralDiagnostics.LogLocalSupportResult(
+                                component, localSupport, componentReleased,
+                                localSupportEvaluator.MaxCantileverBlocks, this);
                             LogStabilityResultIfAvailable(
                                 component,
                                 stability,
@@ -319,7 +299,7 @@ namespace DemolitionLab
             IReadOnlyList<StructuralBlock> blocksToRelease,
             StructuralBlockState releaseState)
         {
-            LogPhysicsHandoff(blocksToRelease);
+            StructuralDiagnostics.LogPhysicsHandoff(blocksToRelease, this);
             int releasedCount = 0;
 
             foreach (StructuralBlock block in blocksToRelease)
@@ -335,122 +315,7 @@ namespace DemolitionLab
 
         private List<List<StructuralBlock>> FindActiveComponents()
         {
-            var unvisited = new HashSet<StructuralBlock>();
-            foreach (StructuralBlock block in adjacency.Keys)
-            {
-                if (block.ParticipatesInStructure)
-                {
-                    unvisited.Add(block);
-                }
-            }
-
-            var components = new List<List<StructuralBlock>>();
-            var searchQueue = new Queue<StructuralBlock>();
-
-            while (unvisited.Count > 0)
-            {
-                StructuralBlock start = null;
-                foreach (StructuralBlock candidate in unvisited)
-                {
-                    start = candidate;
-                    break;
-                }
-
-                var component = new List<StructuralBlock>();
-                unvisited.Remove(start);
-                searchQueue.Enqueue(start);
-
-                while (searchQueue.Count > 0)
-                {
-                    StructuralBlock current = searchQueue.Dequeue();
-                    component.Add(current);
-
-                    foreach (StructuralBlock neighbor in adjacency[current])
-                    {
-                        if (neighbor.ParticipatesInStructure && unvisited.Remove(neighbor))
-                        {
-                            searchQueue.Enqueue(neighbor);
-                        }
-                    }
-                }
-
-                components.Add(component);
-            }
-
-            return components;
-        }
-
-        private static bool HasGroundAnchor(IReadOnlyList<StructuralBlock> component)
-        {
-            foreach (StructuralBlock block in component)
-            {
-                if (block.IsGroundAnchor)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        private void LogPhysicsHandoff(IReadOnlyList<StructuralBlock> component)
-        {
-            for (int firstIndex = 0; firstIndex < component.Count; firstIndex++)
-            {
-                StructuralBlock first = component[firstIndex];
-                Collider firstCollider = first.GetComponent<Collider>();
-
-                for (int secondIndex = firstIndex + 1; secondIndex < component.Count; secondIndex++)
-                {
-                    StructuralBlock second = component[secondIndex];
-                    Collider secondCollider = second.GetComponent<Collider>();
-                    if (Physics.ComputePenetration(
-                            firstCollider,
-                            first.transform.position,
-                            first.transform.rotation,
-                            secondCollider,
-                            second.transform.position,
-                            second.transform.rotation,
-                            out Vector3 direction,
-                            out float distance)
-                        && distance > 0.0001f)
-                    {
-                        Debug.LogError(
-                            $"Physics handoff penetration: '{first.NodeId}' and '{second.NodeId}' "
-                            + $"overlap by {distance:0.0000} m along {direction}.",
-                            this);
-                    }
-                }
-            }
-
-            foreach (StructuralBlock block in component)
-            {
-                Rigidbody body = block.GetComponent<Rigidbody>();
-                Debug.Log(
-                    $"Release snapshot '{block.NodeId}': mass={body.mass:0.00}, "
-                    + $"position={body.position}, linearVelocity={body.linearVelocity}, "
-                    + $"angularVelocity={body.angularVelocity}.",
-                    this);
-            }
-        }
-
-        private void LogStabilityResult(
-            IReadOnlyList<StructuralBlock> component,
-            StructuralStabilityResult result,
-            bool isConnected,
-            bool isStable,
-            int releasedCount)
-        {
-            string supportInterval = result.HasSupport
-                ? $"[{result.SupportMinX:0.00}, {result.SupportMaxX:0.00}]"
-                : "none";
-
-            Debug.Log(
-                $"Component '{component[0].NodeId}': nodes={component.Count}, "
-                + $"mass={result.TotalMass:0.00}, COM.x={result.CenterOfMass.x:0.00}, "
-                + $"support={supportInterval}, connected={isConnected}, stable={isStable}, "
-                + $"released={releasedCount}.",
-                this);
+            return StructuralGraphTraversal.FindActiveComponents(adjacency);
         }
 
         private void LogStabilityResultIfAvailable(
@@ -462,82 +327,16 @@ namespace DemolitionLab
         {
             if (stabilityEvaluator != null)
             {
-                LogStabilityResult(component, result, isConnected, isStable, releasedCount);
+                StructuralDiagnostics.LogStabilityResult(component, result, isConnected, isStable, releasedCount, this);
             }
-        }
-
-        private void LogLocalSupportResult(
-            IReadOnlyList<StructuralBlock> component,
-            LocalSupportResult result,
-            int releasedCount)
-        {
-            var unsupportedIds = new List<string>();
-            foreach (StructuralBlock block in result.UnsupportedBlocks)
-            {
-                unsupportedIds.Add(block.NodeId);
-            }
-
-            Debug.Log(
-                $"Local support '{component[0].NodeId}': supported={result.SupportedBlocks.Count}, "
-                + $"unsupported=[{string.Join(", ", unsupportedIds)}], "
-                + $"maxCantileverBlocks={localSupportEvaluator.MaxCantileverBlocks}, "
-                + $"released={releasedCount}.",
-                this);
         }
 
         private void OnDrawGizmos()
         {
-            if (!drawGraphGizmos)
+            if (drawGraphGizmos)
             {
-                return;
+                StructuralDiagnostics.DrawGraph(blocks);
             }
-
-            foreach (StructuralBlock block in blocks)
-            {
-                if (block == null)
-                {
-                    continue;
-                }
-
-                foreach (StructuralBlock neighbor in block.Neighbors)
-                {
-                    if (neighbor == null || blocks.IndexOf(block) >= blocks.IndexOf(neighbor))
-                    {
-                        continue;
-                    }
-
-                    Gizmos.color = GetStateColor(block, neighbor);
-                    Gizmos.DrawLine(block.transform.position, neighbor.transform.position);
-                }
-            }
-        }
-
-        private static Color GetStateColor(StructuralBlock first, StructuralBlock second)
-        {
-            if (!Application.isPlaying)
-            {
-                return Color.green;
-            }
-
-            if (first.State == StructuralBlockState.Destroyed
-                || second.State == StructuralBlockState.Destroyed)
-            {
-                return Color.gray;
-            }
-
-            if (first.State == StructuralBlockState.Disconnected
-                || second.State == StructuralBlockState.Disconnected)
-            {
-                return Color.red;
-            }
-
-            if (first.State == StructuralBlockState.Unstable
-                || second.State == StructuralBlockState.Unstable)
-            {
-                return Color.yellow;
-            }
-
-            return Color.green;
         }
     }
 }

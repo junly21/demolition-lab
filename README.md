@@ -73,11 +73,15 @@ flowchart LR
 
 주요 런타임 코드는 다음과 같습니다.
 
-- [`LauncherController.cs`](Assets/Scripts/LauncherController.cs): 조준, 궤적 표시, 포탄 생성
-- [`Projectile.cs`](Assets/Scripts/Projectile.cs): 초기 속도와 질량 설정, 충돌 접점과 impulse 기록
-- [`StageTargetPiece.cs`](Assets/Scripts/StageTargetPiece.cs): 이동·낙하·회전량으로 파괴 여부 판정
-- [`StageFlowStateMachine.cs`](Assets/Scripts/StageFlowStateMachine.cs): 스테이지 상태 전이
-- [`VerticalSliceStageController.cs`](Assets/Scripts/VerticalSliceStageController.cs): 탄약, 파괴율, 결과와 씬 진행
+- [`LauncherController.cs`](Assets/Scripts/Gameplay/Launching/LauncherController.cs): 조준, 궤적 표시, 포탄 생성
+- [`Projectile.cs`](Assets/Scripts/Gameplay/Launching/Projectile.cs): 초기 속도와 질량 설정, 충돌 접점과 impulse 기록
+- [`StageTargetPiece.cs`](Assets/Scripts/Gameplay/Stage/StageTargetPiece.cs): 이동·낙하·회전량으로 파괴 여부 판정
+- [`StageFlowStateMachine.cs`](Assets/Scripts/Gameplay/Stage/StageFlowStateMachine.cs): 스테이지 상태 전이
+- [`VerticalSliceStageController.cs`](Assets/Scripts/Gameplay/Stage/VerticalSliceStageController.cs): 탄약, 파괴율, 결과와 씬 진행
+- [`StageHudView.cs`](Assets/Scripts/Presentation/UI/StageHudView.cs): HUD와 결과 패널 표시
+- [`StageFeedbackController.cs`](Assets/Scripts/Presentation/Feedback/StageFeedbackController.cs): 발사·충돌·붕괴의 시각·오디오 연출
+
+최종 게임, 표현, 연구 코드는 기능별 폴더로 구분했습니다. 제작 도구의 생성·검증과 연구 코드의 그래프 탐색·진단 분리는 [리팩토링 기록](docs/refactoring-plan.md)에 정리했습니다.
 
 ## 시도했던 방법과 최종 판단
 

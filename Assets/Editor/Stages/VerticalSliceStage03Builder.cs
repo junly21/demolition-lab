@@ -8,20 +8,20 @@ using UnityEngine.UI;
 
 public static class VerticalSliceStage03Builder
 {
-    private const string SourceScenePath = "Assets/Scenes/VerticalSlice_Stage01.unity";
-    private const string Stage02ScenePath = "Assets/Scenes/VerticalSlice_Stage02.unity";
-    private const string ScenePath = "Assets/Scenes/VerticalSlice_Stage03.unity";
-    private const int ExpectedPieceCount = 31;
-    private const int ExpectedTargetCount = 16;
-    private const int ExpectedJointCount = 6;
-    private const float WeakLowerForce = 185f;
-    private const float WeakLowerTorque = 70f;
-    private const float WeakUpperForce = 230f;
-    private const float WeakUpperTorque = 90f;
-    private const float ReinforcedLowerForce = 1200f;
-    private const float ReinforcedLowerTorque = 500f;
-    private const float ReinforcedUpperForce = 1400f;
-    private const float ReinforcedUpperTorque = 600f;
+    internal const string SourceScenePath = "Assets/Scenes/VerticalSlice_Stage01.unity";
+    internal const string Stage02ScenePath = "Assets/Scenes/VerticalSlice_Stage02.unity";
+    internal const string ScenePath = "Assets/Scenes/VerticalSlice_Stage03.unity";
+    internal const int ExpectedPieceCount = 31;
+    internal const int ExpectedTargetCount = 16;
+    internal const int ExpectedJointCount = 6;
+    internal const float WeakLowerForce = 185f;
+    internal const float WeakLowerTorque = 70f;
+    internal const float WeakUpperForce = 230f;
+    internal const float WeakUpperTorque = 90f;
+    internal const float ReinforcedLowerForce = 1200f;
+    internal const float ReinforcedLowerTorque = 500f;
+    internal const float ReinforcedUpperForce = 1400f;
+    internal const float ReinforcedUpperTorque = 600f;
 
     [MenuItem("DemolitionLab/Build Vertical Slice Stage 03")]
     public static void BuildScene()
@@ -83,11 +83,11 @@ public static class VerticalSliceStage03Builder
                 + $"{ExpectedJointCount} joints, and one controller.");
         }
 
-        ValidateController(controllers[0]);
+        Stage03Validation.ValidateController(controllers[0]);
         VerticalSliceSceneBuilder.ValidateLegacyHudDisabled();
-        ValidateJoints(joints);
-        ValidateNoInitialPenetration(pieces);
-        ValidateNoResearchSystems();
+        Stage03Validation.ValidateJoints(joints);
+        Stage03Validation.ValidateNoInitialPenetration(pieces);
+        Stage03Validation.ValidateNoResearchSystems();
 
         int leftTargets = 0;
         int rightTargets = 0;
@@ -308,6 +308,8 @@ public static class VerticalSliceStage03Builder
         IReadOnlyList<StageTargetPiece> targets)
     {
         var serializedController = new SerializedObject(controller);
+        var serializedHud = new SerializedObject(controller.GetComponent<StageHudView>());
+        var serializedFeedback = new SerializedObject(controller.GetComponent<StageFeedbackController>());
         serializedController.FindProperty("stageLabel").stringValue = "STAGE 03";
         serializedController.FindProperty("startingShots").intValue = 4;
         serializedController.FindProperty("clearThreshold").floatValue = 0.7f;
@@ -317,125 +319,11 @@ public static class VerticalSliceStage03Builder
         serializedController.FindProperty("projectileSpeedMultiplier").floatValue = 1f;
         serializedController.FindProperty("projectileMassMultiplier").floatValue = 1f;
         AssignObjectList(serializedController.FindProperty("targetPieces"), targets);
-        Text label = (Text)serializedController.FindProperty("stageLabelText").objectReferenceValue;
+        Text label = (Text)serializedHud.FindProperty("stageLabelText").objectReferenceValue;
         label.text = "STAGE 03";
         serializedController.ApplyModifiedPropertiesWithoutUndo();
-    }
-
-    private static void ValidateController(VerticalSliceStageController controller)
-    {
-        var serializedController = new SerializedObject(controller);
-        if (serializedController.FindProperty("stageLabel").stringValue != "STAGE 03"
-            || serializedController.FindProperty("startingShots").intValue != 4
-            || !Mathf.Approximately(serializedController.FindProperty("clearThreshold").floatValue, 0.7f)
-            || !Mathf.Approximately(serializedController.FindProperty("postClearPresentationDelay").floatValue, 0f)
-            || !Mathf.Approximately(serializedController.FindProperty("projectileSpeedMultiplier").floatValue, 1f)
-            || !Mathf.Approximately(serializedController.FindProperty("projectileMassMultiplier").floatValue, 1f)
-            || serializedController.FindProperty("nextSceneName").stringValue != "VerticalSlice_Stage04"
-            || serializedController.FindProperty("targetPieces").arraySize != ExpectedTargetCount)
-        {
-            throw new UnityException("Stage03 controller configuration is invalid.");
-        }
-
-        ValidateControllerReferences(serializedController);
-    }
-
-    private static void ValidateControllerReferences(SerializedObject controller)
-    {
-        string[] references =
-        {
-            "launcher", "stageLabelText", "shotsText", "destructionText", "endPanel",
-            "resultTitleText", "resultDetailsText", "nextButton", "cameraShake", "impactDust"
-        };
-
-        foreach (string propertyName in references)
-        {
-            if (controller.FindProperty(propertyName).objectReferenceValue == null)
-            {
-                throw new UnityException($"Stage03 controller is missing '{propertyName}'.");
-            }
-        }
-
-        SerializedProperty targets = controller.FindProperty("targetPieces");
-        for (int index = 0; index < targets.arraySize; index++)
-        {
-            if (targets.GetArrayElementAtIndex(index).objectReferenceValue == null)
-            {
-                throw new UnityException($"Stage03 target reference {index} is missing.");
-            }
-        }
-    }
-
-    private static void ValidateNoResearchSystems()
-    {
-        if (Object.FindAnyObjectByType<StructureManager>() != null
-            || Object.FindAnyObjectByType<StructuralBlock>() != null
-            || Object.FindAnyObjectByType<StructuralConnection>() != null)
-        {
-            throw new UnityException("Stage03 must not use the M1-M5 structural simulation stack.");
-        }
-    }
-
-    private static void ValidateJoints(IReadOnlyList<CriticalSupportJoint> joints)
-    {
-        int weakJoints = 0;
-        int reinforcedJoints = 0;
-        foreach (CriticalSupportJoint joint in joints)
-        {
-            if (joint.IsWeak)
-            {
-                weakJoints++;
-                bool validWeak = Mathf.Approximately(joint.BreakForce, WeakLowerForce)
-                    && Mathf.Approximately(joint.BreakTorque, WeakLowerTorque)
-                    || Mathf.Approximately(joint.BreakForce, WeakUpperForce)
-                    && Mathf.Approximately(joint.BreakTorque, WeakUpperTorque);
-                if (!validWeak)
-                {
-                    throw new UnityException("Stage03 Weak joint calibration mismatch.");
-                }
-            }
-            else
-            {
-                reinforcedJoints++;
-                bool validReinforced = Mathf.Approximately(joint.BreakForce, ReinforcedLowerForce)
-                    && Mathf.Approximately(joint.BreakTorque, ReinforcedLowerTorque)
-                    || Mathf.Approximately(joint.BreakForce, ReinforcedUpperForce)
-                    && Mathf.Approximately(joint.BreakTorque, ReinforcedUpperTorque);
-                if (!validReinforced)
-                {
-                    throw new UnityException("Stage03 Reinforced joint calibration mismatch.");
-                }
-            }
-        }
-
-        if (weakJoints != 4 || reinforcedJoints != 2)
-        {
-            throw new UnityException(
-                $"Stage03 expected 4 Weak and 2 Reinforced joints, found {weakJoints}/{reinforcedJoints}.");
-        }
-    }
-
-    private static void ValidateNoInitialPenetration(IReadOnlyList<GameObject> pieces)
-    {
-        Physics.SyncTransforms();
-        for (int firstIndex = 0; firstIndex < pieces.Count; firstIndex++)
-        {
-            Collider first = pieces[firstIndex].GetComponent<Collider>();
-            for (int secondIndex = firstIndex + 1; secondIndex < pieces.Count; secondIndex++)
-            {
-                Collider second = pieces[secondIndex].GetComponent<Collider>();
-                if (Physics.ComputePenetration(
-                        first, first.transform.position, first.transform.rotation,
-                        second, second.transform.position, second.transform.rotation,
-                        out _, out float distance)
-                    && distance > 0.0001f)
-                {
-                    throw new UnityException(
-                        $"Stage03 pieces '{pieces[firstIndex].name}' and '{pieces[secondIndex].name}' "
-                        + $"overlap by {distance:0.0000} m.");
-                }
-            }
-        }
+        serializedHud.ApplyModifiedPropertiesWithoutUndo();
+        serializedFeedback.ApplyModifiedPropertiesWithoutUndo();
     }
 
     private static StageMaterials LoadMaterials()

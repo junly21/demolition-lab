@@ -36,7 +36,7 @@ Target movement
 
 ## 핵심 코드 1 — LauncherController
 
-파일: [`LauncherController.cs`](../Assets/Scripts/LauncherController.cs)
+파일: [`LauncherController.cs`](../Assets/Scripts/Gameplay/Launching/LauncherController.cs)
 
 ### 읽어야 할 메서드
 
@@ -65,7 +65,7 @@ C# 컴파일 성공은 Unity Inspector의 serialized reference가 연결됐다�
 
 ## 핵심 코드 2 — Projectile
 
-파일: [`Projectile.cs`](../Assets/Scripts/Projectile.cs)
+파일: [`Projectile.cs`](../Assets/Scripts/Gameplay/Launching/Projectile.cs)
 
 ### 읽어야 할 메서드
 
@@ -91,7 +91,7 @@ Impulse의 단위는 `N·s`이며 운동량 변화량과 같다. 힘 `N`과 impu
 
 ## 핵심 코드 3 — StageTargetPiece
 
-파일: [`StageTargetPiece.cs`](../Assets/Scripts/StageTargetPiece.cs)
+파일: [`StageTargetPiece.cs`](../Assets/Scripts/Gameplay/Stage/StageTargetPiece.cs)
 
 ### 파괴 판정 조건
 
@@ -114,7 +114,7 @@ Impulse의 단위는 `N·s`이며 운동량 변화량과 같다. 힘 `N`과 impu
 
 ## 핵심 코드 4 — StageFlowStateMachine
 
-파일: [`StageFlowStateMachine.cs`](../Assets/Scripts/StageFlowStateMachine.cs)
+파일: [`StageFlowStateMachine.cs`](../Assets/Scripts/Gameplay/Stage/StageFlowStateMachine.cs)
 
 허용된 전이는 다음과 같다.
 
@@ -133,7 +133,7 @@ Initializing → Ready → Active → Settling → Clear
 
 ## 핵심 코드 5 — VerticalSliceStageController
 
-파일: [`VerticalSliceStageController.cs`](../Assets/Scripts/VerticalSliceStageController.cs)
+파일: [`VerticalSliceStageController.cs`](../Assets/Scripts/Gameplay/Stage/VerticalSliceStageController.cs)
 
 ### 생명주기 순서
 
@@ -161,7 +161,7 @@ Initializing → Ready → Active → Settling → Clear
 
 ## Physics와 Visual 분리
 
-파일: [`PhysicsPresentationSeparationBuilder.cs`](../Assets/Editor/PhysicsPresentationSeparationBuilder.cs)
+파일: [`PhysicsPresentationSeparationBuilder.cs`](../Assets/Editor/Presentation/PhysicsPresentationSeparationBuilder.cs)
 
 Builder는 Destructible root에 Rigidbody와 Collider를 남기고, MeshFilter와 MeshRenderer를 `VisualRoot`로 이동한다. Validator는 다음을 확인한다.
 

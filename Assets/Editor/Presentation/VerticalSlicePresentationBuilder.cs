@@ -8,11 +8,11 @@ using UnityEngine.UI;
 
 public static class VerticalSlicePresentationBuilder
 {
-    private const string MaterialFolder = "Assets/Materials/Presentation";
-    private const string EnvironmentRootName = "Presentation Environment";
-    private const string ConnectionDetailName = "Presentation Connection Detail";
-    private const string LauncherPresentationName = "Launcher Presentation";
-    private const string BarrelPresentationName = "Barrel Presentation";
+    internal const string MaterialFolder = "Assets/Materials/Presentation";
+    internal const string EnvironmentRootName = "Presentation Environment";
+    internal const string ConnectionDetailName = "Presentation Connection Detail";
+    internal const string LauncherPresentationName = "Launcher Presentation";
+    internal const string BarrelPresentationName = "Barrel Presentation";
 
     private static readonly string[] StageScenePaths =
     {
@@ -43,7 +43,7 @@ public static class VerticalSlicePresentationBuilder
         foreach (string scenePath in StageScenePaths)
         {
             EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
-            ValidateEnvironmentInOpenScene(scenePath);
+            IndustrialPresentationValidation.ValidateEnvironmentInOpenScene(scenePath);
         }
 
         Debug.Log("Industrial demolition environment validation passed for Stage01-05.");
@@ -69,7 +69,7 @@ public static class VerticalSlicePresentationBuilder
         foreach (string scenePath in StageScenePaths)
         {
             EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
-            ValidateStructuralPresentationInOpenScene(scenePath);
+            IndustrialPresentationValidation.ValidateStructuralPresentationInOpenScene(scenePath);
         }
 
         Debug.Log("Structural presentation validation passed for Stage01-05.");
@@ -94,7 +94,7 @@ public static class VerticalSlicePresentationBuilder
         foreach (string scenePath in StageScenePaths)
         {
             EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
-            ValidateCameraFramingInOpenScene(scenePath);
+            IndustrialPresentationValidation.ValidateCameraFramingInOpenScene(scenePath);
         }
 
         Debug.Log("Presentation camera framing validation passed for Stage01-05.");
@@ -265,12 +265,12 @@ public static class VerticalSlicePresentationBuilder
             throw new UnityException("Vertical-slice scene is missing its stage controller.");
         }
 
-        var serializedController = new SerializedObject(controller);
-        Text stage = (Text)serializedController.FindProperty("stageLabelText").objectReferenceValue;
-        Text shots = (Text)serializedController.FindProperty("shotsText").objectReferenceValue;
-        Text destruction = (Text)serializedController.FindProperty("destructionText").objectReferenceValue;
-        GameObject endPanel = (GameObject)serializedController.FindProperty("endPanel").objectReferenceValue;
-        Button next = (Button)serializedController.FindProperty("nextButton").objectReferenceValue;
+        var serializedHud = new SerializedObject(controller.GetComponent<StageHudView>());
+        Text stage = (Text)serializedHud.FindProperty("stageLabelText").objectReferenceValue;
+        Text shots = (Text)serializedHud.FindProperty("shotsText").objectReferenceValue;
+        Text destruction = (Text)serializedHud.FindProperty("destructionText").objectReferenceValue;
+        GameObject endPanel = (GameObject)serializedHud.FindProperty("endPanel").objectReferenceValue;
+        Button next = (Button)serializedHud.FindProperty("nextButton").objectReferenceValue;
 
         ConfigureHudText(stage, 32, new Vector2(32f, -28f), new Vector2(320f, 54f), new Vector2(0f, 1f));
         ConfigureHudText(shots, 32, new Vector2(-32f, -28f), new Vector2(320f, 54f), new Vector2(1f, 1f));
@@ -545,140 +545,7 @@ public static class VerticalSlicePresentationBuilder
         }
     }
 
-    private static void ValidateEnvironmentInOpenScene(string scenePath)
-    {
-        GameObject root = GameObject.Find(EnvironmentRootName);
-        if (root == null || root.GetComponentsInChildren<Renderer>().Length < 20)
-        {
-            throw new UnityException($"{scenePath} is missing the presentation environment.");
-        }
-
-        if (root.GetComponentInChildren<Collider>() != null)
-        {
-            throw new UnityException($"{scenePath} presentation geometry must remain non-colliding.");
-        }
-
-        foreach (Renderer renderer in root.GetComponentsInChildren<Renderer>())
-        {
-            if (renderer.sharedMaterial == null)
-            {
-                throw new UnityException($"{scenePath} has a presentation renderer without a material.");
-            }
-        }
-
-        Renderer ground = GameObject.Find("Ground")?.GetComponent<Renderer>();
-        bool hasSoftKeyLight = false;
-        foreach (Light light in Object.FindObjectsByType<Light>())
-        {
-            if (light.shadows == LightShadows.Soft)
-            {
-                hasSoftKeyLight = true;
-                break;
-            }
-        }
-
-        if (ground == null
-            || ground.sharedMaterial == null
-            || !hasSoftKeyLight
-            || !RenderSettings.fog
-            || RenderSettings.skybox == null)
-        {
-            throw new UnityException($"{scenePath} environment lighting or ground setup is incomplete.");
-        }
-
-        ThirdPartyPresentationBuilder.ValidateOpenScene(scenePath);
-    }
-
-    private static void ValidateStructuralPresentationInOpenScene(string scenePath)
-    {
-        CriticalSupportJoint[] joints = Object.FindObjectsByType<CriticalSupportJoint>();
-        if (joints.Length == 0)
-        {
-            throw new UnityException($"{scenePath} has no critical support joints to present.");
-        }
-
-        foreach (CriticalSupportJoint joint in joints)
-        {
-            Transform detail = PhysicsPresentationSeparationBuilder.FindDescendant(
-                joint.transform,
-                ConnectionDetailName);
-            int expectedRenderers = joint.IsWeak ? 5 : 4;
-            if (detail == null
-                || detail.GetComponentsInChildren<Renderer>().Length != expectedRenderers
-                || detail.GetComponentInChildren<Collider>() != null
-                || detail.GetComponentInChildren<Rigidbody>() != null)
-            {
-                throw new UnityException($"{scenePath} joint '{joint.name}' has invalid visual detailing.");
-            }
-
-            foreach (Renderer renderer in detail.GetComponentsInChildren<Renderer>())
-            {
-                if (renderer.sharedMaterial == null)
-                {
-                    throw new UnityException($"{scenePath} joint '{joint.name}' has a missing visual material.");
-                }
-            }
-        }
-
-        LauncherController launcher = Object.FindAnyObjectByType<LauncherController>();
-        Transform launcherPresentation = launcher != null
-            ? launcher.transform.Find(LauncherPresentationName)
-            : null;
-        Transform pitchPivot = launcher != null
-            ? (Transform)new SerializedObject(launcher).FindProperty("pitchPivot").objectReferenceValue
-            : null;
-        Transform barrelPresentation = pitchPivot != null
-            ? pitchPivot.Find(BarrelPresentationName)
-            : null;
-        if (launcherPresentation == null
-            || launcherPresentation.GetComponentsInChildren<Renderer>().Length < 7
-            || launcherPresentation.GetComponentInChildren<Collider>() != null
-            || launcherPresentation.GetComponentInChildren<Rigidbody>() != null)
-        {
-            throw new UnityException($"{scenePath} launcher presentation is incomplete or colliding.");
-        }
-
-        if (barrelPresentation == null
-            || barrelPresentation.GetComponentsInChildren<Renderer>().Length != 4
-            || barrelPresentation.GetComponentInChildren<Collider>() != null)
-        {
-            throw new UnityException($"{scenePath} barrel presentation is incomplete or colliding.");
-        }
-
-        VerticalSliceStageController controller = Object.FindAnyObjectByType<VerticalSliceStageController>();
-        var serializedController = new SerializedObject(controller);
-        string[] hudProperties = { "stageLabelText", "shotsText", "destructionText" };
-        foreach (string propertyName in hudProperties)
-        {
-            Text text = (Text)serializedController.FindProperty(propertyName).objectReferenceValue;
-            if (text == null || text.GetComponent<Outline>() == null)
-            {
-                throw new UnityException($"{scenePath} HUD presentation is incomplete.");
-            }
-        }
-
-        PhysicsPresentationSeparationBuilder.ValidateOpenScene(scenePath);
-        ThirdPartyPresentationBuilder.ValidateOpenScene(scenePath);
-        FinalVisualPolishBuilder.ValidateLightingAndPostInOpenScene(scenePath);
-        FinalVisualPolishBuilder.ValidateFeedbackInOpenScene(scenePath);
-        FinalVisualPolishBuilder.ValidateHudInOpenScene(scenePath);
-    }
-
-    private static void ValidateCameraFramingInOpenScene(string scenePath)
-    {
-        Camera camera = Camera.main;
-        CameraFraming framing = GetCameraFraming(SceneManager.GetActiveScene().name);
-        Vector3 expectedDirection = (framing.LookAt - framing.Position).normalized;
-        if (camera == null
-            || Vector3.Distance(camera.transform.position, framing.Position) > 0.001f
-            || Vector3.Angle(camera.transform.forward, expectedDirection) > 0.05f
-            || !Mathf.Approximately(camera.fieldOfView, framing.FieldOfView))
-        {
-            throw new UnityException($"{scenePath} presentation camera framing is incorrect.");
-        }
-    }
-
-    private static CameraFraming GetCameraFraming(string sceneName)
+    internal static CameraFraming GetCameraFraming(string sceneName)
     {
         return sceneName switch
         {
@@ -767,7 +634,7 @@ public static class VerticalSlicePresentationBuilder
         public Material SafetyYellow { get; }
     }
 
-    private readonly struct CameraFraming
+    internal readonly struct CameraFraming
     {
         public CameraFraming(Vector3 position, Vector3 lookAt, float fieldOfView)
         {
