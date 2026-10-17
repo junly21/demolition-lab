@@ -54,6 +54,7 @@
 flowchart LR
     Input[Player Input] --> Launcher[LauncherController]
     Launcher --> Projectile[Projectile / Rigidbody]
+    Launcher -->|ProjectileFired| Stage[VerticalSliceStageController]
     Projectile -->|Collision| PhysicalRoot
 
     subgraph Piece[Structure Piece]
@@ -63,25 +64,33 @@ flowchart LR
         VisualRoot --> Visual[Mesh / Material]
     end
 
-    Target --> Stage[VerticalSliceStageController]
-    Stage --> Result[Ammo / Destruction / Result / Scene]
+    Target --> Stage
+    Stage --> Flow[StageFlowStateMachine / Ammo / State]
+    Stage --> Hud[StageHudView / HUD / Result Panel]
+    Stage --> Feedback[StageFeedbackController / VFX / Camera / Audio Hooks]
+    Stage --> Scene[Retry / Next / Scene]
 ```
 
 ### 물리와 외형 분리
 
 구조물의 질량, Collider, Joint와 파괴 판정은 `PhysicalRoot`에 둡니다. 화면에 보이는 메시와 머티리얼은 그 아래 `VisualRoot`로 분리했습니다. 덕분에 외부 메시를 교체해도 Collider 크기나 Joint 위치가 함께 바뀌지 않습니다.
 
-주요 런타임 코드는 다음과 같습니다.
+### 게임 규칙과 표시 책임 분리
+
+`VerticalSliceStageController`는 초기화, 탄약, 목표 집계, 승패와 씬 진행을 조정합니다. UI 표시는 `StageHudView`, 발사·충돌·붕괴 연출은 `StageFeedbackController`로 분리했습니다. HUD는 목표물을 평가하지 않고, 연출은 탄약이나 승패를 변경하지 않습니다. 상태 전환 규칙은 Unity 컴포넌트와 독립된 일반 C# 클래스 `StageFlowStateMachine`에 둡니다.
+
+상속 계층을 늘리기보다 역할이 분명한 컴포넌트를 조합했습니다. 주요 런타임 코드는 다음과 같습니다.
 
 - [`LauncherController.cs`](Assets/Scripts/Gameplay/Launching/LauncherController.cs): 조준, 궤적 표시, 포탄 생성
 - [`Projectile.cs`](Assets/Scripts/Gameplay/Launching/Projectile.cs): 초기 속도와 질량 설정, 충돌 접점과 impulse 기록
 - [`StageTargetPiece.cs`](Assets/Scripts/Gameplay/Stage/StageTargetPiece.cs): 이동·낙하·회전량으로 파괴 여부 판정
+- [`CriticalSupportJoint.cs`](Assets/Scripts/Gameplay/Structure/CriticalSupportJoint.cs): Unity Joint 파손 콜백과 표시·연출 통지
 - [`StageFlowStateMachine.cs`](Assets/Scripts/Gameplay/Stage/StageFlowStateMachine.cs): 스테이지 상태 전이
 - [`VerticalSliceStageController.cs`](Assets/Scripts/Gameplay/Stage/VerticalSliceStageController.cs): 탄약, 파괴율, 결과와 씬 진행
 - [`StageHudView.cs`](Assets/Scripts/Presentation/UI/StageHudView.cs): HUD와 결과 패널 표시
 - [`StageFeedbackController.cs`](Assets/Scripts/Presentation/Feedback/StageFeedbackController.cs): 발사·충돌·붕괴의 시각·오디오 연출
 
-최종 게임, 표현, 연구 코드는 기능별 폴더로 구분했습니다. 제작 도구의 생성·검증과 연구 코드의 그래프 탐색·진단 분리는 [리팩토링 기록](docs/refactoring-plan.md)에 정리했습니다.
+제작 도구도 씬 배치, UI 생성, 연출 제작과 검증을 구분했습니다. 연구용 `StructureManager`에서는 그래프 탐색을 `StructuralGraphTraversal`, 로그·관통 진단·기즈모를 `StructuralDiagnostics`로 분리했습니다. 연구 알고리즘을 최종 게임에 다시 도입한 것은 아닙니다. 구체적인 변경 범위와 보존 조건은 [리팩토링 기록](docs/refactoring-plan.md)에 정리했습니다.
 
 ## 시도했던 방법과 최종 판단
 
@@ -111,7 +120,7 @@ Stage02는 플레이어가 발사하기도 전에 무너졌습니다. 처음에�
 
 목표물이 자신의 시작 위치를 저장하기 전에 `VerticalSliceStageController`가 파괴율을 계산하면서 생긴 문제였습니다. 초기 위치가 제대로 잡히지 않아 모든 목표물이 이미 움직인 것으로 판단됐고, 발사 입력도 바로 막혔습니다.
 
-목표물의 기준 위치를 먼저 저장하고, 다음 프레임부터 판정을 시작하도록 순서를 나눴습니다. 스테이지 흐름도 `Initializing → Ready → Active → Settling → Clear/Failed` 상태로 구분해 `Active` 이전에는 파괴율을 계산하지 않도록 했습니다.
+목표물의 기준 위치를 먼저 저장하고, 다음 프레임부터 판정을 시작하도록 순서를 나눴습니다. 스테이지 흐름도 `Initializing → Ready → Active → Settling → Clear/Failed` 상태로 구분해 초기화 중에는 목표물의 파괴 판정을 비활성화하고, 플레이 활성화와 최소 한 번의 발사 이후 성공 여부를 평가하도록 했습니다.
 
 ### 자동 테스트는 통과했는데 실제 포탄으로는 끊어지지 않았다
 
@@ -129,23 +138,64 @@ Codex와 ChatGPT를 코드 초안, Unity Editor용 씬 빌더와 검증 도구, 
 
 ## 실행 방법
 
-1. Unity Hub에서 프로젝트를 Unity `6000.5.10f1`로 엽니다.
-2. `Assets/Scenes/VerticalSlice_Title.unity`를 엽니다.
-3. Play Mode에서 `START TEST`를 누릅니다.
+1. 현재 리팩토링이 반영된 `vertical-slice` 브랜치를 받습니다.
+2. Unity Hub에서 Unity `6000.5.10f1`을 설치하고 프로젝트를 엽니다.
+3. 컴파일 오류와 Missing Script가 없는지 확인합니다.
+4. `Assets/Scenes/VerticalSlice_Title.unity`를 엽니다.
+5. Play Mode에서 `START TEST`를 누릅니다.
 
-macOS standalone release candidate도 생성했습니다. 전체 실행 점검 항목은 [`docs/release-qa.md`](docs/release-qa.md)에 정리했습니다.
+리팩토링 이전 버전으로 macOS standalone release candidate를 생성한 기록이 있습니다. 현재 코드 분리 변경을 반영한 재빌드·실행 검증은 아직 수행하지 않았습니다. 전체 실행 점검 항목은 [`docs/release-qa.md`](docs/release-qa.md)에 정리했습니다.
+
+### 리팩토링 검증 상태
+
+물리와 게임 규칙을 바꾸지 않고 책임을 분리하는 작업이며, 설정 보존 검사와 실제 Unity 실행 검증을 구분합니다.
+
+| 확인 항목 | 상태 |
+| --- | --- |
+| Stage01–05 기존 객체 3,912개와 HUD·연출 참조 85개 보존 | 정적 검사 통과 |
+| 물리 설정·탄약·목표 목록·씬 진행 및 기존 스크립트 GUID 보존 | 정적 검사 통과 |
+| C# 54개 파일 구문 및 로컬 선언·호출 검사 | 통과 — Unity 전체 컴파일은 아님 |
+| 실제 상태 머신 소스를 실행한 탄약·상태 전환 검사 | assertion 61개 통과 |
+| 리팩토링 후 Unity 컴파일·기존 validator·Play Mode·standalone | **미검증** — 작업 환경에 해당 Unity 버전 미설치 |
+
+저장소 루트에서 Unity 없이 실행할 수 있는 검사입니다. Python 3·Git과 .NET 10 SDK가 필요하며, 상세 범위는 [`Tools/README.md`](Tools/README.md)를 참고하세요.
+
+```sh
+python3 Tools/verify_refactoring.py
+dotnet run --project Tools/RefactoringChecks/RefactoringChecks.csproj
+```
+
+Unity 설치 후에는 `DemolitionLab/Presentation/Validate Final Portfolio Build`와 `DemolitionLab/Release/Validate Release Candidate`를 실행하고, Title→Stage01–05에서 무입력 대기, 발사·탄약, 파괴율, 성공·실패, Retry·Next를 확인해야 합니다. 정적 검사와 상태 머신 테스트만으로 물리 동작이나 플레이 품질이 보장되지는 않습니다.
 
 ## 프로젝트 구성
 
 ```text
 Assets/
-├── Scenes/       # 최종 5스테이지와 M0–M5 실험 씬
-├── Scripts/      # 런타임 게임 코드
-├── Editor/       # 씬 생성과 검증 자동화
-└── Art/          # 머티리얼, visual prefab, 외부 에셋
+├── Scenes/                    # 타이틀, Stage01–05, M0–M5 실험 씬
+├── Scripts/
+│   ├── Gameplay/
+│   │   ├── Launching/         # 조준과 포탄
+│   │   ├── Stage/             # 상태 머신, 목표 판정, 스테이지 진행
+│   │   └── Structure/         # 최종 게임의 지지부 파손 통지
+│   ├── Presentation/
+│   │   ├── UI/                # 메뉴와 HUD
+│   │   └── Feedback/          # 충돌 연출, 카메라, 오디오 연결
+│   ├── Research/
+│   │   └── StructuralSimulation/ # M1–M5 구조 실험과 진단
+│   └── Utility/               # 리셋 보조
+├── Editor/
+│   ├── Stages/                # 스테이지 제작과 검증
+│   ├── Presentation/          # 환경·외형·HUD·연출 제작과 검증
+│   ├── Release/               # 출시 설정과 빌드
+│   └── Research/              # M0–M5 제작과 검증
+├── Prefabs/                   # 포탄 프리팹
+└── Art/                       # 머티리얼, visual prefab, 외부 에셋
 
-docs/             # 설계 과정, 측정값, QA, 라이선스 기록
+Tools/                         # Unity 외부에서 실행하는 리팩토링 검사
+docs/                          # 설계 과정, 측정값, QA, 라이선스 기록
 ```
+
+폴더 분리는 기능을 찾기 위한 구분이며 별도 어셈블리로 격리한 구조는 아닙니다. 기존 씬·프리팹의 스크립트 참조를 유지하도록 `.meta`와 GUID를 보존했습니다.
 
 ## 외부 에셋과 범위
 
